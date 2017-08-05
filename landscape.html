@@ -91,21 +91,16 @@ var light2 = new THREE.AmbientLight(0x333333);
 scene.add(light2);
 
 // SKYBOX
-var imagePrefix = "images/sky-";
-var directions  = ["px", "nx", "py", "ny", "pz", "nz"];
-var imageSuffix = ".jpg";
-var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
-
-var materialArray = [];
-for (var i = 0; i < 6; i++)
-	materialArray.push( new THREE.MeshBasicMaterial({
-		map: new THREE.TextureLoader().load(imagePrefix + directions[i] + imageSuffix),
-		side: THREE.DoubleSide,
-		fog: false
-	}));
-var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
-var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
-scene.add( skyBox );
+scene.background = new THREE.CubeTextureLoader()
+.setPath( 'images/' )
+.load( [
+"sky-px.jpg",
+"sky-nx.jpg",
+"sky-py.jpg",
+"sky-ny.jpg",
+"sky-pz.jpg",
+"sky-nz.jpg"
+] );
 
 // MOUSE
 var mouseButtonDown = false;
