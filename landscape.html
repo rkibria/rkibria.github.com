@@ -9,31 +9,17 @@
 
 <body>
 
-<div id="container"></div>
-
-<canvas id="canvas" width="500" height="500"></canvas>
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 
 <script src="js/three.min.js"></script>
-
 <script src="js/FirstPersonControls.js"></script>
-
 <script src="js/Detector.js"></script>
-
 <script src="js/stats.min.js"></script>
-
 <script src="js/seedrandom.min.js"></script>
-
 <script src="js/dat.gui.min.js"></script>
-
 <script src="js/threex.windowresize.js"></script>
 
 <script>
-
-if ( ! Detector.webgl ) {
-	Detector.addGetWebGLMessage();
-	document.getElementById( 'container' ).innerHTML = "";
-}
-
 //-------------------------------------
 // CONSTS
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
@@ -49,12 +35,6 @@ var MOVE_SPEED = 1.0;
 var TURN_SPEED = 0.1;
 
 //-------------------------------------
-
-// STATS
-var stats = new Stats();
-var container = document.getElementById( 'container' );
-container.appendChild( stats.dom );
-
 // SCENE
 var scene = new THREE.Scene();
 
@@ -65,22 +45,33 @@ camera.position.x = 0;
 camera.position.y = 10;
 camera.position.z = 0;
 
-// CONTROLS
-var controls = new THREE.FirstPersonControls( camera );
-controls.movementSpeed = 10;
-controls.lookSpeed = 0.1;
-
 // RENDERER + FOG
 var FogColor = 0xffffff;
 scene.fog = new THREE.FogExp2( FogColor, 0.01 );
 
-var canvas = document.getElementById('canvas');
-var renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
-renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+if ( Detector.webgl )
+	renderer = new THREE.WebGLRenderer( {antialias:true} );
+else
+	renderer = new THREE.CanvasRenderer();
+renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 renderer.setClearColor( FogColor );
+var container = document.getElementById( 'ThreeJS' );
+container.appendChild( renderer.domElement );
 
 // EVENTS
 THREEx.WindowResize(renderer, camera);
+
+// STATS
+stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.bottom = '0px';
+stats.domElement.style.zIndex = 100;
+container.appendChild( stats.domElement );
+
+// CONTROLS
+var controls = new THREE.FirstPersonControls( camera );
+controls.movementSpeed = 10;
+controls.lookSpeed = 0.1;
 
 // LIGHT
 var light = new THREE.PointLight(0xffffff, 1, 0);
@@ -101,55 +92,6 @@ scene.background = new THREE.CubeTextureLoader()
 "sky-pz.jpg",
 "sky-nz.jpg"
 ] );
-
-// MOUSE
-var mouseButtonDown = false;
-window.addEventListener('mousedown', function(event) {mouseButtonDown = true;}, false);
-window.addEventListener('mouseup', function(event) {mouseButtonDown = false;}, false);
-
-/**
- * Keeps track of the current mouse position, relative to an element.
- * @param {HTMLElement} element
- * @return {object} Contains properties: x, y, event
- */
-function captureMouse(element) {
-	var mouse = {x: 0, y: 0, event: null, normalized: new THREE.Vector2()},
-		body_scrollLeft = document.body.scrollLeft,
-		element_scrollLeft = document.documentElement.scrollLeft,
-		body_scrollTop = document.body.scrollTop,
-		element_scrollTop = document.documentElement.scrollTop,
-		offsetLeft = element.offsetLeft,
-		offsetTop = element.offsetTop;
-
-	element.addEventListener('mousemove', function (event) {
-		var x, y;
-
-		if (event.pageX || event.pageY) {
-			x = event.pageX;
-			y = event.pageY;
-		} else {
-			x = event.clientX + body_scrollLeft + element_scrollLeft;
-			y = event.clientY + body_scrollTop + element_scrollTop;
-		}
-		x -= offsetLeft;
-		y -= offsetTop;
-
-		mouse.x = x;
-		mouse.y = y;
-		mouse.event = event;
-		mouse.normalized.x = ( x / SCREEN_WIDTH ) * 2 - 1;
-		mouse.normalized.y = - ( y / SCREEN_HEIGHT ) * 2 + 1;
-	}, false);
-
-	return mouse;
-};
-
-var mouse = captureMouse(canvas);
-
-// http://www.jacklmoore.com/notes/rounding-in-javascript/
-function round(value, decimals) {
-	return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
-}
 
 //-------------------------------------
 // GUI
