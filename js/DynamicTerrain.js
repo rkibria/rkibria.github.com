@@ -19,19 +19,18 @@ this.TerrainTiles = new Map();
 this.TriggerTerrainReset = true;
 
 this.terrainHeightCallback = null;
+this.terrainTextureCallback = null;
 
 this.showWireframe = false;
 
 // OBJECT POOLING VARIABLES
 this.tmpDeleteTpos = new THREE.Vector3();
 this.tmpTerrainHeightOutput = {rndMult: 0, z: 0};
+this.tmpTerrainTextureOutput = {texture: null};
 
-this.init = function(terrainTexturePath, terrainHeightCallback) {
-	this.terrainTexture = new THREE.TextureLoader().load(terrainTexturePath);
-	this.terrainTexture.wrapS = THREE.RepeatWrapping;
-	this.terrainTexture.wrapT = THREE.RepeatWrapping;
-
+this.init = function(terrainHeightCallback, terrainTextureCallback) {
 	this.terrainHeightCallback = terrainHeightCallback;
+	this.terrainTextureCallback = terrainTextureCallback;
 };
 
 this.getCurrentTerrainPos = function() {
@@ -94,8 +93,9 @@ this.generateTile = function(tx, ty) {
 			} );
 	}
 	else {
+		this.terrainTextureCallback(bx, by, this.tmpTerrainTextureOutput);
 		terrainMaterial = new THREE.MeshBasicMaterial( {
-			map: this.terrainTexture,
+			map: this.tmpTerrainTextureOutput.texture,
 			side: THREE.DoubleSide
 			} );
 	}
