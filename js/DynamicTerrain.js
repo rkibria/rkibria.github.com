@@ -73,7 +73,7 @@ this.generateTile = function(tx, ty) {
 			var x = bx + (k / this.TERRAIN_SEGMENTS) * this.TERRAIN_SIZE;
 			var y = by + ((this.TERRAIN_SEGMENTS - i) / this.TERRAIN_SEGMENTS) * this.TERRAIN_SIZE;
 			var z = this.getTerrainHeight(x, y);
-			terrainGeometry.vertices[index].z = z;
+			terrainGeometry.vertices[index].z = -z;
 			index += 1;
 		}
 	}
