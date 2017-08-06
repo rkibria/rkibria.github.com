@@ -31,7 +31,7 @@ var scene = new THREE.Scene();
 var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 var camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.x = 0;
-camera.position.y = 10;
+camera.position.y = 0;
 camera.position.z = 0;
 
 // RENDERER + FOG
@@ -96,22 +96,38 @@ var GuiParameters =
 
 var showWireframe = gui.add( GuiParameters, 'showWireframe' );
 showWireframe.onChange(function(value) {
+	dynTerrain.showWireframe = value;
 	dynTerrain.TriggerTerrainReset = true;
 });
 
 gui.open();
 
 // RENDER LOOP
-dynTerrain.init("images/graystone.jpg");
+
+dynTerrain.init("images/graystone.jpg",
+	function(x, y, output) {
+		var absX = Math.abs(x);
+		var absY = Math.abs(y);
+
+		if (absX < 0 && absY < 0) {
+			output.rndMult = 0;
+			output.z = 1;
+		}
+		else {
+			var d = Math.sqrt(x*x + y*y);
+			var w = Math.sin(d / 10) * 5 + (Math.sin(x/10) + Math.cos(y/10)) * 5;
+
+			output.rndMult = 4;
+			output.z = w;
+		}
+	}
+);
 
 var clock = new THREE.Clock();
-
 var render = function () {
 	requestAnimationFrame( render );
 	stats.update();
-
 	dynTerrain.updateTerrain();
-
 	controls.update( clock.getDelta() );
 	renderer.render(scene, camera);
 };
