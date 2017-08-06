@@ -18,6 +18,10 @@ this.curTpos = new THREE.Vector3();
 this.TerrainTiles = new Map();
 this.TriggerTerrainReset = true;
 
+// OBJECT POOLING VARIABLES
+this.tmpDeleteTpos = new THREE.Vector3();
+
+
 this.init = function () {
 	this.TerrainTexture = new THREE.TextureLoader().load( "images/graystone.jpg" );
 	this.TerrainTexture.wrapS = THREE.RepeatWrapping;
@@ -34,11 +38,10 @@ this.getTerrainKey = function(tx, ty) {
 	return tx + "/" + ty;
 }
 
-this.getPosFromTerrainKey = function(terrainKey) {
+this.getPosFromTerrainKey = function(terrainKey, tpos) {
 	tokens = terrainKey.split("/");
-	var tx = parseInt(tokens[0]);
-	var ty = parseInt(tokens[1]);
-	return new THREE.Vector2(tx, ty);
+	tpos.x = parseInt(tokens[0]);
+	tpos.y = parseInt(tokens[1]);
 }
 
 this.getTerrainHeight = function(x, y) {
@@ -133,8 +136,8 @@ this.removeTerrain = function(terrainKey) {
 this.deleteTiles = function(tileDeleteRange) {
 	toDelete = [];
 	for (var terrainKey of this.TerrainTiles.keys()) {
-		var tpos = this.getPosFromTerrainKey(terrainKey);
-		if (Math.abs(tpos.x - this.curTpos.x) > tileDeleteRange || Math.abs(tpos.y - this.curTpos.y) > tileDeleteRange) {
+		this.getPosFromTerrainKey(terrainKey, this.tmpDeleteTpos);
+		if (Math.abs(this.tmpDeleteTpos.x - this.curTpos.x) > tileDeleteRange || Math.abs(this.tmpDeleteTpos.y - this.curTpos.y) > tileDeleteRange) {
 			toDelete.push(terrainKey);
 		}
 	}
