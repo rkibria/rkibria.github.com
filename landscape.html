@@ -21,21 +21,9 @@
 <script src="js/DynamicTerrain.js"></script>
 
 <script>
-//-------------------------------------
 // CONSTS
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 
-var TERRAIN_SIZE = 10;
-
-var TERRAIN_SEGMENTS = 4;
-var TERRAIN_TRACKS = TERRAIN_SEGMENTS + 1;
-
-var MIN_TILE_CREATE_RANGE = 15;
-
-var MOVE_SPEED = 1.0;
-var TURN_SPEED = 0.1;
-
-//-------------------------------------
 // SCENE
 var scene = new THREE.Scene();
 
@@ -94,12 +82,10 @@ scene.background = new THREE.CubeTextureLoader()
 "sky-nz.jpg"
 ] );
 
-//-------------------------------------
+// DYNAMIC TERRAIN
 var dynTerrain = new DynamicTerrain(scene, camera);
 
-//-------------------------------------
 // GUI
-
 var gui = new dat.GUI();
 this.displayOutline = false;
 
@@ -115,7 +101,8 @@ showWireframe.onChange(function(value) {
 
 gui.open();
 
-dynTerrain.init();
+// RENDER LOOP
+dynTerrain.init("images/graystone.jpg");
 
 var clock = new THREE.Clock();
 

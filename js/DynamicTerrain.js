@@ -22,8 +22,8 @@ this.TriggerTerrainReset = true;
 this.tmpDeleteTpos = new THREE.Vector3();
 
 
-this.init = function () {
-	this.TerrainTexture = new THREE.TextureLoader().load( "images/graystone.jpg" );
+this.init = function(terrainTexturePath) {
+	this.TerrainTexture = new THREE.TextureLoader().load(terrainTexturePath);
 	this.TerrainTexture.wrapS = THREE.RepeatWrapping;
 	this.TerrainTexture.wrapT = THREE.RepeatWrapping;
 };
