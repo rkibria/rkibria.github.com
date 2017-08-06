@@ -12,9 +12,11 @@ this.TERRAIN_SEGMENTS = 4;
 this.TERRAIN_TRACKS = this.TERRAIN_SEGMENTS + 1;
 this.MIN_TILE_CREATE_RANGE = 15;
 
-this.LastTerrainPos = null;
+this.lastTpos = new THREE.Vector3();
+this.curTpos = new THREE.Vector3();
+
 this.TerrainTiles = new Map();
-this.TriggerTerrainReset = false;
+this.TriggerTerrainReset = true;
 
 this.init = function () {
 	this.TerrainTexture = new THREE.TextureLoader().load( "images/graystone.jpg" );
@@ -23,10 +25,9 @@ this.init = function () {
 };
 
 this.getCurrentTerrainPos = function() {
-	var tx = Math.floor(this.camera.position.x / this.TERRAIN_SIZE);
-	var ty = Math.floor(this.camera.position.z / this.TERRAIN_SIZE);
-	var tz = Math.floor(Math.sqrt(Math.abs(this.camera.position.y)));
-	return new THREE.Vector3(tx, ty, tz);
+	this.curTpos.x = Math.floor(this.camera.position.x / this.TERRAIN_SIZE);
+	this.curTpos.y = Math.floor(this.camera.position.z / this.TERRAIN_SIZE);
+	this.curTpos.z = Math.floor(Math.sqrt(Math.abs(this.camera.position.y)));
 }
 
 this.getTerrainKey = function(tx, ty) {
@@ -129,11 +130,11 @@ this.removeTerrain = function(terrainKey) {
 	this.TerrainTiles.delete(terrainKey);
 }
 
-this.deleteTiles = function(curTpos, tileDeleteRange) {
+this.deleteTiles = function(tileDeleteRange) {
 	toDelete = [];
 	for (var terrainKey of this.TerrainTiles.keys()) {
 		var tpos = this.getPosFromTerrainKey(terrainKey);
-		if (Math.abs(tpos.x - curTpos.x) > tileDeleteRange || Math.abs(tpos.y - curTpos.y) > tileDeleteRange) {
+		if (Math.abs(tpos.x - this.curTpos.x) > tileDeleteRange || Math.abs(tpos.y - this.curTpos.y) > tileDeleteRange) {
 			toDelete.push(terrainKey);
 		}
 	}
@@ -147,9 +148,9 @@ this.deleteTiles = function(curTpos, tileDeleteRange) {
 	}
 }
 
-this.createTiles = function(curTpos, tileCreateRange) {
-	for (tx = curTpos.x - tileCreateRange; tx <= curTpos.x + tileCreateRange; tx++) {
-		for (ty = curTpos.y - tileCreateRange; ty <= curTpos.y + tileCreateRange; ty++) {
+this.createTiles = function(tileCreateRange) {
+	for (tx = this.curTpos.x - tileCreateRange; tx <= this.curTpos.x + tileCreateRange; tx++) {
+		for (ty = this.curTpos.y - tileCreateRange; ty <= this.curTpos.y + tileCreateRange; ty++) {
 			var terrainKey = this.getTerrainKey(tx, ty);
 			if (!this.TerrainTiles.has(terrainKey)) {
 				var terrainValue = this.generateTile(tx, ty);
@@ -160,25 +161,26 @@ this.createTiles = function(curTpos, tileCreateRange) {
 }
 
 this.updateTerrain = function() {
-	var curTpos = this.getCurrentTerrainPos();
-	if (!this.TriggerTerrainReset && (this.LastTerrainPos !== null && curTpos.equals(this.LastTerrainPos)))
+	this.getCurrentTerrainPos();
+
+	if (!this.TriggerTerrainReset && this.curTpos.equals(this.lastTpos))
 		return;
 
-	var tileCreateRange = this.MIN_TILE_CREATE_RANGE + curTpos.z;
+	var tileCreateRange = this.MIN_TILE_CREATE_RANGE + this.curTpos.z;
 
 	var tileDeleteRange = tileCreateRange; // + 1; // When debugging don't add 1 to see pop-in and out easier
 	if (this.TriggerTerrainReset) {
 		tileDeleteRange = -1;
 	}
 
-	this.deleteTiles(curTpos, tileDeleteRange);
+	this.deleteTiles(tileDeleteRange);
 
 	var t0 = performance.now();
-	this.createTiles(curTpos, tileCreateRange);
+	this.createTiles(tileCreateRange);
 	var t1 = performance.now();
 	console.log("createTiles(): " + (t1 - t0) + " ms")
 
-	this.LastTerrainPos = this.getCurrentTerrainPos();
+	this.lastTpos.copy(this.curTpos);
 
 	this.TriggerTerrainReset = false;
 }
