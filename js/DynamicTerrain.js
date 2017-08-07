@@ -110,7 +110,7 @@ this.generateTile = function(tx, ty) {
 	}
 
 	var waterGeometry = new THREE.PlaneGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE );
-	var waterMaterial = new THREE.MeshPhongMaterial( {
+	var waterMaterial = new THREE.MeshBasicMaterial( {
 			color: 0x0000ff,
 			side: THREE.DoubleSide,
 			transparent: true,
