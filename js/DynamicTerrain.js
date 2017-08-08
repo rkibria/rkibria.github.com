@@ -63,16 +63,18 @@ this.getTerrainHeight = function(x, y) {
 }
 
 this.generateTile = function(tx, ty) {
-	var terrainGeometry = new THREE.PlaneGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE, this.TERRAIN_SEGMENTS, this.TERRAIN_SEGMENTS );
+	var terrainGeometry = new THREE.PlaneBufferGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE, this.TERRAIN_SEGMENTS, this.TERRAIN_SEGMENTS );
 	var index = 0;
 	var bx = (tx + 0.5) * this.TERRAIN_SIZE;
 	var by = (ty + 0.5) * this.TERRAIN_SIZE;
+	var vertices = terrainGeometry.attributes.position.array;
+
 	for ( var i = 0; i < this.TERRAIN_TRACKS; i ++ ) {
 		for ( var k = 0; k < this.TERRAIN_TRACKS; k ++ ) {
 			var x = bx + (k / this.TERRAIN_SEGMENTS) * this.TERRAIN_SIZE;
 			var y = by + ((this.TERRAIN_SEGMENTS - i) / this.TERRAIN_SEGMENTS) * this.TERRAIN_SIZE;
 			var z = this.getTerrainHeight(x, y);
-			terrainGeometry.vertices[index].z = -z;
+			vertices[index * 3 + 2] = -z;
 			index += 1;
 		}
 	}
@@ -109,7 +111,7 @@ this.generateTile = function(tx, ty) {
 		terrainTile.add( wireframe );
 	}
 
-	var waterGeometry = new THREE.PlaneGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE );
+	var waterGeometry = new THREE.PlaneBufferGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE );
 	var waterMaterial = new THREE.MeshBasicMaterial( {
 			color: 0x0000ff,
 			side: THREE.DoubleSide,
