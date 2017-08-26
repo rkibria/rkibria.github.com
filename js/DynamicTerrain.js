@@ -21,6 +21,8 @@ this.TriggerTerrainReset = true;
 this.terrainHeightCallback = null;
 this.terrainTextureCallback = null;
 
+this.waterDisplacement = null;
+
 this.showWireframe = false;
 
 // OBJECT POOLING VARIABLES
@@ -111,15 +113,39 @@ this.generateTile = function(tx, ty) {
 		terrainTile.add( wireframe );
 	}
 
-	var waterGeometry = new THREE.PlaneBufferGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE );
-	var waterMaterial = new THREE.MeshBasicMaterial( {
-			color: 0x0000ff,
-			side: THREE.DoubleSide,
-			transparent: true,
-			opacity: 0.5,
-			wireframe: this.showWireframe
-			});
+	var waterSegments = 4;
+	var waterGeometry = new THREE.PlaneBufferGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE, waterSegments, waterSegments );
+
+	if (this.waterDisplacement == null) {
+		this.waterDisplacement = new Float32Array( waterGeometry.attributes.position.count );
+		/*
+		for ( var i = 0; i < this.waterDisplacement.length; i ++ ) {
+			this.waterDisplacement[ i ] = 0.1 * Math.sin( 0.25 * i );
+		}
+		*/
+	}
+	waterGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( this.waterDisplacement, 1 ) );
+
+	var uniforms = {
+		color:     { value: new THREE.Color( 0x0000ff ) },
+		light:     { value: new THREE.Vector3( 1.5, 1.2, 1.0 ) },
+		//texture:   { value: new THREE.TextureLoader().load( "images/sky-ny.jpg" ) }
+	};
+	//uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
+
+	var vertexShaderCode = document.getElementById( 'vertexshader' ).textContent;
+	var fragmentShaderCode = document.getElementById( 'fragmentshader' ).textContent;
+
+	var waterMaterial = new THREE.ShaderMaterial( {
+		side: THREE.DoubleSide,
+		transparent: true,
+		uniforms: uniforms,
+		vertexShader: vertexShaderCode,
+		fragmentShader: fragmentShaderCode
+	});
+
 	var waterMesh = new THREE.Mesh( waterGeometry, waterMaterial );
+
 	terrainTile.add( waterMesh );
 
 	terrainTile.position.x = (tx + 0.5) * this.TERRAIN_SIZE;
