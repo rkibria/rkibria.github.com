@@ -39,7 +39,7 @@
 
 			//uniform float amplitude;
 
-			//attribute float displacement;
+			attribute float displacement;
 
 			varying vec3 vNormal;
 			//varying vec2 vUv;
@@ -49,9 +49,8 @@
 				vNormal = normal;
 				//vUv = ( 0.5 + amplitude ) * uv + vec2( amplitude );
 
-				//vec3 newPosition = position + amplitude * normal * vec3( displacement );
-				// gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+				vec3 newPosition = position + normal * vec3( displacement );
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 
 			}
 
@@ -127,8 +126,10 @@
 			//var radius = 50, segments = 8, rings = 8;
 			var geometry = new THREE.SphereBufferGeometry( radius, segments, rings );
 
-			/*
 			displacement = new Float32Array( geometry.attributes.position.count );
+			geometry.addAttribute( 'displacement', new THREE.BufferAttribute( displacement, 1 ) );
+
+			/*
 			noise = new Float32Array( geometry.attributes.position.count );
 
 			for ( var i = 0; i < displacement.length; i ++ ) {
@@ -136,8 +137,6 @@
 				noise[ i ] = Math.random() * 5;
 
 			}
-
-			geometry.addAttribute( 'displacement', new THREE.BufferAttribute( displacement, 1 ) );
 			*/
 
 			sphere = new THREE.Mesh( geometry, shaderMaterial );
@@ -177,43 +176,24 @@
 
 		}
 
-		var rotationAxis = new THREE.Vector3( 1.0, 0.0, 0.0 );
-
 		function render() {
 
 			var time = Date.now() * 0.01;
 
-			//uniforms.light.value.applyAxisAngle(rotationAxis, 0.01);
-			//uniforms.light.value.z += 0.01;
-			//uniforms.light.value.addScalar(0.01);
 			var vector = new THREE.Vector3();
 			vector.copy(uniforms.light.value);
 
-			var axis = new THREE.Vector3( 0, 1, 0 );
-			var angle = 0.01;
-
-			vector.applyAxisAngle( axis, angle );
+			var rotationAxis = new THREE.Vector3( 0, 0, 1 );
+			vector.applyAxisAngle( rotationAxis, 0.01 );
 			uniforms.light.value.copy(vector);
 
 			//sphere.rotation.y = sphere.rotation.z = 0.01 * time;
 
-			/*
-			uniforms.amplitude.value = 2.5 * Math.sin( sphere.rotation.y * 0.125 );
-			uniforms.color.value.offsetHSL( 0.0005, 0, 0 );
-
 			for ( var i = 0; i < displacement.length; i ++ ) {
-
 				displacement[ i ] = Math.sin( 0.1 * i + time );
-
-				noise[ i ] += 0.5 * ( 0.5 - Math.random() );
-				noise[ i ] = THREE.Math.clamp( noise[ i ], -5, 5 );
-
-				displacement[ i ] += noise[ i ];
-
 			}
 
 			sphere.geometry.attributes.displacement.needsUpdate = true;
-			*/
 
 			renderer.render( scene, camera );
 
