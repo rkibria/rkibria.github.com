@@ -37,19 +37,19 @@
 
 		<script type="x-shader/x-vertex" id="vertexshader">
 
-			uniform float amplitude;
+			//uniform float amplitude;
 
-			attribute float displacement;
+			//attribute float displacement;
 
 			varying vec3 vNormal;
-			varying vec2 vUv;
+			//varying vec2 vUv;
 
 			void main() {
 
 				vNormal = normal;
-				vUv = ( 0.5 + amplitude ) * uv + vec2( amplitude );
+				//vUv = ( 0.5 + amplitude ) * uv + vec2( amplitude );
 
-				vec3 newPosition = position + amplitude * normal * vec3( displacement );
+				//vec3 newPosition = position + amplitude * normal * vec3( displacement );
 				// gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 
@@ -60,23 +60,24 @@
 		<script type="x-shader/x-fragment" id="fragmentshader">
 
 			varying vec3 vNormal;
-			varying vec2 vUv;
+			//varying vec2 vUv;
 
+			uniform vec3 light;
 			uniform vec3 color;
-			uniform sampler2D texture;
+			//uniform sampler2D texture;
 
 			void main() {
 
-				vec3 light = vec3( 0.5, 0.2, 1.0 );
-				light = normalize( light );
+				//vec3 light = vec3( 0.5, 0.2, 1.0 );
+				vec3 vLight = normalize( light );
 
-				float dProd = dot( vNormal, light ) * 0.5 + 0.5;
-
-				vec4 tcolor = texture2D( texture, vUv );
-				vec4 gray = vec4( vec3( tcolor.r * 0.3 + tcolor.g * 0.59 + tcolor.b * 0.11 ), 1.0 );
-
+				// float dProd = dot( vNormal, light ) * 0.5 + 0.5;
+				// vec4 tcolor = texture2D( texture, vUv );
+				// vec4 gray = vec4( vec3( tcolor.r * 0.3 + tcolor.g * 0.59 + tcolor.b * 0.11 ), 1.0 );
 				// gl_FragColor = gray * vec4( vec3( dProd ) * vec3( color ), 1.0 );
-				gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+				float dProd = max(0.0, dot(vNormal, vLight));
+				gl_FragColor = vec4(vec3( dProd ) * vec3( color ), 1.0 );
 
 			}
 
@@ -106,27 +107,27 @@
 
 			uniforms = {
 
-				amplitude: { value: 1.0 },
-				color:     { value: new THREE.Color( 0xffffff ) },
-				texture:   { value: new THREE.TextureLoader().load( "images/sky-ny.jpg" ) }
+				//amplitude: { value: 1.0 },
+				color:     { value: new THREE.Color( 0xff00ff ) },
+				light:     { value: new THREE.Vector3( 1.5, 1.2, 1.0 ) },
+				//texture:   { value: new THREE.TextureLoader().load( "images/sky-ny.jpg" ) }
 
 			};
 
-			uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
+			//uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
 
 			var shaderMaterial = new THREE.ShaderMaterial( {
-
 				uniforms: uniforms,
 				vertexShader:document.getElementById( 'vertexshader' ).textContent,
 				fragmentShader: document.getElementById( 'fragmentshader' ).textContent
-
 			});
 
 
 			var radius = 50, segments = 128, rings = 64;
-
+			//var radius = 50, segments = 8, rings = 8;
 			var geometry = new THREE.SphereBufferGeometry( radius, segments, rings );
 
+			/*
 			displacement = new Float32Array( geometry.attributes.position.count );
 			noise = new Float32Array( geometry.attributes.position.count );
 
@@ -137,6 +138,7 @@
 			}
 
 			geometry.addAttribute( 'displacement', new THREE.BufferAttribute( displacement, 1 ) );
+			*/
 
 			sphere = new THREE.Mesh( geometry, shaderMaterial );
 			scene.add( sphere );
@@ -175,12 +177,27 @@
 
 		}
 
+		var rotationAxis = new THREE.Vector3( 1.0, 0.0, 0.0 );
+
 		function render() {
 
 			var time = Date.now() * 0.01;
 
-			sphere.rotation.y = sphere.rotation.z = 0.01 * time;
+			//uniforms.light.value.applyAxisAngle(rotationAxis, 0.01);
+			//uniforms.light.value.z += 0.01;
+			//uniforms.light.value.addScalar(0.01);
+			var vector = new THREE.Vector3();
+			vector.copy(uniforms.light.value);
 
+			var axis = new THREE.Vector3( 0, 1, 0 );
+			var angle = 0.01;
+
+			vector.applyAxisAngle( axis, angle );
+			uniforms.light.value.copy(vector);
+
+			//sphere.rotation.y = sphere.rotation.z = 0.01 * time;
+
+			/*
 			uniforms.amplitude.value = 2.5 * Math.sin( sphere.rotation.y * 0.125 );
 			uniforms.color.value.offsetHSL( 0.0005, 0, 0 );
 
@@ -196,6 +213,7 @@
 			}
 
 			sphere.geometry.attributes.displacement.needsUpdate = true;
+			*/
 
 			renderer.render( scene, camera );
 
