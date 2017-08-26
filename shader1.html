@@ -190,7 +190,7 @@
 			//sphere.rotation.y = sphere.rotation.z = 0.01 * time;
 
 			for ( var i = 0; i < displacement.length; i ++ ) {
-				displacement[ i ] = Math.sin( 0.1 * i + time );
+				displacement[ i ] = 2.0 * Math.sin( 0.25 * i + time );
 			}
 
 			sphere.geometry.attributes.displacement.needsUpdate = true;
