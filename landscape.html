@@ -22,10 +22,14 @@
 
 <script type="x-shader/x-vertex" id="vertexshader">
 	attribute float displacement;
+
+	varying vec2 vUv;
 	varying vec3 vNormal;
 
 	void main() {
 		vNormal = normal;
+		vUv = uv;
+
 		vec3 newPosition = position + normal * vec3( displacement );
 		gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 	}
@@ -33,13 +37,16 @@
 
 <script type="x-shader/x-fragment" id="fragmentshader">
 	varying vec3 vNormal;
+	varying vec2 vUv;
+
 	uniform vec3 light;
 	uniform vec3 color;
 
 	void main() {
-		vec3 vLight = normalize( light );
-		float dProd = max(0.0, dot(vNormal, vLight));
-		gl_FragColor = vec4(vec3( dProd ) * vec3( color ), 0.5 );
+		//vec3 vLight = normalize( light );
+		//float dProd = max(0.0, dot(vNormal, vLight));
+		//gl_FragColor = vec4(vec3( dProd ) * vec3( color ), 0.5 );
+		gl_FragColor = vec4(0.0, 0.0, max(0.0, sin(vUv.x)), 0.5 );
 	}
 </script>
 
