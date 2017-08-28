@@ -25,6 +25,14 @@ this.waterDisplacement = null;
 
 this.showWireframe = false;
 
+this.uniforms = {
+	time: { type: "f", value: 1.0 },
+	color:     { value: new THREE.Color( 0x0000ff ) },
+	light:     { value: new THREE.Vector3( 1.5, 1.2, 1.0 ) },
+	//texture:   { value: new THREE.TextureLoader().load( "images/sky-ny.jpg" ) }
+};
+//uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
+
 // OBJECT POOLING VARIABLES
 this.tmpDeleteTpos = new THREE.Vector3();
 this.tmpTerrainHeightOutput = {rndMult: 0, z: 0};
@@ -126,20 +134,13 @@ this.generateTile = function(tx, ty) {
 	}
 	waterGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( this.waterDisplacement, 1 ) );
 
-	var uniforms = {
-		color:     { value: new THREE.Color( 0x0000ff ) },
-		light:     { value: new THREE.Vector3( 1.5, 1.2, 1.0 ) },
-		//texture:   { value: new THREE.TextureLoader().load( "images/sky-ny.jpg" ) }
-	};
-	//uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
-
 	var vertexShaderCode = document.getElementById( 'vertexshader' ).textContent;
 	var fragmentShaderCode = document.getElementById( 'fragmentshader' ).textContent;
 
 	var waterMaterial = new THREE.ShaderMaterial( {
 		side: THREE.DoubleSide,
 		transparent: true,
-		uniforms: uniforms,
+		uniforms: this.uniforms,
 		vertexShader: vertexShaderCode,
 		fragmentShader: fragmentShaderCode
 	});
@@ -195,7 +196,9 @@ this.createTiles = function(tileCreateRange) {
 	}
 }
 
-this.updateTerrain = function() {
+this.updateTerrain = function(delta, elapsed) {
+	this.uniforms.time.value = elapsed;
+
 	this.getCurrentTerrainPos();
 
 	if (!this.TriggerTerrainReset && this.curTpos.equals(this.lastTpos))
@@ -213,7 +216,7 @@ this.updateTerrain = function() {
 	var t0 = performance.now();
 	this.createTiles(tileCreateRange);
 	var t1 = performance.now();
-	console.log("createTiles(): " + (t1 - t0) + " ms")
+	console.log("createTiles(): " + (t1 - t0) + " ms");
 
 	this.lastTpos.copy(this.curTpos);
 

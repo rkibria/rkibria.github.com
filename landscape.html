@@ -26,6 +26,8 @@
 	varying vec2 vUv;
 	varying vec3 vNormal;
 
+	uniform float time;
+
 	void main() {
 		vNormal = normal;
 		vUv = uv;
@@ -39,6 +41,7 @@
 	varying vec3 vNormal;
 	varying vec2 vUv;
 
+	uniform float time;
 	uniform vec3 light;
 	uniform vec3 color;
 
@@ -46,7 +49,7 @@
 		//vec3 vLight = normalize( light );
 		//float dProd = max(0.0, dot(vNormal, vLight));
 		//gl_FragColor = vec4(vec3( dProd ) * vec3( color ), 0.5 );
-		gl_FragColor = vec4(0.0, 0.0, max(0.0, sin(vUv.x)), 0.5 );
+		gl_FragColor = vec4(0.0, 0.0, max(0.0, sin(vUv.x + time)), 0.5 );
 	}
 </script>
 
@@ -177,11 +180,14 @@ dynTerrain.init(
 );
 
 var clock = new THREE.Clock();
+var clock2 = new THREE.Clock();
 var render = function () {
 	requestAnimationFrame( render );
 	stats.update();
-	dynTerrain.updateTerrain();
-	controls.update( clock.getDelta() );
+	var deltaT = clock.getDelta();
+	var elapsedT = clock2.getElapsedTime();
+	dynTerrain.updateTerrain(deltaT, elapsedT);
+	controls.update(deltaT);
 	renderer.render(scene, camera);
 };
 
