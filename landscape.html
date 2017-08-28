@@ -38,31 +38,80 @@
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
-	varying vec3 vNormal;
-	varying vec2 vUv;
+varying vec3 vNormal;
+varying vec2 vUv;
 
-	uniform float time;
-	uniform vec3 light;
-	uniform vec3 color;
+uniform float time;
+uniform vec3 light;
+uniform vec3 color;
 
-	float wave(float sx, float sy, float ampl, float xspeed, float ywidth) {
-		return abs(sy - sin(sx + time * xspeed) * ampl) / ywidth;
-	}
+float TWO_PI = 6.28318530718;
 
-	void main() {
-		//vec3 vLight = normalize( light );
-		//float dProd = max(0.0, dot(vNormal, vLight));
-		//gl_FragColor = vec4(vec3( dProd ) * vec3( color ), 0.5 );
-		gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5 );
+// Goes 0 to 1 at period/2 and back to 0
+float trianglefunction(float t, float period) {
+	float z = mod(t, period) / period; // 0 to 1 in period
+	if (z > 0.5)
+		z = 1.0 - z;
+	return z * 2.0;
+}
 
-		float sx = vUv.x * 6.28318530718;
-    float sy = vUv.y * 2.0 - 1.0;
+float waterwave(
+	vec2 uv,
+	float t,
+	float period,
+	float horzSpeed,
+	float vertSpeed,
+	float amplitude,
+	float crestWidth
+	) {
+	float cx = uv.x;
+	float cy = uv.y + vertSpeed * sin(t);
 
-		//float d = abs(sy - sin(sx));
-		float d = wave(sx, sy, 0.6, 1.0, 0.5);
+	// map area to [0..TWOPI, -1..1]
+	float sx = cx * TWO_PI;
+	float sy = cy * 2.0 - 1.0;
 
-		gl_FragColor = mix(vec4(1.0, 1.0, 1.0, 0.5 ), vec4(0.0, 0.412, 0.58, 0.5 ), clamp(d, 0.0, 1.0));
-	}
+	float ss = trianglefunction(t, period);
+	ss = ss * 2.0 - 1.0;
+
+	float f = sin(t * horzSpeed + sx) * ss * amplitude;
+
+	float d = abs(sy - f) / crestWidth;
+	return 1.0 - d;
+}
+
+vec4 WATER_COLOR = vec4(0.0, 0.412, 0.58, 0.5);
+vec4 CREST_COLOR = vec4(0.0, 0.6, 0.8, 0.5);
+
+void main() {
+	//vec3 vLight = normalize( light );
+	//float dProd = max(0.0, dot(vNormal, vLight));
+	//gl_FragColor = vec4(vec3( dProd ) * vec3( color ), 0.5 );
+
+	float w1 = waterwave(
+		vec2(vUv.x, vUv.y - 0.2),
+		time,
+		30.0, // period
+		0.5, // horzSpeed
+		0.05, // vertSpeed
+		0.4, // amplitude
+		0.2 * (0.2 + 0.8 * abs(sin(time / 2.0))) // crestWidth
+		);
+
+	float w2 = waterwave(
+		vec2(vUv.x, vUv.y + 0.2),
+		time,
+		20.0, // period
+		1.0, // horzSpeed
+		0.05, // vertSpeed
+		0.2, // amplitude
+		0.1 * (0.1 + 0.9 * abs(sin(time / 2.0 * 1.5 + 2.0))) // crestWidth
+		);
+
+	// float waves = clamp(w1 + w2, 0.0, 1.0);
+	float waves = clamp(w1, 0.0, 1.0) + clamp(w2, 0.0, 1.0);
+	gl_FragColor = mix(WATER_COLOR, CREST_COLOR, waves);
+}
 </script>
 
 <script>
