@@ -7,10 +7,10 @@ DynamicTerrain = function ( scene, camera ) {
 this.scene = scene;
 this.camera = camera;
 
-this.TERRAIN_SIZE = 10;
-this.TERRAIN_SEGMENTS = 4;
+this.TERRAIN_SIZE = 40;
+this.TERRAIN_SEGMENTS = 3;
 this.TERRAIN_TRACKS = this.TERRAIN_SEGMENTS + 1;
-this.MIN_TILE_CREATE_RANGE = 15;
+this.MIN_TILE_CREATE_RANGE = 5;
 
 this.lastTpos = new THREE.Vector3();
 this.curTpos = new THREE.Vector3();
@@ -23,13 +23,11 @@ this.terrainTextureCallback = null;
 
 this.showWireframe = false;
 
-this.uniforms = {
+this.waterUniforms = {
 	time: { type: "f", value: 1.0 },
 	color:     { value: new THREE.Color( 0x0000ff ) },
 	light:     { value: new THREE.Vector3( 1.5, 1.2, 1.0 ) },
-	//texture:   { value: new THREE.TextureLoader().load( "images/sky-ny.jpg" ) }
 };
-//uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
 
 // OBJECT POOLING VARIABLES
 this.tmpDeleteTpos = new THREE.Vector3();
@@ -127,7 +125,7 @@ this.generateTile = function(tx, ty) {
 	var waterMaterial = new THREE.ShaderMaterial( {
 		side: THREE.DoubleSide,
 		transparent: true,
-		uniforms: this.uniforms,
+		uniforms: this.waterUniforms,
 		vertexShader: vertexShaderCode,
 		fragmentShader: fragmentShaderCode
 	});
@@ -184,7 +182,7 @@ this.createTiles = function(tileCreateRange) {
 }
 
 this.updateTerrain = function(delta, elapsed) {
-	this.uniforms.time.value = elapsed;
+	this.waterUniforms.time.value = elapsed;
 
 	this.getCurrentTerrainPos();
 
