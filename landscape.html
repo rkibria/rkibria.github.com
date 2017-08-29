@@ -20,9 +20,7 @@
 <script src="js/threex.windowresize.js"></script>
 <script src="js/DynamicTerrain.js"></script>
 
-<script type="x-shader/x-vertex" id="vertexshader">
-	attribute float displacement;
-
+<script type="x-shader/x-vertex" id="water_vertexshader">
 	varying vec2 vUv;
 	varying vec3 vNormal;
 
@@ -32,12 +30,11 @@
 		vNormal = normal;
 		vUv = uv;
 
-		vec3 newPosition = position + normal * vec3( displacement );
-		gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+		gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0 );
 	}
 </script>
 
-<script type="x-shader/x-fragment" id="fragmentshader">
+<script type="x-shader/x-fragment" id="water_fragmentshader">
 varying vec3 vNormal;
 varying vec2 vUv;
 
@@ -108,7 +105,6 @@ void main() {
 		0.1 * (0.1 + 0.9 * abs(sin(time / 2.0 * 1.5 + 2.0))) // crestWidth
 		);
 
-	// float waves = clamp(w1 + w2, 0.0, 1.0);
 	float waves = clamp(w1, 0.0, 1.0) + clamp(w2, 0.0, 1.0);
 	gl_FragColor = mix(WATER_COLOR, CREST_COLOR, waves);
 }
@@ -125,7 +121,7 @@ var scene = new THREE.Scene();
 var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 var camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.x = 0;
-camera.position.y = 10;
+camera.position.y = 20;
 camera.position.z = 0;
 
 // RENDERER + FOG
@@ -202,41 +198,20 @@ var rockTexture = new THREE.TextureLoader().load("images/graystone.jpg");
 rockTexture.wrapS = THREE.RepeatWrapping;
 rockTexture.wrapT = THREE.RepeatWrapping;
 
-var grassTexture = new THREE.TextureLoader().load("images/grass.jpg");
-grassTexture.wrapS = THREE.RepeatWrapping;
-grassTexture.wrapT = THREE.RepeatWrapping;
-
 dynTerrain.init(
 	// Height computation callback
 	function(x, y, output) {
-		var absX = Math.abs(x);
-		var absY = Math.abs(y);
+		var d = Math.sqrt(x*x + y*y);
 
-		if (absX < 30 && absY < 30) {
-			output.rndMult = 0;
-			output.z = 1;
-		}
-		else {
-			var d = Math.sqrt(x*x + y*y);
+		var w1 = Math.sin(d / 10) * 5;
+		var w2 = (Math.sin(x/10) + Math.cos(y/10)) * 5;
 
-			var w1 = Math.sin(d / 10) * 5;
-			var w2 = (Math.sin(x/10) + Math.cos(y/10)) * 5;
-
-			output.rndMult = 4;
-			output.z = w1 + w2;
-		}
+		output.rndMult = 4;
+		output.z = w1 + w2;
 	},
 	// Texture callback
 	function(x, y, output) {
-		var absX = Math.abs(x);
-		var absY = Math.abs(y);
-
-		if (absX < 20 && absY < 20) {
-			output.texture = grassTexture;
-		}
-		else {
-			output.texture = rockTexture;
-		}
+		output.texture = rockTexture;
 	}
 );
 

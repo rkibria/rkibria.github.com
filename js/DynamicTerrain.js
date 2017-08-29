@@ -21,8 +21,6 @@ this.TriggerTerrainReset = true;
 this.terrainHeightCallback = null;
 this.terrainTextureCallback = null;
 
-this.waterDisplacement = null;
-
 this.showWireframe = false;
 
 this.uniforms = {
@@ -121,21 +119,10 @@ this.generateTile = function(tx, ty) {
 		terrainTile.add( wireframe );
 	}
 
-	var waterSegments = 4;
-	var waterGeometry = new THREE.PlaneBufferGeometry( this.TERRAIN_SIZE, this.TERRAIN_SIZE, waterSegments, waterSegments );
+	var waterGeometry = new THREE.PlaneBufferGeometry(this.TERRAIN_SIZE, this.TERRAIN_SIZE);
 
-	if (this.waterDisplacement == null) {
-		this.waterDisplacement = new Float32Array( waterGeometry.attributes.position.count );
-		/*
-		for ( var i = 0; i < this.waterDisplacement.length; i ++ ) {
-			this.waterDisplacement[ i ] = 0.1 * Math.sin( 0.25 * i );
-		}
-		*/
-	}
-	waterGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( this.waterDisplacement, 1 ) );
-
-	var vertexShaderCode = document.getElementById( 'vertexshader' ).textContent;
-	var fragmentShaderCode = document.getElementById( 'fragmentshader' ).textContent;
+	var vertexShaderCode = document.getElementById( 'water_vertexshader' ).textContent;
+	var fragmentShaderCode = document.getElementById( 'water_fragmentshader' ).textContent;
 
 	var waterMaterial = new THREE.ShaderMaterial( {
 		side: THREE.DoubleSide,
