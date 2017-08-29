@@ -201,6 +201,8 @@ rockTexture.wrapT = THREE.RepeatWrapping;
 dynTerrain.init(
 	// Height computation callback
 	function(x, y, output) {
+		x /= 5;
+		y /= 5;
 		var d = Math.sqrt(x*x + y*y);
 
 		var w1 = Math.sin(d / 10) * 5;
