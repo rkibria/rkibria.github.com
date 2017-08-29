@@ -7,11 +7,6 @@ DynamicTerrain = function ( scene, camera ) {
 this.scene = scene;
 this.camera = camera;
 
-this.TERRAIN_SIZE = 40;
-this.TERRAIN_SEGMENTS = 3;
-this.TERRAIN_TRACKS = this.TERRAIN_SEGMENTS + 1;
-this.MIN_TILE_CREATE_RANGE = 5;
-
 this.lastTpos = new THREE.Vector3();
 this.curTpos = new THREE.Vector3();
 
@@ -34,9 +29,14 @@ this.tmpDeleteTpos = new THREE.Vector3();
 this.tmpTerrainHeightOutput = {rndMult: 0, z: 0};
 this.tmpTerrainTextureOutput = {texture: null};
 
-this.init = function(terrainHeightCallback, terrainTextureCallback) {
+this.init = function(terrainHeightCallback, terrainTextureCallback, terrainSize, terrainSegments, minTileCreateRange) {
 	this.terrainHeightCallback = terrainHeightCallback;
 	this.terrainTextureCallback = terrainTextureCallback;
+
+	this.TERRAIN_SIZE = terrainSize;
+	this.TERRAIN_SEGMENTS = terrainSegments;
+	this.TERRAIN_TRACKS = this.TERRAIN_SEGMENTS + 1;
+	this.MIN_TILE_CREATE_RANGE = minTileCreateRange;
 };
 
 this.getCurrentTerrainPos = function() {

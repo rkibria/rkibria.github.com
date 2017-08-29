@@ -212,7 +212,10 @@ dynTerrain.init(
 	// Texture callback
 	function(x, y, output) {
 		output.texture = rockTexture;
-	}
+	},
+	50, // TERRAIN_SIZE
+	3, // TERRAIN_SEGMENTS
+	4 // MIN_TILE_CREATE_RANGE
 );
 
 var clock = new THREE.Clock();
