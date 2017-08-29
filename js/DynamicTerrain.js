@@ -20,8 +20,6 @@ this.showWireframe = false;
 
 this.waterUniforms = {
 	time: { type: "f", value: 1.0 },
-	color:     { value: new THREE.Color( 0x0000ff ) },
-	light:     { value: new THREE.Vector3( 1.5, 1.2, 1.0 ) },
 };
 
 // OBJECT POOLING VARIABLES
