@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="300" height="300" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+var SCREEN_SIZE = 300;
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");    
+ctx.fillStyle="black";
+ctx.fillRect(0, 0, SCREEN_SIZE, SCREEN_SIZE);
+
+var imgData = ctx.getImageData(0, 0, SCREEN_SIZE, SCREEN_SIZE);
+console.log(imgData.data.length);
+
+var i;
+for (i = 0; i < imgData.data.length; i += 4) {
+	var x = (i / 4) % SCREEN_SIZE;
+	var y = (i / (4 * SCREEN_SIZE));
+	imgData.data[i] = y % 256;
+	imgData.data[i+1] = x % 256;
+	imgData.data[i+2] = 0;
+	imgData.data[i+3] = 255;
+}
+ctx.putImageData(imgData, 0, 0);
+
+</script>
+
+</body>
+</html>
