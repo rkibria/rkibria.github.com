@@ -52,16 +52,32 @@ var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 console.log(imgData.data.length);
 
 var i;
+var xcomp = new THREE.Vector3();
+var ycomp = new THREE.Vector3();
+var rayDirection = new THREE.Vector3();
+var eyeRay = new THREE.Ray();
+
 for (i = 0; i < imgData.data.length; i += 4) {
 	var x = (i / 4) % SCREEN_WIDTH;
 	var y = (i / (4 * SCREEN_HEIGHT));
 
+	xcomp.copy(eyeRightVector);
+	xcomp.multiplyScalar((x * pixelWidth) - halfWidth);
+
+	ycomp.copy(eyeUpVector);
+	ycomp.multiplyScalar((y * pixelHeight) - halfHeight);
+
+	rayDirection.copy(xcomp);
+	rayDirection.add(ycomp).normalize();
+
+	eyeRay.set(camera.pos, rayDirection);
 
 	imgData.data[i] = y % 256;
 	imgData.data[i+1] = x % 256;
 	imgData.data[i+2] = 0;
 	imgData.data[i+3] = 255;
 }
+
 ctx.putImageData(imgData, 0, 0);
 
 </script>
