@@ -4,13 +4,13 @@
 
 <script src="js/three.min.js"></script>
 
-<canvas id="myCanvas" width="320" height="240" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas" width="300" height="300" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
 
-var SCREEN_WIDTH = 320;
-var SCREEN_HEIGHT = 240;
+var SCREEN_WIDTH = 300;
+var SCREEN_HEIGHT = 300;
 
 // CAMERA
 var camera = {
@@ -18,6 +18,8 @@ var camera = {
 	point: new THREE.Vector3(0, 0, -10),
 	fov: 45.0
 	};
+
+var sphere = new THREE.Sphere(new THREE.Vector3(0, 0, -5), 1);
 
 var VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
@@ -55,6 +57,7 @@ var i;
 var xcomp = new THREE.Vector3();
 var ycomp = new THREE.Vector3();
 var rayDirection = new THREE.Vector3();
+var intersectVector = new THREE.Vector3();
 var eyeRay = new THREE.Ray();
 
 for (i = 0; i < imgData.data.length; i += 4) {
@@ -67,14 +70,21 @@ for (i = 0; i < imgData.data.length; i += 4) {
 	ycomp.copy(eyeUpVector);
 	ycomp.multiplyScalar((y * pixelHeight) - halfHeight);
 
-	rayDirection.copy(xcomp);
+	rayDirection.copy(eyeVector);
+	rayDirection.add(xcomp);
 	rayDirection.add(ycomp).normalize();
 
 	eyeRay.set(camera.pos, rayDirection);
 
-	imgData.data[i] = y % 256;
-	imgData.data[i+1] = x % 256;
-	imgData.data[i+2] = 0;
+	var color = 0;
+	var intersect = eyeRay.intersectSphere(sphere, intersectVector);
+	if (intersect != null) {
+		color = 1;
+	}
+
+	imgData.data[i] = color * 255;
+	imgData.data[i+1] = color * 255;
+	imgData.data[i+2] = color * 255;
 	imgData.data[i+3] = 255;
 }
 
