@@ -65,7 +65,7 @@ var eyeRay = new THREE.Ray();
 
 for (i = 0; i < imgData.data.length; i += 4) {
 	var x = (i / 4) % SCREEN_WIDTH;
-	var y = (i / (4 * SCREEN_HEIGHT));
+	var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
 	xcomp.copy(eyeRightVector);
 	xcomp.multiplyScalar((x * pixelWidth) - halfWidth);
