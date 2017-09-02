@@ -12,7 +12,6 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 var SCREEN_WIDTH = 300;
 var SCREEN_HEIGHT = 300;
 
-// CAMERA
 var camera = {
 	pos: new THREE.Vector3(0, 0, 0),
 	point: new THREE.Vector3(0, 0, -10),
@@ -20,6 +19,8 @@ var camera = {
 	};
 
 var sphere = new THREE.Sphere(new THREE.Vector3(0, 0, -5), 1);
+
+var light = new THREE.Vector3(0, 10, 0);
 
 var VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
@@ -58,6 +59,8 @@ var xcomp = new THREE.Vector3();
 var ycomp = new THREE.Vector3();
 var rayDirection = new THREE.Vector3();
 var intersectVector = new THREE.Vector3();
+var surfaceNormal = new THREE.Vector3();
+var lightVector = new THREE.Vector3();
 var eyeRay = new THREE.Ray();
 
 for (i = 0; i < imgData.data.length; i += 4) {
@@ -79,7 +82,13 @@ for (i = 0; i < imgData.data.length; i += 4) {
 	var color = 0;
 	var intersect = eyeRay.intersectSphere(sphere, intersectVector);
 	if (intersect != null) {
-		color = 1;
+		surfaceNormal.copy(intersectVector);
+		surfaceNormal.sub(sphere.center).normalize();
+
+		lightVector.copy(light);
+		lightVector.sub(intersectVector).normalize();
+
+		color = surfaceNormal.dot(lightVector);
 	}
 
 	imgData.data[i] = color * 255;
