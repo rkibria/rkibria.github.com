@@ -2,25 +2,61 @@
 <html>
 <body>
 
-<canvas id="myCanvas" width="300" height="300" style="border:1px solid #d3d3d3;">
+<script src="js/three.min.js"></script>
+
+<canvas id="myCanvas" width="320" height="240" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
 
-var SCREEN_SIZE = 300;
+var SCREEN_WIDTH = 320;
+var SCREEN_HEIGHT = 240;
+
+// CAMERA
+var camera = {
+	pos: new THREE.Vector3(0, 0, 0),
+	point: new THREE.Vector3(0, 0, -10),
+	fov: 45.0
+	};
+
+var VECTOR_UP = new THREE.Vector3(0, 1, 0);
+
+var eyeVector = new THREE.Vector3();
+eyeVector.subVectors(camera.point, camera.pos).normalize();
+console.log("eyeVector", eyeVector);
+
+var eyeRightVector = new THREE.Vector3();
+eyeRightVector.crossVectors(eyeVector, VECTOR_UP).normalize();
+console.log("eyeRightVector", eyeRightVector);
+
+var eyeUpVector = new THREE.Vector3();
+eyeUpVector.crossVectors(eyeRightVector, eyeVector).normalize();
+console.log("eyeUpVector", eyeUpVector);
+
+var fovRadians = Math.PI * (camera.fov / 2) / 180,
+heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT,
+halfWidth = Math.tan(fovRadians),
+halfHeight = heightWidthRatio * halfWidth,
+camerawidth = halfWidth * 2,
+cameraheight = halfHeight * 2,
+pixelWidth = camerawidth / (SCREEN_WIDTH - 1),
+pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
+
 
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");    
 ctx.fillStyle="black";
-ctx.fillRect(0, 0, SCREEN_SIZE, SCREEN_SIZE);
+ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-var imgData = ctx.getImageData(0, 0, SCREEN_SIZE, SCREEN_SIZE);
+var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 console.log(imgData.data.length);
 
 var i;
 for (i = 0; i < imgData.data.length; i += 4) {
-	var x = (i / 4) % SCREEN_SIZE;
-	var y = (i / (4 * SCREEN_SIZE));
+	var x = (i / 4) % SCREEN_WIDTH;
+	var y = (i / (4 * SCREEN_HEIGHT));
+
+
 	imgData.data[i] = y % 256;
 	imgData.data[i+1] = x % 256;
 	imgData.data[i+2] = 0;
