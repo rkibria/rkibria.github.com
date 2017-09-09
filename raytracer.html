@@ -18,7 +18,16 @@ var camera = {
 	fov: 45.0
 	};
 
-var sphere = new THREE.Sphere(new THREE.Vector3(0, 0, -5), 1);
+var objects = [
+	{
+		shape: "sphere",
+		geometry: new THREE.Sphere(new THREE.Vector3(0, 0, -5), 1)
+	},
+	{
+		shape: "sphere",
+		geometry: new THREE.Sphere(new THREE.Vector3(3, 0, -5), 0.33)
+	},
+];
 
 var light = new THREE.Vector3(10, 10, 10);
 
@@ -58,8 +67,6 @@ var i;
 var xcomp = new THREE.Vector3();
 var ycomp = new THREE.Vector3();
 var rayDirection = new THREE.Vector3();
-var intersectVector = new THREE.Vector3();
-var surfaceNormal = new THREE.Vector3();
 var lightVector = new THREE.Vector3();
 var reflectVector = new THREE.Vector3();
 var cameraVector = new THREE.Vector3();
@@ -69,17 +76,33 @@ var lighting = 0;
 var diffuseLight = 0, specularLight = 0;
 
 // Lighting options
-var SPECULAR_ENABLED = true;
 var ambientLight = new THREE.Vector3(0.1, 0.0, 0.0);
-var specularExponent = 10, diffuseFactor = 0.08;
+var specularExponent = 10, diffuseFactor = 0.3;
 //var specularExponent = 50, diffuseFactor = 0.1;
 var specularFactor = 0.9;
 var lightIntensity = 1.0;
+
+var rayIntersection = {
+	isIntersection: false,
+	intersectionPoint: new THREE.Vector3(),
+	surfaceNormal: new THREE.Vector3(),
+	};
+
+function getNearestIntersection(ray, result) {
+	var currentGeometry = objects[0].geometry;
+	result.isIntersection = ray.intersectSphere(currentGeometry, result.intersectionPoint);
+	if (result.isIntersection != null) {
+		// Compute sphere surface normal by getting vector from sphere centre to intersect
+		result.surfaceNormal.copy(result.intersectionPoint);
+		result.surfaceNormal.sub(currentGeometry.center).normalize();
+	}
+}
 
 for (i = 0; i < imgData.data.length; i += 4) {
 	var x = (i / 4) % SCREEN_WIDTH;
 	var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
+	// Set up current eye ray
 	xcomp.copy(eyeRightVector);
 	xcomp.multiplyScalar((x * pixelWidth) - halfWidth);
 
@@ -92,45 +115,37 @@ for (i = 0; i < imgData.data.length; i += 4) {
 
 	eyeRay.set(camera.pos, rayDirection);
 
-	var intersect = eyeRay.intersectSphere(sphere, intersectVector);
-
 	// Clear color
 	color.setScalar(0);
 
-	if (intersect != null) {
+	// Get nearest intersection point
+	getNearestIntersection(eyeRay, rayIntersection);
+
+	if (rayIntersection.isIntersection != null) {
 		// APPLY AMBIENT LIGHTING
 		color.add(ambientLight);
 
 		// GET LIGHTING STRENGTH
 
-		// Compute sphere surface normal by getting vector from sphere centre to intersect
-		surfaceNormal.copy(intersectVector);
-		surfaceNormal.sub(sphere.center).normalize();
-
 		// Compute vector to light source
 		lightVector.copy(light);
-		lightVector.sub(intersectVector).normalize();
+		lightVector.sub(rayIntersection.intersectionPoint).normalize();
+
+		// Compute reflected light vector
+		reflectVector.copy(lightVector);
+		reflectVector.reflect(rayIntersection.surfaceNormal).normalize();
+
+		// Compute camera / viewpoint vector
+		cameraVector.copy(rayIntersection.intersectionPoint);
+		cameraVector.sub(camera.pos).normalize();
 
 		// Be aware that cos can be negative, which makes no sense here as light contribution
-		if (SPECULAR_ENABLED) {
-			// Compute reflected light vector
-			reflectVector.copy(lightVector);
-			reflectVector.reflect(surfaceNormal).normalize();
+		diffuseLight = lightIntensity * diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
 
-			// Compute camera / viewpoint vector
-			cameraVector.copy(intersectVector);
-			cameraVector.sub(camera.pos).normalize();
+		specularLight = lightIntensity * Math.max(0, cameraVector.dot(reflectVector)); // specular lighting
+		specularLight = specularFactor * Math.pow(specularLight, specularExponent);
 
-			diffuseLight = lightIntensity * diffuseFactor * Math.max(0, surfaceNormal.dot(lightVector));
-
-			specularLight = lightIntensity * Math.max(0, cameraVector.dot(reflectVector)); // specular lighting
-			specularLight = specularFactor * Math.pow(specularLight, specularExponent);
-
-			lighting = diffuseLight + specularLight;
-		}
-		else {
-			lighting = Math.max(0, surfaceNormal.dot(lightVector)); // illumation only!
-		}
+		lighting = diffuseLight + specularLight;
 
 		color.x += lighting;
 		color.y += lighting;
