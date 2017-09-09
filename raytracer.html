@@ -66,11 +66,15 @@ var cameraVector = new THREE.Vector3();
 var color = new THREE.Vector3();
 var eyeRay = new THREE.Ray();
 var lighting = 0;
+var diffuseLight = 0, specularLight = 0;
 
 // Lighting options
 var SPECULAR_ENABLED = true;
 var ambientLight = new THREE.Vector3(0.1, 0.0, 0.0);
-var specularExponent = 50;
+var specularExponent = 10, diffuseFactor = 0.08;
+//var specularExponent = 50, diffuseFactor = 0.1;
+var specularFactor = 0.9;
+var lightIntensity = 1.0;
 
 for (i = 0; i < imgData.data.length; i += 4) {
 	var x = (i / 4) % SCREEN_WIDTH;
@@ -117,8 +121,12 @@ for (i = 0; i < imgData.data.length; i += 4) {
 			cameraVector.copy(intersectVector);
 			cameraVector.sub(camera.pos).normalize();
 
-			lighting = Math.max(0, cameraVector.dot(reflectVector)); // specular lighting
-			lighting = Math.pow(lighting, specularExponent);
+			diffuseLight = lightIntensity * diffuseFactor * Math.max(0, surfaceNormal.dot(lightVector));
+
+			specularLight = lightIntensity * Math.max(0, cameraVector.dot(reflectVector)); // specular lighting
+			specularLight = specularFactor * Math.pow(specularLight, specularExponent);
+
+			lighting = diffuseLight + specularLight;
 		}
 		else {
 			lighting = Math.max(0, surfaceNormal.dot(lightVector)); // illumation only!
