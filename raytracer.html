@@ -61,6 +61,7 @@ var rayDirection = new THREE.Vector3();
 var intersectVector = new THREE.Vector3();
 var surfaceNormal = new THREE.Vector3();
 var lightVector = new THREE.Vector3();
+var color = new THREE.Vector3();
 var eyeRay = new THREE.Ray();
 
 for (i = 0; i < imgData.data.length; i += 4) {
@@ -79,8 +80,9 @@ for (i = 0; i < imgData.data.length; i += 4) {
 
 	eyeRay.set(camera.pos, rayDirection);
 
-	var color = 0;
 	var intersect = eyeRay.intersectSphere(sphere, intersectVector);
+	color.setScalar(0);
+
 	if (intersect != null) {
 		surfaceNormal.copy(intersectVector);
 		surfaceNormal.sub(sphere.center).normalize();
@@ -88,12 +90,15 @@ for (i = 0; i < imgData.data.length; i += 4) {
 		lightVector.copy(light);
 		lightVector.sub(intersectVector).normalize();
 
-		color = surfaceNormal.dot(lightVector);
+		var lighting = surfaceNormal.dot(lightVector);
+		color.x += lighting;
+		color.y += lighting;
+		color.z += lighting;
 	}
 
-	imgData.data[i] = color * 255;
-	imgData.data[i+1] = color * 255;
-	imgData.data[i+2] = color * 255;
+	imgData.data[i] = Math.max(0, Math.min(255, color.x * 255));
+	imgData.data[i+1] = Math.max(0, Math.min(255, color.y * 255));
+	imgData.data[i+2] = Math.max(0, Math.min(255, color.z * 255));
 	imgData.data[i+3] = 255;
 }
 
