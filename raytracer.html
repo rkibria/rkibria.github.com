@@ -21,11 +21,15 @@ var camera = {
 var objects = [
 	{
 		shape: "sphere",
-		geometry: new THREE.Sphere(new THREE.Vector3(0, 0, -5), 1)
+		geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8)
 	},
 	{
 		shape: "sphere",
-		geometry: new THREE.Sphere(new THREE.Vector3(3, 0, -5), 0.33)
+		geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -5), 0.5)
+	},
+	{
+		shape: "sphere",
+		geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -4.5), 0.1)
 	},
 ];
 
@@ -94,18 +98,27 @@ function getNearestIntersection(ray, result) {
 	var curIntersection = new THREE.Vector3();
 	var isIntersection;
 
-	var curObject = objects[0];
-	var curGeometry = curObject.geometry;
+	var objectsLength = objects.length;
+	var i;
+	for (i = 0; i < objectsLength; i++) {
+		var curObject = objects[i];
+		var curGeometry = curObject.geometry;
 
-	isIntersection = ray.intersectSphere(curGeometry, curIntersection);
-	if (isIntersection != null) {
-		result.isIntersection = true;
+		isIntersection = ray.intersectSphere(curGeometry, curIntersection);
+		if (isIntersection != null) {
+			result.isIntersection = true;
 
-		result.intersectionPoint.copy(curIntersection);
+			var curDist = curIntersection.lengthSq();
+			if (curDist < minDist) {
+				minDist = curDist;
 
-		// Compute sphere surface normal by getting vector from sphere centre to intersect
-		result.surfaceNormal.copy(result.intersectionPoint);
-		result.surfaceNormal.sub(curGeometry.center).normalize();
+				result.intersectionPoint.copy(curIntersection);
+
+				// Compute sphere surface normal by getting vector from sphere centre to intersect
+				result.surfaceNormal.copy(result.intersectionPoint);
+				result.surfaceNormal.sub(curGeometry.center).normalize();
+			}
+		}
 	}
 }
 
