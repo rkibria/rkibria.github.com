@@ -89,12 +89,23 @@ var rayIntersection = {
 	};
 
 function getNearestIntersection(ray, result) {
-	var currentGeometry = objects[0].geometry;
-	result.isIntersection = ray.intersectSphere(currentGeometry, result.intersectionPoint);
-	if (result.isIntersection != null) {
+	result.isIntersection = false;
+	var minDist = Infinity;
+	var curIntersection = new THREE.Vector3();
+	var isIntersection;
+
+	var curObject = objects[0];
+	var curGeometry = curObject.geometry;
+
+	isIntersection = ray.intersectSphere(curGeometry, curIntersection);
+	if (isIntersection != null) {
+		result.isIntersection = true;
+
+		result.intersectionPoint.copy(curIntersection);
+
 		// Compute sphere surface normal by getting vector from sphere centre to intersect
 		result.surfaceNormal.copy(result.intersectionPoint);
-		result.surfaceNormal.sub(currentGeometry.center).normalize();
+		result.surfaceNormal.sub(curGeometry.center).normalize();
 	}
 }
 
@@ -121,7 +132,7 @@ for (i = 0; i < imgData.data.length; i += 4) {
 	// Get nearest intersection point
 	getNearestIntersection(eyeRay, rayIntersection);
 
-	if (rayIntersection.isIntersection != null) {
+	if (rayIntersection.isIntersection) {
 		// APPLY AMBIENT LIGHTING
 		color.add(ambientLight);
 
