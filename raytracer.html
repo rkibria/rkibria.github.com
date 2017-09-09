@@ -61,7 +61,7 @@ var rayDirection = new THREE.Vector3();
 var intersectVector = new THREE.Vector3();
 var surfaceNormal = new THREE.Vector3();
 var lightVector = new THREE.Vector3();
-var ambientLight = new THREE.Vector3(0.33, 0.0, 0.0);
+var ambientLight = new THREE.Vector3(0.1, 0.0, 0.0);
 var color = new THREE.Vector3();
 var eyeRay = new THREE.Ray();
 
@@ -97,7 +97,9 @@ for (i = 0; i < imgData.data.length; i += 4) {
 		lightVector.copy(light);
 		lightVector.sub(intersectVector).normalize();
 
-		var lighting = surfaceNormal.dot(lightVector);
+		// Be aware that cos can be negative, which makes no sense here as light contribution
+		var lighting = Math.max(0, surfaceNormal.dot(lightVector));
+
 		color.x += lighting;
 		color.y += lighting;
 		color.z += lighting;
