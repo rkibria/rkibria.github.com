@@ -42,6 +42,12 @@ var scene = {
 		},
 		],
 
+	ambientLight: new THREE.Vector3(0.05, 0.05, 0.05),
+	specularExponent: 10,
+	diffuseFactor: 0.3,
+	specularFactor: 0.9,
+	lightIntensity: 1.0,
+
 	light: new THREE.Vector3(10, 10, 10),
 
 	view: {
@@ -92,16 +98,6 @@ var lightVector = new THREE.Vector3();
 var reflectVector = new THREE.Vector3();
 var cameraVector = new THREE.Vector3();
 var color = new THREE.Vector3();
-var lighting = 0;
-var diffuseLight = 0, specularLight = 0;
-
-// Lighting options
-var ambientLight = new THREE.Vector3(0.05, 0.05, 0.05);
-//var ambientLight = new THREE.Vector3(0.0, 0.0, 0.0);
-var specularExponent = 10, diffuseFactor = 0.3;
-//var specularExponent = 50, diffuseFactor = 0.1;
-var specularFactor = 0.9;
-var lightIntensity = 1.0;
 
 var rayIntersection = {
 	isIntersection: false,
@@ -181,7 +177,7 @@ for (var i = 0; i < imgData.data.length; i += 4) {
 
 	if (rayIntersection.isIntersection) {
 		// APPLY AMBIENT LIGHTING
-		color.add(ambientLight);
+		color.add(scene.ambientLight);
 
 		// GET LIGHTING STRENGTH
 
@@ -198,12 +194,12 @@ for (var i = 0; i < imgData.data.length; i += 4) {
 		cameraVector.sub(scene.camera.pos).normalize();
 
 		// Be aware that cos can be negative, which makes no sense here as light contribution
-		diffuseLight = lightIntensity * diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
+		var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
 
-		specularLight = lightIntensity * Math.max(0, cameraVector.dot(reflectVector)); // specular lighting
-		specularLight = specularFactor * Math.pow(specularLight, specularExponent);
+		var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
+		specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
 
-		lighting = diffuseLight + specularLight;
+		var lighting = diffuseLight + specularLight;
 
 		color.x += lighting;
 		color.y += lighting;
