@@ -4,7 +4,7 @@
 
 <script src="js/three.min.js"></script>
 
-<canvas id="myCanvas" width="300" height="300" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas" width="500" height="500" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
@@ -65,7 +65,13 @@ var scene = {
 		xcomp: new THREE.Vector3(),
 		ycomp: new THREE.Vector3(),
 		rayDirection: new THREE.Vector3(),
-
+	},
+	
+	render: {
+		lightVector: new THREE.Vector3(),
+		reflectVector: new THREE.Vector3(),
+		cameraVector: new THREE.Vector3(),
+		color: new THREE.Vector3(),
 	},
 };
 
@@ -85,19 +91,6 @@ function initView(scene) {
 	scene.view.pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
 	scene.view.pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
 }
-
-initView(scene);
-
-// Get canvas bitmap
-var ctx = canvas.getContext("2d");
-ctx.fillStyle="black";
-ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-var lightVector = new THREE.Vector3();
-var reflectVector = new THREE.Vector3();
-var cameraVector = new THREE.Vector3();
-var color = new THREE.Vector3();
 
 var rayIntersection = {
 	isIntersection: false,
@@ -161,57 +154,73 @@ function getEyeRay(scene, x, y) {
 	scene.view.eyeRay.set(scene.camera.pos, scene.view.rayDirection);
 }
 
-var t0 = performance.now();
+function render(scene, imgData) {
+	var color = scene.render.color;
 
-for (var i = 0; i < imgData.data.length; i += 4) {
-	var x = (i / 4) % SCREEN_WIDTH;
-	var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
+	for (var i = 0; i < imgData.data.length; i += 4) {
+		var x = (i / 4) % SCREEN_WIDTH;
+		var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
-	getEyeRay(scene, x, y);
+		getEyeRay(scene, x, y);
 
-	// Clear color
-	color.setScalar(0);
+		// Clear color
+		color.setScalar(0);
 
-	// Get nearest intersection point
-	getNearestIntersection(scene.view.eyeRay, rayIntersection);
+		// Get nearest intersection point
+		getNearestIntersection(scene.view.eyeRay, rayIntersection);
 
-	if (rayIntersection.isIntersection) {
-		// APPLY AMBIENT LIGHTING
-		color.add(scene.ambientLight);
+		if (rayIntersection.isIntersection) {
+			// APPLY AMBIENT LIGHTING
+			color.add(scene.ambientLight);
 
-		// GET LIGHTING STRENGTH
+			// GET LIGHTING STRENGTH
 
-		// Compute vector to light source
-		lightVector.copy(scene.light);
-		lightVector.sub(rayIntersection.intersectionPoint).normalize();
+			// Compute vector to light source
+			var lightVector = scene.render.lightVector;
+			var reflectVector = scene.render.reflectVector;
+			var cameraVector = scene.render.cameraVector;
 
-		// Compute reflected light vector
-		reflectVector.copy(lightVector);
-		reflectVector.reflect(rayIntersection.surfaceNormal).normalize();
+			lightVector.copy(scene.light);
+			lightVector.sub(rayIntersection.intersectionPoint).normalize();
 
-		// Compute camera / viewpoint vector
-		cameraVector.copy(rayIntersection.intersectionPoint);
-		cameraVector.sub(scene.camera.pos).normalize();
+			// Compute reflected light vector
+			reflectVector.copy(lightVector);
+			reflectVector.reflect(rayIntersection.surfaceNormal).normalize();
 
-		// Be aware that cos can be negative, which makes no sense here as light contribution
-		var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
+			// Compute camera / viewpoint vector
+			cameraVector.copy(rayIntersection.intersectionPoint);
+			cameraVector.sub(scene.camera.pos).normalize();
 
-		var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
-		specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
+			// Be aware that cos can be negative, which makes no sense here as light contribution
+			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
 
-		var lighting = diffuseLight + specularLight;
+			var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
+			specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
 
-		color.x += lighting;
-		color.y += lighting;
-		color.z += lighting;
+			var lighting = diffuseLight + specularLight;
+
+			color.x += lighting;
+			color.y += lighting;
+			color.z += lighting;
+		}
+
+		imgData.data[i] = Math.max(0, Math.min(255, color.x * 255));
+		imgData.data[i+1] = Math.max(0, Math.min(255, color.y * 255));
+		imgData.data[i+2] = Math.max(0, Math.min(255, color.z * 255));
+		imgData.data[i+3] = 255;
 	}
-
-	imgData.data[i] = Math.max(0, Math.min(255, color.x * 255));
-	imgData.data[i+1] = Math.max(0, Math.min(255, color.y * 255));
-	imgData.data[i+2] = Math.max(0, Math.min(255, color.z * 255));
-	imgData.data[i+3] = 255;
 }
 
+// Get canvas bitmap
+var ctx = canvas.getContext("2d");
+ctx.fillStyle="black";
+ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+initView(scene);
+
+var t0 = performance.now();
+render(scene, imgData);
 var t1 = performance.now();
 console.log("render time: " + (t1 - t0) + " ms");
 
