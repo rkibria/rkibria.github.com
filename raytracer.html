@@ -88,7 +88,6 @@ ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-var i;
 var lightVector = new THREE.Vector3();
 var reflectVector = new THREE.Vector3();
 var cameraVector = new THREE.Vector3();
@@ -117,8 +116,7 @@ function getNearestIntersection(ray, result) {
 	var isIntersection = null;
 
 	var objectsLength = scene.objects.length;
-	var i;
-	for (i = 0; i < objectsLength; i++) {
+	for (var i = 0; i < objectsLength; i++) {
 		var curObject = scene.objects[i];
 		var curShape = curObject.shape;
 		var curGeometry = curObject.geometry;
@@ -169,7 +167,7 @@ function getEyeRay(scene, x, y) {
 
 var t0 = performance.now();
 
-for (i = 0; i < imgData.data.length; i += 4) {
+for (var i = 0; i < imgData.data.length; i += 4) {
 	var x = (i / 4) % SCREEN_WIDTH;
 	var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
