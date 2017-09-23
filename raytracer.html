@@ -176,19 +176,20 @@ function render(scene, imgData) {
 
 			// GET LIGHTING STRENGTH
 
-			// Compute vector to light source
 			var lightVector = scene.render.lightVector;
 			var reflectVector = scene.render.reflectVector;
 			var cameraVector = scene.render.cameraVector;
 
+			// Compute vector to light source
+
 			lightVector.copy(scene.light);
 			lightVector.sub(rayIntersection.intersectionPoint).normalize();
 
-			// Compute reflected light vector
+			// Compute reflected light vector: from intersect to light, normalized
 			reflectVector.copy(lightVector);
 			reflectVector.reflect(rayIntersection.surfaceNormal).normalize();
 
-			// Compute camera / viewpoint vector
+			// Compute vector from camera to intersect, normalized
 			cameraVector.copy(rayIntersection.intersectionPoint);
 			cameraVector.sub(scene.camera.pos).normalize();
 
