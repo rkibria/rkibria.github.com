@@ -12,6 +12,8 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 var SCREEN_WIDTH = 300;
 var SCREEN_HEIGHT = 300;
 
+var VECTOR_UP = new THREE.Vector3(0, 1, 0);
+
 var scene = {
 	camera: {
 		pos: new THREE.Vector3(0, 0, 0),
@@ -39,49 +41,57 @@ var scene = {
 		],
 
 	light: new THREE.Vector3(10, 10, 10),
+
+	view: {
+		eyeVector: new THREE.Vector3(),
+		eyeRightVector: new THREE.Vector3(),
+		eyeUpVector: new THREE.Vector3(),
+
+		halfWidth: 0,
+		halfHeight: 0,
+		pixelWidth: 0,
+		pixelHeight: 0,
+
+		eyeRay: new THREE.Ray(),
+
+		xcomp: new THREE.Vector3(),
+		ycomp: new THREE.Vector3(),
+		rayDirection: new THREE.Vector3(),
+
+	},
 };
 
-var VECTOR_UP = new THREE.Vector3(0, 1, 0);
+function initView(scene) {
+	scene.view.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
+	scene.view.eyeRightVector.crossVectors(scene.view.eyeVector, VECTOR_UP).normalize();
+	scene.view.eyeUpVector.crossVectors(scene.view.eyeRightVector, scene.view.eyeVector).normalize();
 
-var eyeVector = new THREE.Vector3();
-eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
-console.log("eyeVector", eyeVector);
+	var fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
+	scene.view.halfWidth = Math.tan(fovRadians);
 
-var eyeRightVector = new THREE.Vector3();
-eyeRightVector.crossVectors(eyeVector, VECTOR_UP).normalize();
-console.log("eyeRightVector", eyeRightVector);
+	var heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+	scene.view.halfHeight = heightWidthRatio * scene.view.halfWidth;
 
-var eyeUpVector = new THREE.Vector3();
-eyeUpVector.crossVectors(eyeRightVector, eyeVector).normalize();
-console.log("eyeUpVector", eyeUpVector);
+	var camerawidth = scene.view.halfWidth * 2;
+	var cameraheight = scene.view.halfHeight * 2;
+	scene.view.pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
+	scene.view.pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
+}
 
-var fovRadians = Math.PI * (scene.camera.fov / 2) / 180,
-heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT,
-halfWidth = Math.tan(fovRadians),
-halfHeight = heightWidthRatio * halfWidth,
-camerawidth = halfWidth * 2,
-cameraheight = halfHeight * 2,
-pixelWidth = camerawidth / (SCREEN_WIDTH - 1),
-pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
+initView(scene);
 
-
+// Get canvas bitmap
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
 var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-console.log(imgData.data.length);
 
 var i;
-var xcomp = new THREE.Vector3();
-var ycomp = new THREE.Vector3();
-var rayDirection = new THREE.Vector3();
 var lightVector = new THREE.Vector3();
 var reflectVector = new THREE.Vector3();
 var cameraVector = new THREE.Vector3();
 var color = new THREE.Vector3();
-var eyeRay = new THREE.Ray();
 var lighting = 0;
 var diffuseLight = 0, specularLight = 0;
 
@@ -142,28 +152,31 @@ function getNearestIntersection(ray, result) {
 	}
 }
 
+function getEyeRay(scene, x, y) {
+	scene.view.xcomp.copy(scene.view.eyeRightVector);
+	scene.view.xcomp.multiplyScalar((x * scene.view.pixelWidth) - scene.view.halfWidth);
+
+	scene.view.ycomp.copy(scene.view.eyeUpVector);
+	scene.view.ycomp.multiplyScalar((y * scene.view.pixelHeight) - scene.view.halfHeight);
+
+	scene.view.rayDirection.copy(scene.view.eyeVector);
+	scene.view.rayDirection.add(scene.view.xcomp);
+	scene.view.rayDirection.add(scene.view.ycomp).normalize();
+
+	scene.view.eyeRay.set(scene.camera.pos, scene.view.rayDirection);
+}
+
 for (i = 0; i < imgData.data.length; i += 4) {
 	var x = (i / 4) % SCREEN_WIDTH;
 	var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
-	// Set up current eye ray
-	xcomp.copy(eyeRightVector);
-	xcomp.multiplyScalar((x * pixelWidth) - halfWidth);
-
-	ycomp.copy(eyeUpVector);
-	ycomp.multiplyScalar((y * pixelHeight) - halfHeight);
-
-	rayDirection.copy(eyeVector);
-	rayDirection.add(xcomp);
-	rayDirection.add(ycomp).normalize();
-
-	eyeRay.set(scene.camera.pos, rayDirection);
+	getEyeRay(scene, x, y);
 
 	// Clear color
 	color.setScalar(0);
 
 	// Get nearest intersection point
-	getNearestIntersection(eyeRay, rayIntersection);
+	getNearestIntersection(scene.view.eyeRay, rayIntersection);
 
 	if (rayIntersection.isIntersection) {
 		// APPLY AMBIENT LIGHTING
