@@ -8,9 +8,11 @@
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
+var canvas = document.getElementById("myCanvas");
 
-var SCREEN_WIDTH = 300;
-var SCREEN_HEIGHT = 300;
+// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
+var SCREEN_WIDTH = canvas.scrollWidth;
+var SCREEN_HEIGHT = canvas.scrollHeight;
 
 var VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
@@ -81,8 +83,7 @@ function initView(scene) {
 initView(scene);
 
 // Get canvas bitmap
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
+var ctx = canvas.getContext("2d");
 ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
