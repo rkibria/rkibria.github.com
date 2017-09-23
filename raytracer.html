@@ -12,37 +12,39 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 var SCREEN_WIDTH = 300;
 var SCREEN_HEIGHT = 300;
 
-var camera = {
-	pos: new THREE.Vector3(0, 0, 0),
-	point: new THREE.Vector3(0, 0, -10),
-	fov: 45.0
-	};
+var scene = {
+	camera: {
+		pos: new THREE.Vector3(0, 0, 0),
+		point: new THREE.Vector3(0, 0, -10),
+		fov: 45.0
+		},
 
-var objects = [
-	{
-		shape: "sphere",
-		geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8)
-	},
-	{
-		shape: "sphere",
-		geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -5), 0.5)
-	},
-	{
-		shape: "sphere",
-		geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -4.5), 0.1)
-	},
-	{
-		shape: "plane",
-		geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0)
-	},
-];
+	objects: [
+		{
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8)
+		},
+		{
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -5), 0.5)
+		},
+		{
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -4.5), 0.1)
+		},
+		{
+			shape: "plane",
+			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0)
+		},
+		],
 
-var light = new THREE.Vector3(10, 10, 10);
+	light: new THREE.Vector3(10, 10, 10),
+};
 
 var VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
 var eyeVector = new THREE.Vector3();
-eyeVector.subVectors(camera.point, camera.pos).normalize();
+eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
 console.log("eyeVector", eyeVector);
 
 var eyeRightVector = new THREE.Vector3();
@@ -53,7 +55,7 @@ var eyeUpVector = new THREE.Vector3();
 eyeUpVector.crossVectors(eyeRightVector, eyeVector).normalize();
 console.log("eyeUpVector", eyeUpVector);
 
-var fovRadians = Math.PI * (camera.fov / 2) / 180,
+var fovRadians = Math.PI * (scene.camera.fov / 2) / 180,
 heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT,
 halfWidth = Math.tan(fovRadians),
 halfHeight = heightWidthRatio * halfWidth,
@@ -103,10 +105,10 @@ function getNearestIntersection(ray, result) {
 	var curIntersection = new THREE.Vector3();
 	var isIntersection = null;
 
-	var objectsLength = objects.length;
+	var objectsLength = scene.objects.length;
 	var i;
 	for (i = 0; i < objectsLength; i++) {
-		var curObject = objects[i];
+		var curObject = scene.objects[i];
 		var curShape = curObject.shape;
 		var curGeometry = curObject.geometry;
 
@@ -155,7 +157,7 @@ for (i = 0; i < imgData.data.length; i += 4) {
 	rayDirection.add(xcomp);
 	rayDirection.add(ycomp).normalize();
 
-	eyeRay.set(camera.pos, rayDirection);
+	eyeRay.set(scene.camera.pos, rayDirection);
 
 	// Clear color
 	color.setScalar(0);
@@ -170,7 +172,7 @@ for (i = 0; i < imgData.data.length; i += 4) {
 		// GET LIGHTING STRENGTH
 
 		// Compute vector to light source
-		lightVector.copy(light);
+		lightVector.copy(scene.light);
 		lightVector.sub(rayIntersection.intersectionPoint).normalize();
 
 		// Compute reflected light vector
@@ -179,7 +181,7 @@ for (i = 0; i < imgData.data.length; i += 4) {
 
 		// Compute camera / viewpoint vector
 		cameraVector.copy(rayIntersection.intersectionPoint);
-		cameraVector.sub(camera.pos).normalize();
+		cameraVector.sub(scene.camera.pos).normalize();
 
 		// Be aware that cos can be negative, which makes no sense here as light contribution
 		diffuseLight = lightIntensity * diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
