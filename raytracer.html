@@ -26,22 +26,32 @@ var scene = {
 
 	objects: [
 		{
-			name: "sphere_1",
+			name: "body_lower_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8)
 		},
 		{
-			name: "sphere_2",
+			name: "body_upper_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -5), 0.5)
 		},
 		{
-			name: "sphere_3",
+			name: "nose_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -4.5), 0.1)
 		},
 		{
-			name: "plane_1",
+			name: "left_eye_sphere",
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(0.15, 0.65, -4.55), 0.05)
+		},
+		{
+			name: "right_eye_sphere",
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(-0.15, 0.65, -4.55), 0.05)
+		},
+		{
+			name: "ground_plane",
 			shape: "plane",
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0)
 		},
