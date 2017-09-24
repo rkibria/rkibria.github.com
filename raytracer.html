@@ -26,18 +26,22 @@ var scene = {
 
 	objects: [
 		{
+			name: "sphere_1",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8)
 		},
 		{
+			name: "sphere_2",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -5), 0.5)
 		},
 		{
+			name: "sphere_3",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -4.5), 0.1)
 		},
 		{
+			name: "plane_1",
 			shape: "plane",
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0)
 		},
@@ -73,6 +77,7 @@ var scene = {
 		reflectVector: new THREE.Vector3(),
 		cameraVector: new THREE.Vector3(),
 		color: new THREE.Vector3(),
+		lightObscuredRay: new THREE.Ray(),
 	},
 };
 
@@ -104,6 +109,7 @@ function getNearestIntersection(ray, result) {
 			if (curDist < minDist) {
 				minDist = curDist;
 				result.intersectionPoint.copy(curIntersection);
+				result.objectName = curObject.name;
 
 				if (curShape == "sphere") {
 					// Compute sphere surface normal by getting vector from sphere centre to intersect
@@ -140,6 +146,14 @@ var eyeRayNearestIntersection = {
 	isIntersection: false,
 	intersectionPoint: new THREE.Vector3(),
 	surfaceNormal: new THREE.Vector3(),
+	objectName: "",
+	};
+
+var lightRayNearestIntersection = {
+	isIntersection: false,
+	intersectionPoint: new THREE.Vector3(),
+	surfaceNormal: new THREE.Vector3(),
+	objectName: "",
 	};
 
 function render(scene, imgData) {
@@ -173,34 +187,45 @@ function render(scene, imgData) {
 		getNearestIntersection(scene.view.eyeRay, eyeRayNearestIntersection);
 
 		if (eyeRayNearestIntersection.isIntersection) {
-			// APPLY AMBIENT LIGHTING
-			color.add(scene.ambientLight);
-
-			// GET LIGHTING STRENGTH
-
+			// Unpack some values
 			var lightVector = scene.render.lightVector;
 			var reflectVector = scene.render.reflectVector;
 			var cameraVector = scene.render.cameraVector;
+			var lightObscuredRay = scene.render.lightObscuredRay;
+			var intersectionPoint = eyeRayNearestIntersection.intersectionPoint;
 
-			getNormalizedVectorFromTo (lightVector, eyeRayNearestIntersection.intersectionPoint, scene.light);
-			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, eyeRayNearestIntersection.intersectionPoint);
+			// APPLY AMBIENT LIGHTING
+			color.add(scene.ambientLight);
 
-			// Compute reflected light vector: from intersect to light, normalized
-			reflectVector.copy(lightVector);
-			reflectVector.reflect(eyeRayNearestIntersection.surfaceNormal).normalize();
+			getNormalizedVectorFromTo (lightVector, intersectionPoint, scene.light);
+			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
 
-			// Be aware that cos can be negative, which makes no sense here as light contribution
-			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, eyeRayNearestIntersection.surfaceNormal.dot(lightVector));
+			// Is a light visible from this point?
+			lightObscuredRay.set(intersectionPoint, lightVector);
+			// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
+			lightObscuredRay.origin.addScaledVector (lightVector, 0.01);
+			getNearestIntersection (lightObscuredRay, lightRayNearestIntersection);
+			if (lightRayNearestIntersection.isIntersection) {
+				// color.x = 1.0;
+			}
+			else {
+				// Compute reflected light vector: from intersect to light, normalized
+				reflectVector.copy(lightVector);
+				reflectVector.reflect(eyeRayNearestIntersection.surfaceNormal).normalize();
 
-			// Specular: how much reflected light from the sourcce goes towards the camera
-			var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
-			specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
+				// Be aware that cos can be negative, which makes no sense here as light contribution
+				var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, eyeRayNearestIntersection.surfaceNormal.dot(lightVector));
 
-			var lighting = diffuseLight + specularLight;
+				// Specular: how much reflected light from the sourcce goes towards the camera
+				var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
+				specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
 
-			color.x += lighting;
-			color.y += lighting;
-			color.z += lighting;
+				var lighting = diffuseLight + specularLight;
+
+				color.x += lighting;
+				color.y += lighting;
+				color.z += lighting;
+			}
 		}
 
 		imgData.data[i] = Math.max(0, Math.min(255, color.x * 255));
