@@ -155,6 +155,11 @@ function getEyeRay(scene, x, y) {
 	scene.view.eyeRay.set(scene.camera.pos, scene.view.rayDirection);
 }
 
+function getNormalizedVectorFromTo(resultVector, startVector, endVector) {
+	resultVector.copy(endVector);
+	resultVector.sub(startVector).normalize();
+}
+
 function render(scene, imgData) {
 	var color = scene.render.color;
 
@@ -180,18 +185,12 @@ function render(scene, imgData) {
 			var reflectVector = scene.render.reflectVector;
 			var cameraVector = scene.render.cameraVector;
 
-			// Compute vector to light source
-
-			lightVector.copy(scene.light);
-			lightVector.sub(rayIntersection.intersectionPoint).normalize();
+			getNormalizedVectorFromTo (lightVector, rayIntersection.intersectionPoint, scene.light);
+			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, rayIntersection.intersectionPoint);
 
 			// Compute reflected light vector: from intersect to light, normalized
 			reflectVector.copy(lightVector);
 			reflectVector.reflect(rayIntersection.surfaceNormal).normalize();
-
-			// Compute vector from camera to intersect, normalized
-			cameraVector.copy(rayIntersection.intersectionPoint);
-			cameraVector.sub(scene.camera.pos).normalize();
 
 			// Be aware that cos can be negative, which makes no sense here as light contribution
 			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
