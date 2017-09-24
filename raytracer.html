@@ -76,23 +76,6 @@ var scene = {
 	},
 };
 
-function initView(scene) {
-	scene.view.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
-	scene.view.eyeRightVector.crossVectors(scene.view.eyeVector, VECTOR_UP).normalize();
-	scene.view.eyeUpVector.crossVectors(scene.view.eyeRightVector, scene.view.eyeVector).normalize();
-
-	var fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
-	scene.view.halfWidth = Math.tan(fovRadians);
-
-	var heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
-	scene.view.halfHeight = heightWidthRatio * scene.view.halfWidth;
-
-	var camerawidth = scene.view.halfWidth * 2;
-	var cameraheight = scene.view.halfHeight * 2;
-	scene.view.pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
-	scene.view.pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
-}
-
 var rayIntersection = {
 	isIntersection: false,
 	intersectionPoint: new THREE.Vector3(),
@@ -160,6 +143,21 @@ function getNormalizedVectorFromTo(resultVector, startVector, endVector) {
 }
 
 function render(scene, imgData) {
+	scene.view.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
+	scene.view.eyeRightVector.crossVectors(scene.view.eyeVector, VECTOR_UP).normalize();
+	scene.view.eyeUpVector.crossVectors(scene.view.eyeRightVector, scene.view.eyeVector).normalize();
+
+	var fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
+	scene.view.halfWidth = Math.tan(fovRadians);
+
+	var heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+	scene.view.halfHeight = heightWidthRatio * scene.view.halfWidth;
+
+	var camerawidth = scene.view.halfWidth * 2;
+	var cameraheight = scene.view.halfHeight * 2;
+	scene.view.pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
+	scene.view.pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
+
 	var color = scene.render.color;
 
 	for (var i = 0; i < imgData.data.length; i += 4) {
@@ -217,8 +215,6 @@ var ctx = canvas.getContext("2d");
 ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-initView(scene);
 
 var t0 = performance.now();
 render(scene, imgData);
