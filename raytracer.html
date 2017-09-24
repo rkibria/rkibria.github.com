@@ -130,8 +130,7 @@ function getNearestIntersection(ray, result) {
 
 				if (curShape == "sphere") {
 					// Compute sphere surface normal by getting vector from sphere centre to intersect
-					result.surfaceNormal.copy(result.intersectionPoint);
-					result.surfaceNormal.sub(curGeometry.center).normalize();
+					getNormalizedVectorFromTo (result.surfaceNormal, curGeometry.center, result.intersectionPoint);
 				}
 				else if (curShape == "plane") {
 					result.surfaceNormal.copy(curGeometry.normal);
@@ -195,6 +194,7 @@ function render(scene, imgData) {
 			// Be aware that cos can be negative, which makes no sense here as light contribution
 			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, rayIntersection.surfaceNormal.dot(lightVector));
 
+			// Specular: how much reflected light from the sourcce goes towards the camera
 			var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
 			specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
 
