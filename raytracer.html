@@ -8,18 +8,18 @@
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
-var canvas = document.getElementById("myCanvas");
+const canvas = document.getElementById("myCanvas");
 
 // https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
-var SCREEN_WIDTH = canvas.scrollWidth;
-var SCREEN_HEIGHT = canvas.scrollHeight;
+const SCREEN_WIDTH = canvas.scrollWidth;
+const SCREEN_HEIGHT = canvas.scrollHeight;
 console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT, "=", SCREEN_WIDTH * SCREEN_HEIGHT, "rays");
 
-var MAX_DEPTH = 2;
+const MAX_DEPTH = 2;
 
-var VECTOR_UP = new THREE.Vector3(0, 1, 0);
+const VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
-var gMainScene = {
+const gMainScene = {
 	camera: {
 		pos: new THREE.Vector3(0, 0, 0),
 		point: new THREE.Vector3(0, 0, -10),
@@ -80,7 +80,8 @@ var gMainScene = {
 		{
 			name: "ground_plane",
 			shape: "plane",
-			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0)
+			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0),
+			specular: 0.5,
 		},
 		],
 
@@ -96,15 +97,15 @@ var gMainScene = {
 
 function getNearestIntersection(scene, ray, result) {
 	result.isIntersection = false;
-	var minDist = Infinity;
-	var curIntersection = new THREE.Vector3();
-	var isIntersection = null;
+	let minDist = Infinity;
+	const curIntersection = new THREE.Vector3();
+	let isIntersection = null;
 
-	var objectsLength = scene.objects.length;
-	for (var i = 0; i < objectsLength; i++) {
-		var curObject = scene.objects[i];
-		var curShape = curObject.shape;
-		var curGeometry = curObject.geometry;
+	const objectsLength = scene.objects.length;
+	for (let i = 0; i < objectsLength; i++) {
+		const curObject = scene.objects[i];
+		const curShape = curObject.shape;
+		const curGeometry = curObject.geometry;
 
 		if (curShape == "sphere")
 			isIntersection = ray.intersectSphere(curGeometry, curIntersection);
@@ -118,7 +119,7 @@ function getNearestIntersection(scene, ray, result) {
 		if (isIntersection != null) {
 			result.isIntersection = true;
 
-			var curDist = curIntersection.lengthSq();
+			const curDist = curIntersection.lengthSq();
 			if (curDist < minDist) {
 				minDist = curDist;
 				result.intersectionPoint.copy(curIntersection);
@@ -150,7 +151,7 @@ function allocateIntersectionResult() {
 		};
 }
 
-var gRenderTemps = {
+const gRenderTemps = {
 	eyeVector: new THREE.Vector3(),
 	eyeRightVector: new THREE.Vector3(),
 	eyeUpVector: new THREE.Vector3(),
@@ -178,13 +179,13 @@ function allocateTraceTemps() {
 		};
 }
 
-var gTraceStack = Array.from (Array(MAX_DEPTH), () => allocateTraceTemps());
+const gTraceStack = Array.from (Array(MAX_DEPTH), () => allocateTraceTemps());
 
 function trace (scene, traceStack, depth) {
-	var traceTemps = traceStack[depth];
+	const traceTemps = traceStack[depth];
 
 	// Clear color
-	var color = traceTemps.color;
+	const color = traceTemps.color;
 	color.setScalar(0);
 
 	// Get nearest intersection point
@@ -196,12 +197,12 @@ function trace (scene, traceStack, depth) {
 		// Apply ambient lighting
 		color.add (scene.ambientLight);
 
-		var lightVector = traceTemps.lightVector;
-		var intersectionPoint = traceTemps.eyeRayNearestIntersection.intersectionPoint;
+		const lightVector = traceTemps.lightVector;
+		const intersectionPoint = traceTemps.eyeRayNearestIntersection.intersectionPoint;
 		getNormalizedVectorFromTo (lightVector, intersectionPoint, scene.light);
 
 		// Is a light visible from this point?
-		var lightObscuredRay = traceTemps.lightObscuredRay;
+		const lightObscuredRay = traceTemps.lightObscuredRay;
 		lightObscuredRay.set (intersectionPoint, lightVector);
 
 		// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
@@ -212,20 +213,20 @@ function trace (scene, traceStack, depth) {
 		}
 		else {
 			// Compute reflected light vector: from intersect to light, normalized
-			var reflectVector = traceTemps.reflectVector;
+			const reflectVector = traceTemps.reflectVector;
 			reflectVector.copy (lightVector);
 			reflectVector.reflect (traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
 
 			// Be aware that cos can be negative, which makes no sense here as light contribution
-			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
+			const diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
 
 			// Specular: how much reflected light from the sourcce goes towards the camera
-			var cameraVector = traceTemps.cameraVector;
+			let cameraVector = traceTemps.cameraVector;
 			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
-			var specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(reflectVector));
+			let specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(reflectVector));
 			specularLight = scene.specularFactor * Math.pow (specularLight, scene.specularExponent);
 
-			var lighting = diffuseLight + specularLight;
+			const lighting = diffuseLight + specularLight;
 
 			color.x += lighting;
 			color.y += lighting;
@@ -239,20 +240,20 @@ function render(scene, imgData) {
 	gRenderTemps.eyeRightVector.crossVectors (gRenderTemps.eyeVector, VECTOR_UP).normalize();
 	gRenderTemps.eyeUpVector.crossVectors (gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
 
-	var fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
-	var halfWidth = Math.tan(fovRadians);
+	const fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
+	const halfWidth = Math.tan(fovRadians);
 
-	var heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
-	var halfHeight = heightWidthRatio * halfWidth;
+	const heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+	const halfHeight = heightWidthRatio * halfWidth;
 
-	var camerawidth = halfWidth * 2;
-	var cameraheight = halfHeight * 2;
-	var pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
-	var pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
+	const camerawidth = halfWidth * 2;
+	const cameraheight = halfHeight * 2;
+	const pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
+	const pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
 
-	for (var i = 0; i < imgData.data.length; i += 4) {
-		var x = (i / 4) % SCREEN_WIDTH;
-		var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
+	for (let i = 0; i < imgData.data.length; i += 4) {
+		const x = (i / 4) % SCREEN_WIDTH;
+		const y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
 		// Compute the current eye ray
 		gRenderTemps.xcomp.copy (gRenderTemps.eyeRightVector);
@@ -269,7 +270,7 @@ function render(scene, imgData) {
 
 		trace (scene, gTraceStack, 0);
 
-		var color = gTraceStack[0].color;
+		const color = gTraceStack[0].color;
 		imgData.data[i] = Math.max (0, Math.min (255, color.x * 255));
 		imgData.data[i+1] = Math.max (0, Math.min (255, color.y * 255));
 		imgData.data[i+2] = Math.max (0, Math.min (255, color.z * 255));
@@ -278,14 +279,14 @@ function render(scene, imgData) {
 }
 
 // Get canvas bitmap
-var ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
 ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-var t0 = performance.now();
+const t0 = performance.now();
 render (gMainScene, imgData);
-var t1 = performance.now();
+const t1 = performance.now();
 console.log("render time: " + (t1 - t0) + " ms");
 
 ctx.putImageData(imgData, 0, 0);
