@@ -28,6 +28,24 @@ const gMainScene = {
 
 	objects: [
 		{
+			name: "left_snowdrift",
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(-10, -26, -21.5), 28),
+			ambient: 0.3,
+			lambert: 0.7,
+			specular: 0.0,
+			specularExponent: 0.0,
+		},
+		{
+			name: "right_snowdrift",
+			shape: "sphere",
+			geometry: new THREE.Sphere(new THREE.Vector3(10, -55.5, -16), 56),
+			ambient: 0.3,
+			lambert: 0.7,
+			specular: 0.0,
+			specularExponent: 0.0,
+		},
+		{
 			name: "body_lower_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8),
@@ -123,7 +141,7 @@ const gMainScene = {
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0),
 			ambient: 0.5,
 			lambert: 0.7,
-			specular: 0.4,
+			specular: 0.2,
 			specularExponent: 10.0,
 		},
 		],
