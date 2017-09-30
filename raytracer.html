@@ -17,7 +17,7 @@ console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT, "=", SCREEN_WIDTH *
 
 var VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
-var scene = {
+var gMainScene = {
 	camera: {
 		pos: new THREE.Vector3(0, 0, 0),
 		point: new THREE.Vector3(0, 0, -10),
@@ -99,7 +99,7 @@ var scene = {
 	},
 };
 
-function getNearestIntersection(ray, result) {
+function getNearestIntersection(scene, ray, result) {
 	result.isIntersection = false;
 	var minDist = Infinity;
 	var curIntersection = new THREE.Vector3();
@@ -209,7 +209,7 @@ function render(scene, imgData) {
 		color.setScalar(0);
 
 		// Get nearest intersection point
-		getNearestIntersection(gRenderTemps.eyeRay, gEyeRayNearestIntersection);
+		getNearestIntersection(scene, gRenderTemps.eyeRay, gEyeRayNearestIntersection);
 
 		if (gEyeRayNearestIntersection.isIntersection) {
 			// Unpack some values
@@ -229,7 +229,7 @@ function render(scene, imgData) {
 			lightObscuredRay.set(intersectionPoint, lightVector);
 			// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
 			lightObscuredRay.origin.addScaledVector (lightVector, 0.01);
-			getNearestIntersection (lightObscuredRay, gLightRayNearestIntersection);
+			getNearestIntersection (scene, lightObscuredRay, gLightRayNearestIntersection);
 			if (gLightRayNearestIntersection.isIntersection) {
 				// color.x = 1.0;
 			}
@@ -267,7 +267,7 @@ ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 var imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 var t0 = performance.now();
-render(scene, imgData);
+render (gMainScene, imgData);
 var t1 = performance.now();
 console.log("render time: " + (t1 - t0) + " ms");
 
