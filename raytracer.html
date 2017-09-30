@@ -31,7 +31,7 @@ const gMainScene = {
 			name: "left_snowdrift",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(-10, -26, -21.5), 28),
-			ambient: 0.3,
+			ambient: 0.5,
 			lambert: 0.7,
 			specular: 0.0,
 			specularExponent: 0.0,
@@ -41,7 +41,7 @@ const gMainScene = {
 			name: "right_snowdrift",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(10, -55.5, -16), 56),
-			ambient: 0.3,
+			ambient: 0.5,
 			lambert: 0.7,
 			specular: 0.0,
 			specularExponent: 0.0,
@@ -151,8 +151,8 @@ const gMainScene = {
 			name: "ground_plane",
 			shape: "plane",
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0),
-			ambient: 0.5,
-			lambert: 0.7,
+			ambient: 0.6,
+			lambert: 0.3,
 			specular: 0.9,
 			specularExponent: 10.0,
 			reflectivity: 0.1,
@@ -162,7 +162,7 @@ const gMainScene = {
 	ambientLight: new THREE.Vector3(0.75, 0.75, 0.75),
 	lightIntensity: 1.0,
 
-	light: new THREE.Vector3(10, 10, 10),
+	light: new THREE.Vector3(10000, 10000, 20000),
 
 };
 
