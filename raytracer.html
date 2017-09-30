@@ -90,13 +90,6 @@ var gMainScene = {
 
 	light: new THREE.Vector3(10, 10, 10),
 
-	render: {
-		lightVector: new THREE.Vector3(),
-		reflectVector: new THREE.Vector3(),
-		cameraVector: new THREE.Vector3(),
-		color: new THREE.Vector3(),
-		lightObscuredRay: new THREE.Ray(),
-	},
 };
 
 function getNearestIntersection(scene, ray, result) {
@@ -170,6 +163,14 @@ var gRenderTemps = {
 	rayDirection: new THREE.Vector3(),
 	};
 
+var gTraceTemps = {
+	lightVector: new THREE.Vector3(),
+	reflectVector: new THREE.Vector3(),
+	cameraVector: new THREE.Vector3(),
+	color: new THREE.Vector3(),
+	lightObscuredRay: new THREE.Ray(),
+	};
+
 function render(scene, imgData) {
 	gRenderTemps.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
 	gRenderTemps.eyeRightVector.crossVectors(gRenderTemps.eyeVector, VECTOR_UP).normalize();
@@ -186,7 +187,7 @@ function render(scene, imgData) {
 	var pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
 	var pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
 
-	var color = scene.render.color;
+	var color = gTraceTemps.color;
 
 	for (var i = 0; i < imgData.data.length; i += 4) {
 		var x = (i / 4) % SCREEN_WIDTH;
@@ -213,10 +214,10 @@ function render(scene, imgData) {
 
 		if (gEyeRayNearestIntersection.isIntersection) {
 			// Unpack some values
-			var lightVector = scene.render.lightVector;
-			var reflectVector = scene.render.reflectVector;
-			var cameraVector = scene.render.cameraVector;
-			var lightObscuredRay = scene.render.lightObscuredRay;
+			var lightVector = gTraceTemps.lightVector;
+			var reflectVector = gTraceTemps.reflectVector;
+			var cameraVector = gTraceTemps.cameraVector;
+			var lightObscuredRay = gTraceTemps.lightObscuredRay;
 			var intersectionPoint = gEyeRayNearestIntersection.intersectionPoint;
 
 			// APPLY AMBIENT LIGHTING
