@@ -4,7 +4,7 @@
 
 <script src="js/three.min.js"></script>
 
-<canvas id="myCanvas" width="500" height="500" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas" width="600" height="600" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
@@ -23,7 +23,7 @@ const gMainScene = {
 	camera: {
 		pos: new THREE.Vector3(0, 0, 0),
 		point: new THREE.Vector3(0, 0, -10),
-		fov: 45.0
+		fov: 65.0
 		},
 
 	objects: [
@@ -31,96 +31,104 @@ const gMainScene = {
 			name: "body_lower_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, -0.5, -5), 0.8),
-			ambient: 0.1,
+			ambient: 0.3,
 			lambert: 0.7,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "body_upper_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -5), 0.5),
-			ambient: 0.1,
+			ambient: 0.3,
 			lambert: 0.7,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "nose_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.5, -4.5), 0.1),
-			ambient: 0.1,
-			lambert: 0.7,
-			specular: 0.2,
+			ambient: 0.05,
+			lambert: 0.1,
+			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "left_eye_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0.15, 0.65, -4.55), 0.05),
-			ambient: 0.1,
-			lambert: 0.7,
-			specular: 0.2,
+			ambient: 0.05,
+			lambert: 0.1,
+			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "right_eye_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(-0.15, 0.65, -4.55), 0.05),
-			ambient: 0.1,
-			lambert: 0.7,
-			specular: 0.2,
+			ambient: 0.05,
+			lambert: 0.1,
+			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "mouth_mid_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0, 0.31, -4.56), 0.03),
-			ambient: 0.1,
-			lambert: 0.7,
+			ambient: 0.05,
+			lambert: 0.1,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "mouth_left_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0.05, 0.31, -4.56), 0.03),
-			ambient: 0.1,
-			lambert: 0.7,
+			ambient: 0.05,
+			lambert: 0.1,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "mouth_far_left_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(0.1, 0.32, -4.565), 0.03),
-			ambient: 0.1,
-			lambert: 0.7,
+			ambient: 0.05,
+			lambert: 0.1,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "mouth_right_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(-0.05, 0.31, -4.56), 0.03),
-			ambient: 0.1,
-			lambert: 0.7,
+			ambient: 0.05,
+			lambert: 0.1,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "mouth_far_right_sphere",
 			shape: "sphere",
 			geometry: new THREE.Sphere(new THREE.Vector3(-0.1, 0.32, -4.565), 0.03),
-			ambient: 0.1,
-			lambert: 0.7,
+			ambient: 0.05,
+			lambert: 0.1,
 			specular: 0.0,
+			specularExponent: 0.0,
 		},
 		{
 			name: "ground_plane",
 			shape: "plane",
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0),
-			ambient: 0.1,
+			ambient: 0.5,
 			lambert: 0.7,
 			specular: 0.4,
+			specularExponent: 10.0,
 		},
 		],
 
-	ambientLight: new THREE.Vector3(0.05, 0.05, 0.05),
-	specularExponent: 10,
-	diffuseFactor: 0.3,
-	specularFactor: 0.9,
+	ambientLight: new THREE.Vector3(0.5, 0.5, 0.5),
 	lightIntensity: 1.0,
 
 	light: new THREE.Vector3(10, 10, 10),
@@ -227,9 +235,15 @@ function trace (scene, traceStack, depth) {
 
 	if (traceTemps.eyeRayNearestIntersection.isIntersection) {
 		// Ray hits an object
+		const intersectedObject = traceTemps.eyeRayNearestIntersection.intersectedObject;
+
+		const ambient = intersectedObject.ambient;
+		const lambert = intersectedObject.lambert;
+		const specular = intersectedObject.specular;
+		const specularExponent = intersectedObject.specularExponent;
 
 		// Apply ambient lighting
-		color.add (scene.ambientLight);
+		color.addScaledVector (scene.ambientLight, ambient);
 
 		const lightVector = traceTemps.lightVector;
 		const intersectionPoint = traceTemps.eyeRayNearestIntersection.intersectionPoint;
@@ -254,14 +268,20 @@ function trace (scene, traceStack, depth) {
 			lightReflectVector.copy (lightVector);
 			lightReflectVector.reflect (traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
 
-			// Be aware that cos can be negative, which makes no sense here as light contribution
-			const diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
+			let lambertLight = 0.0;
+			if (lambert > 0.0) {
+				// Be aware that cos can be negative, which makes no sense here as light contribution
+				lambertLight = scene.lightIntensity * lambert * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
+			}
 
 			// Specular: how much reflected light from the sourcce goes towards the camera
-			let specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(lightReflectVector));
-			specularLight = scene.specularFactor * Math.pow (specularLight, scene.specularExponent);
+			let specularLight = 0.0;
+			if (specular > 0.0) {
+				specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(lightReflectVector));
+				specularLight = specular * Math.pow (specularLight, specularExponent);
+			}
 
-			const lighting = diffuseLight + specularLight;
+			const lighting = lambertLight + specularLight;
 
 			color.x += lighting;
 			color.y += lighting;
@@ -269,9 +289,7 @@ function trace (scene, traceStack, depth) {
 		}
 
 		// Reflections
-		const specular = traceTemps.eyeRayNearestIntersection.intersectedObject.specular;
 		if ((depth < MAX_DEPTH - 1) && specular > 0.0) {
-			// throw "reflect off " + traceTemps.eyeRayNearestIntersection.intersectedObject.name;
 			const nextTraceTemps = traceStack[depth + 1];
 
 			// Reflected camera vector
