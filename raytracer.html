@@ -15,6 +15,8 @@ var SCREEN_WIDTH = canvas.scrollWidth;
 var SCREEN_HEIGHT = canvas.scrollHeight;
 console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT, "=", SCREEN_WIDTH * SCREEN_HEIGHT, "rays");
 
+var MAX_DEPTH = 2;
+
 var VECTOR_UP = new THREE.Vector3(0, 1, 0);
 
 var gMainScene = {
@@ -176,7 +178,7 @@ function allocateTraceTemps() {
 		};
 }
 
-var gTraceStack = [allocateTraceTemps()];
+var gTraceStack = Array.from (Array(MAX_DEPTH), () => allocateTraceTemps());
 
 function trace (scene, traceStack, depth) {
 	var traceTemps = traceStack[depth];
