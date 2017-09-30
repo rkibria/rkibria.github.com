@@ -90,23 +90,6 @@ var scene = {
 
 	light: new THREE.Vector3(10, 10, 10),
 
-	view: {
-		eyeVector: new THREE.Vector3(),
-		eyeRightVector: new THREE.Vector3(),
-		eyeUpVector: new THREE.Vector3(),
-
-		halfWidth: 0,
-		halfHeight: 0,
-		pixelWidth: 0,
-		pixelHeight: 0,
-
-		eyeRay: new THREE.Ray(),
-
-		xcomp: new THREE.Vector3(),
-		ycomp: new THREE.Vector3(),
-		rayDirection: new THREE.Vector3(),
-	},
-	
 	render: {
 		lightVector: new THREE.Vector3(),
 		reflectVector: new THREE.Vector3(),
@@ -158,20 +141,6 @@ function getNearestIntersection(ray, result) {
 	}
 }
 
-function getEyeRay(scene, x, y) {
-	scene.view.xcomp.copy(scene.view.eyeRightVector);
-	scene.view.xcomp.multiplyScalar((x * scene.view.pixelWidth) - scene.view.halfWidth);
-
-	scene.view.ycomp.copy(scene.view.eyeUpVector);
-	scene.view.ycomp.multiplyScalar((y * scene.view.pixelHeight) - scene.view.halfHeight);
-
-	scene.view.rayDirection.copy(scene.view.eyeVector);
-	scene.view.rayDirection.add(scene.view.xcomp);
-	scene.view.rayDirection.add(scene.view.ycomp).normalize();
-
-	scene.view.eyeRay.set(scene.camera.pos, scene.view.rayDirection);
-}
-
 function getNormalizedVectorFromTo(resultVector, startVector, endVector) {
 	resultVector.copy(endVector);
 	resultVector.sub(startVector).normalize();
@@ -191,21 +160,33 @@ var lightRayNearestIntersection = {
 	objectName: "",
 	};
 
+var gRenderTemps = {
+	eyeVector: new THREE.Vector3(),
+	eyeRightVector: new THREE.Vector3(),
+	eyeUpVector: new THREE.Vector3(),
+
+	eyeRay: new THREE.Ray(),
+
+	xcomp: new THREE.Vector3(),
+	ycomp: new THREE.Vector3(),
+	rayDirection: new THREE.Vector3(),
+	};
+
 function render(scene, imgData) {
-	scene.view.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
-	scene.view.eyeRightVector.crossVectors(scene.view.eyeVector, VECTOR_UP).normalize();
-	scene.view.eyeUpVector.crossVectors(scene.view.eyeRightVector, scene.view.eyeVector).normalize();
+	gRenderTemps.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
+	gRenderTemps.eyeRightVector.crossVectors(gRenderTemps.eyeVector, VECTOR_UP).normalize();
+	gRenderTemps.eyeUpVector.crossVectors(gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
 
 	var fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
-	scene.view.halfWidth = Math.tan(fovRadians);
+	var halfWidth = Math.tan(fovRadians);
 
 	var heightWidthRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
-	scene.view.halfHeight = heightWidthRatio * scene.view.halfWidth;
+	var halfHeight = heightWidthRatio * halfWidth;
 
-	var camerawidth = scene.view.halfWidth * 2;
-	var cameraheight = scene.view.halfHeight * 2;
-	scene.view.pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
-	scene.view.pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
+	var camerawidth = halfWidth * 2;
+	var cameraheight = halfHeight * 2;
+	var pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
+	var pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
 
 	var color = scene.render.color;
 
@@ -213,13 +194,24 @@ function render(scene, imgData) {
 		var x = (i / 4) % SCREEN_WIDTH;
 		var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
-		getEyeRay(scene, x, y);
+		// Compute the current eye ray
+		gRenderTemps.xcomp.copy(gRenderTemps.eyeRightVector);
+		gRenderTemps.xcomp.multiplyScalar((x * pixelWidth) - halfWidth);
+
+		gRenderTemps.ycomp.copy(gRenderTemps.eyeUpVector);
+		gRenderTemps.ycomp.multiplyScalar((y * pixelHeight) - halfHeight);
+
+		gRenderTemps.rayDirection.copy(gRenderTemps.eyeVector);
+		gRenderTemps.rayDirection.add(gRenderTemps.xcomp);
+		gRenderTemps.rayDirection.add(gRenderTemps.ycomp).normalize();
+
+		gRenderTemps.eyeRay.set(scene.camera.pos, gRenderTemps.rayDirection);
 
 		// Clear color
 		color.setScalar(0);
 
 		// Get nearest intersection point
-		getNearestIntersection(scene.view.eyeRay, eyeRayNearestIntersection);
+		getNearestIntersection(gRenderTemps.eyeRay, eyeRayNearestIntersection);
 
 		if (eyeRayNearestIntersection.isIntersection) {
 			// Unpack some values
