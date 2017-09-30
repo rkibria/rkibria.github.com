@@ -183,21 +183,19 @@ function trace (scene, traceTemps, depth) {
 	getNearestIntersection(scene, traceTemps.eyeRay, traceTemps.eyeRayNearestIntersection);
 
 	if (traceTemps.eyeRayNearestIntersection.isIntersection) {
-		// Unpack some values
+		// Ray hits an object
+
+		// Apply ambient lighting
+		color.add (scene.ambientLight);
+
 		var lightVector = traceTemps.lightVector;
-		var reflectVector = traceTemps.reflectVector;
-		var cameraVector = traceTemps.cameraVector;
-		var lightObscuredRay = traceTemps.lightObscuredRay;
 		var intersectionPoint = traceTemps.eyeRayNearestIntersection.intersectionPoint;
-
-		// APPLY AMBIENT LIGHTING
-		color.add(scene.ambientLight);
-
 		getNormalizedVectorFromTo (lightVector, intersectionPoint, scene.light);
-		getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
 
 		// Is a light visible from this point?
-		lightObscuredRay.set(intersectionPoint, lightVector);
+		var lightObscuredRay = traceTemps.lightObscuredRay;
+		lightObscuredRay.set (intersectionPoint, lightVector);
+
 		// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
 		lightObscuredRay.origin.addScaledVector (lightVector, 0.01);
 		getNearestIntersection (scene, lightObscuredRay, traceTemps.lightRayNearestIntersection);
@@ -206,15 +204,18 @@ function trace (scene, traceTemps, depth) {
 		}
 		else {
 			// Compute reflected light vector: from intersect to light, normalized
-			reflectVector.copy(lightVector);
-			reflectVector.reflect(traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
+			var reflectVector = traceTemps.reflectVector;
+			reflectVector.copy (lightVector);
+			reflectVector.reflect (traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
 
 			// Be aware that cos can be negative, which makes no sense here as light contribution
-			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot(lightVector));
+			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
 
 			// Specular: how much reflected light from the sourcce goes towards the camera
-			var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
-			specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
+			var cameraVector = traceTemps.cameraVector;
+			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
+			var specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(reflectVector));
+			specularLight = scene.specularFactor * Math.pow (specularLight, scene.specularExponent);
 
 			var lighting = diffuseLight + specularLight;
 
@@ -226,9 +227,9 @@ function trace (scene, traceTemps, depth) {
 }
 
 function render(scene, imgData) {
-	gRenderTemps.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
-	gRenderTemps.eyeRightVector.crossVectors(gRenderTemps.eyeVector, VECTOR_UP).normalize();
-	gRenderTemps.eyeUpVector.crossVectors(gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
+	gRenderTemps.eyeVector.subVectors (scene.camera.point, scene.camera.pos).normalize();
+	gRenderTemps.eyeRightVector.crossVectors (gRenderTemps.eyeVector, VECTOR_UP).normalize();
+	gRenderTemps.eyeUpVector.crossVectors (gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
 
 	var fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
 	var halfWidth = Math.tan(fovRadians);
@@ -261,9 +262,9 @@ function render(scene, imgData) {
 		trace (scene, gTraceTemps, 0);
 
 		var color = gTraceTemps.color;
-		imgData.data[i] = Math.max(0, Math.min(255, color.x * 255));
-		imgData.data[i+1] = Math.max(0, Math.min(255, color.y * 255));
-		imgData.data[i+2] = Math.max(0, Math.min(255, color.z * 255));
+		imgData.data[i] = Math.max (0, Math.min (255, color.x * 255));
+		imgData.data[i+1] = Math.max (0, Math.min (255, color.y * 255));
+		imgData.data[i+2] = Math.max (0, Math.min (255, color.z * 255));
 		imgData.data[i+3] = 255;
 	}
 }
