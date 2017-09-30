@@ -81,7 +81,7 @@ const gMainScene = {
 			name: "ground_plane",
 			shape: "plane",
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0),
-			specular: 0.5,
+			specular: 0.3,
 		},
 		],
 
@@ -169,8 +169,9 @@ function allocateTraceTemps() {
 
 		// Temps
 		lightVector: new THREE.Vector3(),
-		reflectVector: new THREE.Vector3(),
+		lightReflectVector: new THREE.Vector3(),
 		cameraVector: new THREE.Vector3(),
+		cameraReflectVector: new THREE.Vector3(),
 		lightObscuredRay: new THREE.Ray(),
 		eyeRayNearestIntersection: allocateIntersectionResult(),
 		lightRayNearestIntersection: allocateIntersectionResult(),
@@ -202,6 +203,9 @@ function trace (scene, traceStack, depth) {
 		const intersectionPoint = traceTemps.eyeRayNearestIntersection.intersectionPoint;
 		getNormalizedVectorFromTo (lightVector, intersectionPoint, scene.light);
 
+		const cameraVector = traceTemps.cameraVector;
+		getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
+
 		// Is a light visible from this point?
 		const lightObscuredRay = traceTemps.lightObscuredRay;
 		lightObscuredRay.set (intersectionPoint, lightVector);
@@ -214,17 +218,15 @@ function trace (scene, traceStack, depth) {
 		}
 		else {
 			// Compute reflected light vector: from intersect to light, normalized
-			const reflectVector = traceTemps.reflectVector;
-			reflectVector.copy (lightVector);
-			reflectVector.reflect (traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
+			const lightReflectVector = traceTemps.lightReflectVector;
+			lightReflectVector.copy (lightVector);
+			lightReflectVector.reflect (traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
 
 			// Be aware that cos can be negative, which makes no sense here as light contribution
 			const diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
 
 			// Specular: how much reflected light from the sourcce goes towards the camera
-			let cameraVector = traceTemps.cameraVector;
-			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
-			let specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(reflectVector));
+			let specularLight = scene.lightIntensity * Math.max (0, cameraVector.dot(lightReflectVector));
 			specularLight = scene.specularFactor * Math.pow (specularLight, scene.specularExponent);
 
 			const lighting = diffuseLight + specularLight;
@@ -232,6 +234,25 @@ function trace (scene, traceStack, depth) {
 			color.x += lighting;
 			color.y += lighting;
 			color.z += lighting;
+		}
+
+		// Reflections
+		if ((depth < MAX_DEPTH - 1) && traceTemps.eyeRayNearestIntersection.intersectedObject.hasOwnProperty('specular')) {
+			// throw "reflect off " + traceTemps.eyeRayNearestIntersection.intersectedObject.name;
+			const nextTraceTemps = traceStack[depth + 1];
+
+			// Reflected camera vector
+			const cameraReflectVector = traceTemps.cameraReflectVector;
+			cameraReflectVector.copy (cameraVector);
+			cameraReflectVector.reflect (traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
+			nextTraceTemps.eyeRay.set (intersectionPoint, cameraReflectVector);
+			// Similar to light obscured test, move the test point slightly away from the object we are on
+			nextTraceTemps.eyeRay.origin.addScaledVector (cameraReflectVector, 0.01);
+
+			trace (scene, traceStack, depth + 1);
+
+			const specular = traceTemps.eyeRayNearestIntersection.intersectedObject.specular;
+			color.addScaledVector(nextTraceTemps.color, specular);
 		}
 	}
 }
