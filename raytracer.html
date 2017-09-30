@@ -156,19 +156,23 @@ var gRenderTemps = {
 	eyeRightVector: new THREE.Vector3(),
 	eyeUpVector: new THREE.Vector3(),
 
-	eyeRay: new THREE.Ray(),
-
 	xcomp: new THREE.Vector3(),
 	ycomp: new THREE.Vector3(),
 	rayDirection: new THREE.Vector3(),
 	};
 
 var gTraceTemps = {
+	// Inputs
+	eyeRay: new THREE.Ray(),
+
+	// Temps
 	lightVector: new THREE.Vector3(),
 	reflectVector: new THREE.Vector3(),
 	cameraVector: new THREE.Vector3(),
-	color: new THREE.Vector3(),
 	lightObscuredRay: new THREE.Ray(),
+
+	// Outputs
+	color: new THREE.Vector3(),
 	};
 
 function render(scene, imgData) {
@@ -204,13 +208,13 @@ function render(scene, imgData) {
 		gRenderTemps.rayDirection.add(gRenderTemps.xcomp);
 		gRenderTemps.rayDirection.add(gRenderTemps.ycomp).normalize();
 
-		gRenderTemps.eyeRay.set(scene.camera.pos, gRenderTemps.rayDirection);
+		gTraceTemps.eyeRay.set(scene.camera.pos, gRenderTemps.rayDirection);
 
 		// Clear color
 		color.setScalar(0);
 
 		// Get nearest intersection point
-		getNearestIntersection(scene, gRenderTemps.eyeRay, gEyeRayNearestIntersection);
+		getNearestIntersection(scene, gTraceTemps.eyeRay, gEyeRayNearestIntersection);
 
 		if (gEyeRayNearestIntersection.isIntersection) {
 			// Unpack some values
