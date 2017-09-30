@@ -272,6 +272,7 @@ function trace (scene, traceStack, depth) {
 			if (lambert > 0.0) {
 				// Be aware that cos can be negative, which makes no sense here as light contribution
 				lambertLight = scene.lightIntensity * lambert * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot (lightVector));
+				lambertLight = Math.min (1.0, lambertLight);
 			}
 
 			// Specular: how much reflected light from the sourcce goes towards the camera
@@ -281,7 +282,8 @@ function trace (scene, traceStack, depth) {
 				specularLight = specular * Math.pow (specularLight, specularExponent);
 			}
 
-			const lighting = lambertLight + specularLight;
+			let lighting = lambertLight + specularLight;
+			lighting = Math.min (1.0, lighting);
 
 			color.x += lighting;
 			color.y += lighting;
