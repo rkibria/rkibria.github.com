@@ -35,6 +35,7 @@ const gMainScene = {
 			lambert: 0.7,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "right_snowdrift",
@@ -44,6 +45,7 @@ const gMainScene = {
 			lambert: 0.7,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "body_lower_sphere",
@@ -53,6 +55,7 @@ const gMainScene = {
 			lambert: 0.7,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "body_upper_sphere",
@@ -62,6 +65,7 @@ const gMainScene = {
 			lambert: 0.7,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "nose_sphere",
@@ -71,6 +75,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "left_eye_sphere",
@@ -80,6 +85,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "right_eye_sphere",
@@ -89,6 +95,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "mouth_mid_sphere",
@@ -98,6 +105,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "mouth_left_sphere",
@@ -107,6 +115,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "mouth_far_left_sphere",
@@ -116,6 +125,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "mouth_right_sphere",
@@ -125,6 +135,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "mouth_far_right_sphere",
@@ -134,6 +145,7 @@ const gMainScene = {
 			lambert: 0.1,
 			specular: 0.0,
 			specularExponent: 0.0,
+			reflectivity: 0.0,
 		},
 		{
 			name: "ground_plane",
@@ -141,8 +153,9 @@ const gMainScene = {
 			geometry: new THREE.Plane(new THREE.Vector3(0.0, 1.0, 0.0), 1.0),
 			ambient: 0.5,
 			lambert: 0.7,
-			specular: 0.2,
+			specular: 0.9,
 			specularExponent: 10.0,
+			reflectivity: 0.1,
 		},
 		],
 
@@ -259,6 +272,7 @@ function trace (scene, traceStack, depth) {
 		const lambert = intersectedObject.lambert;
 		const specular = intersectedObject.specular;
 		const specularExponent = intersectedObject.specularExponent;
+		const reflectivity = intersectedObject.reflectivity;
 
 		// Apply ambient lighting
 		color.addScaledVector (scene.ambientLight, ambient);
@@ -309,7 +323,7 @@ function trace (scene, traceStack, depth) {
 		}
 
 		// Reflections
-		if ((depth < MAX_DEPTH - 1) && specular > 0.0) {
+		if ((depth < MAX_DEPTH - 1) && reflectivity > 0.0) {
 			const nextTraceTemps = traceStack[depth + 1];
 
 			// Reflected camera vector
@@ -322,7 +336,7 @@ function trace (scene, traceStack, depth) {
 
 			trace (scene, traceStack, depth + 1);
 
-			color.addScaledVector(nextTraceTemps.color, specular);
+			color.addScaledVector(nextTraceTemps.color, reflectivity);
 		}
 	}
 }
