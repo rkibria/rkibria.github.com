@@ -97,6 +97,7 @@ const gMainScene = {
 
 function getNearestIntersection(scene, ray, result) {
 	result.isIntersection = false;
+	result.intersectedObject = null;
 	let minDist = Infinity;
 	const curIntersection = new THREE.Vector3();
 	let isIntersection = null;
@@ -123,7 +124,7 @@ function getNearestIntersection(scene, ray, result) {
 			if (curDist < minDist) {
 				minDist = curDist;
 				result.intersectionPoint.copy(curIntersection);
-				result.objectName = curObject.name;
+				result.intersectedObject = curObject;
 
 				if (curShape == "sphere") {
 					// Compute sphere surface normal by getting vector from sphere centre to intersect
@@ -147,7 +148,7 @@ function allocateIntersectionResult() {
 		isIntersection: false,
 		intersectionPoint: new THREE.Vector3(),
 		surfaceNormal: new THREE.Vector3(),
-		objectName: "",
+		intersectedObject: null,
 		};
 }
 
