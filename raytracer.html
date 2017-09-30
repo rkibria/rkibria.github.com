@@ -148,9 +148,6 @@ function allocateIntersectionResult() {
 		};
 }
 
-var gEyeRayNearestIntersection = allocateIntersectionResult();
-var gLightRayNearestIntersection = allocateIntersectionResult();
-
 var gRenderTemps = {
 	eyeVector: new THREE.Vector3(),
 	eyeRightVector: new THREE.Vector3(),
@@ -170,6 +167,8 @@ var gTraceTemps = {
 	reflectVector: new THREE.Vector3(),
 	cameraVector: new THREE.Vector3(),
 	lightObscuredRay: new THREE.Ray(),
+	eyeRayNearestIntersection: allocateIntersectionResult(),
+	lightRayNearestIntersection: allocateIntersectionResult(),
 
 	// Outputs
 	color: new THREE.Vector3(),
@@ -181,15 +180,15 @@ function trace (scene, traceTemps, depth) {
 	color.setScalar(0);
 
 	// Get nearest intersection point
-	getNearestIntersection(scene, traceTemps.eyeRay, gEyeRayNearestIntersection);
+	getNearestIntersection(scene, traceTemps.eyeRay, traceTemps.eyeRayNearestIntersection);
 
-	if (gEyeRayNearestIntersection.isIntersection) {
+	if (traceTemps.eyeRayNearestIntersection.isIntersection) {
 		// Unpack some values
 		var lightVector = traceTemps.lightVector;
 		var reflectVector = traceTemps.reflectVector;
 		var cameraVector = traceTemps.cameraVector;
 		var lightObscuredRay = traceTemps.lightObscuredRay;
-		var intersectionPoint = gEyeRayNearestIntersection.intersectionPoint;
+		var intersectionPoint = traceTemps.eyeRayNearestIntersection.intersectionPoint;
 
 		// APPLY AMBIENT LIGHTING
 		color.add(scene.ambientLight);
@@ -201,17 +200,17 @@ function trace (scene, traceTemps, depth) {
 		lightObscuredRay.set(intersectionPoint, lightVector);
 		// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
 		lightObscuredRay.origin.addScaledVector (lightVector, 0.01);
-		getNearestIntersection (scene, lightObscuredRay, gLightRayNearestIntersection);
-		if (gLightRayNearestIntersection.isIntersection) {
+		getNearestIntersection (scene, lightObscuredRay, traceTemps.lightRayNearestIntersection);
+		if (traceTemps.lightRayNearestIntersection.isIntersection) {
 			// color.x = 1.0;
 		}
 		else {
 			// Compute reflected light vector: from intersect to light, normalized
 			reflectVector.copy(lightVector);
-			reflectVector.reflect(gEyeRayNearestIntersection.surfaceNormal).normalize();
+			reflectVector.reflect(traceTemps.eyeRayNearestIntersection.surfaceNormal).normalize();
 
 			// Be aware that cos can be negative, which makes no sense here as light contribution
-			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, gEyeRayNearestIntersection.surfaceNormal.dot(lightVector));
+			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, traceTemps.eyeRayNearestIntersection.surfaceNormal.dot(lightVector));
 
 			// Specular: how much reflected light from the sourcce goes towards the camera
 			var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
