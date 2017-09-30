@@ -175,6 +175,57 @@ var gTraceTemps = {
 	color: new THREE.Vector3(),
 	};
 
+function trace (scene, traceTemps, depth) {
+	// Clear color
+	var color = traceTemps.color;
+	color.setScalar(0);
+
+	// Get nearest intersection point
+	getNearestIntersection(scene, traceTemps.eyeRay, gEyeRayNearestIntersection);
+
+	if (gEyeRayNearestIntersection.isIntersection) {
+		// Unpack some values
+		var lightVector = traceTemps.lightVector;
+		var reflectVector = traceTemps.reflectVector;
+		var cameraVector = traceTemps.cameraVector;
+		var lightObscuredRay = traceTemps.lightObscuredRay;
+		var intersectionPoint = gEyeRayNearestIntersection.intersectionPoint;
+
+		// APPLY AMBIENT LIGHTING
+		color.add(scene.ambientLight);
+
+		getNormalizedVectorFromTo (lightVector, intersectionPoint, scene.light);
+		getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
+
+		// Is a light visible from this point?
+		lightObscuredRay.set(intersectionPoint, lightVector);
+		// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
+		lightObscuredRay.origin.addScaledVector (lightVector, 0.01);
+		getNearestIntersection (scene, lightObscuredRay, gLightRayNearestIntersection);
+		if (gLightRayNearestIntersection.isIntersection) {
+			// color.x = 1.0;
+		}
+		else {
+			// Compute reflected light vector: from intersect to light, normalized
+			reflectVector.copy(lightVector);
+			reflectVector.reflect(gEyeRayNearestIntersection.surfaceNormal).normalize();
+
+			// Be aware that cos can be negative, which makes no sense here as light contribution
+			var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, gEyeRayNearestIntersection.surfaceNormal.dot(lightVector));
+
+			// Specular: how much reflected light from the sourcce goes towards the camera
+			var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
+			specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
+
+			var lighting = diffuseLight + specularLight;
+
+			color.x += lighting;
+			color.y += lighting;
+			color.z += lighting;
+		}
+	}
+}
+
 function render(scene, imgData) {
 	gRenderTemps.eyeVector.subVectors(scene.camera.point, scene.camera.pos).normalize();
 	gRenderTemps.eyeRightVector.crossVectors(gRenderTemps.eyeVector, VECTOR_UP).normalize();
@@ -191,73 +242,26 @@ function render(scene, imgData) {
 	var pixelWidth = camerawidth / (SCREEN_WIDTH - 1);
 	var pixelHeight = cameraheight / (SCREEN_HEIGHT - 1);
 
-	var color = gTraceTemps.color;
-
 	for (var i = 0; i < imgData.data.length; i += 4) {
 		var x = (i / 4) % SCREEN_WIDTH;
 		var y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
 		// Compute the current eye ray
-		gRenderTemps.xcomp.copy(gRenderTemps.eyeRightVector);
-		gRenderTemps.xcomp.multiplyScalar((x * pixelWidth) - halfWidth);
+		gRenderTemps.xcomp.copy (gRenderTemps.eyeRightVector);
+		gRenderTemps.xcomp.multiplyScalar ((x * pixelWidth) - halfWidth);
 
-		gRenderTemps.ycomp.copy(gRenderTemps.eyeUpVector);
-		gRenderTemps.ycomp.multiplyScalar((y * pixelHeight) - halfHeight);
+		gRenderTemps.ycomp.copy (gRenderTemps.eyeUpVector);
+		gRenderTemps.ycomp.multiplyScalar ((y * pixelHeight) - halfHeight);
 
-		gRenderTemps.rayDirection.copy(gRenderTemps.eyeVector);
-		gRenderTemps.rayDirection.add(gRenderTemps.xcomp);
-		gRenderTemps.rayDirection.add(gRenderTemps.ycomp).normalize();
+		gRenderTemps.rayDirection.copy (gRenderTemps.eyeVector);
+		gRenderTemps.rayDirection.add (gRenderTemps.xcomp);
+		gRenderTemps.rayDirection.add (gRenderTemps.ycomp).normalize();
 
-		gTraceTemps.eyeRay.set(scene.camera.pos, gRenderTemps.rayDirection);
+		gTraceTemps.eyeRay.set (scene.camera.pos, gRenderTemps.rayDirection);
 
-		// Clear color
-		color.setScalar(0);
+		trace (scene, gTraceTemps, 0);
 
-		// Get nearest intersection point
-		getNearestIntersection(scene, gTraceTemps.eyeRay, gEyeRayNearestIntersection);
-
-		if (gEyeRayNearestIntersection.isIntersection) {
-			// Unpack some values
-			var lightVector = gTraceTemps.lightVector;
-			var reflectVector = gTraceTemps.reflectVector;
-			var cameraVector = gTraceTemps.cameraVector;
-			var lightObscuredRay = gTraceTemps.lightObscuredRay;
-			var intersectionPoint = gEyeRayNearestIntersection.intersectionPoint;
-
-			// APPLY AMBIENT LIGHTING
-			color.add(scene.ambientLight);
-
-			getNormalizedVectorFromTo (lightVector, intersectionPoint, scene.light);
-			getNormalizedVectorFromTo (cameraVector, scene.camera.pos, intersectionPoint);
-
-			// Is a light visible from this point?
-			lightObscuredRay.set(intersectionPoint, lightVector);
-			// Move the light test point slightly towards the light source since the intersect will be exactly on the object, which will always mean the light is "obscured"
-			lightObscuredRay.origin.addScaledVector (lightVector, 0.01);
-			getNearestIntersection (scene, lightObscuredRay, gLightRayNearestIntersection);
-			if (gLightRayNearestIntersection.isIntersection) {
-				// color.x = 1.0;
-			}
-			else {
-				// Compute reflected light vector: from intersect to light, normalized
-				reflectVector.copy(lightVector);
-				reflectVector.reflect(gEyeRayNearestIntersection.surfaceNormal).normalize();
-
-				// Be aware that cos can be negative, which makes no sense here as light contribution
-				var diffuseLight = scene.lightIntensity * scene.diffuseFactor * Math.max(0, gEyeRayNearestIntersection.surfaceNormal.dot(lightVector));
-
-				// Specular: how much reflected light from the sourcce goes towards the camera
-				var specularLight = scene.lightIntensity * Math.max(0, cameraVector.dot(reflectVector));
-				specularLight = scene.specularFactor * Math.pow(specularLight, scene.specularExponent);
-
-				var lighting = diffuseLight + specularLight;
-
-				color.x += lighting;
-				color.y += lighting;
-				color.z += lighting;
-			}
-		}
-
+		var color = gTraceTemps.color;
 		imgData.data[i] = Math.max(0, Math.min(255, color.x * 255));
 		imgData.data[i+1] = Math.max(0, Math.min(255, color.y * 255));
 		imgData.data[i+2] = Math.max(0, Math.min(255, color.z * 255));
