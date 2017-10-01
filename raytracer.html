@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+<meta charset="utf-8">
+<title>JS ray tracing</title>
+</head>
+
 <body>
 
 <script src="js/three.min.js"></script>
@@ -22,7 +28,7 @@ const VECTOR_UP = new THREE.Vector3(0, 1, 0);
 const gMainScene = {
 	camera: {
 		pos: new THREE.Vector3(0, 0, 0),
-		point: new THREE.Vector3(0, 0, -10),
+		point: new THREE.Vector3(0, 0, -5),
 		fov: 65.0
 		},
 
@@ -390,12 +396,24 @@ ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-const t0 = performance.now();
-render (gMainScene, imgData);
-const t1 = performance.now();
-console.log("render time: " + (t1 - t0) + " ms");
+const rotationVector = new THREE.Vector3(0, 0, 0);
 
-ctx.putImageData(imgData, 0, 0);
+(function drawFrame () {
+	window.requestAnimationFrame(drawFrame, canvas);
+
+	const t0 = performance.now();
+	render (gMainScene, imgData);
+	const t1 = performance.now();
+	console.log("render time: " + (t1 - t0) + " ms");
+
+	ctx.putImageData(imgData, 0, 0);
+
+	rotationVector.copy(gMainScene.camera.pos);
+	rotationVector.sub(gMainScene.camera.point);
+	rotationVector.applyAxisAngle(VECTOR_UP, 0.1);
+	rotationVector.add(gMainScene.camera.point);
+	gMainScene.camera.pos.copy(rotationVector);
+}());
 
 </script>
 
