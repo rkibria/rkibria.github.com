@@ -80,6 +80,21 @@ rv2.set(4, 8, 10);
 rv2.divideScalar(2);
 console.assert(rv2.x == 2 && rv2.y == 4 && rv2.z == 5);
 
+rv2.set(4, 9, 10);
+rv3.set(2, 3, 5);
+rv2.multiply(rv3);
+console.assert(rv2.x == 8 && rv2.y == 27 && rv2.z == 50);
+
+rv2.set(4, 8, 10);
+rv2.multiplyScalar(2);
+console.assert(rv2.x == 8 && rv2.y == 16 && rv2.z == 20);
+
+rv1.set(99, 99, 99);
+rv2.set(1, 2, 3);
+rv3.set(7, 8, 9);
+rv1.multiplyVectors(rv2, rv3);
+console.assert(rv1.x == 7 && rv1.y == 16 && rv1.z == 27);
+
 console.log("Vector3 tests done");
 
 </script>
