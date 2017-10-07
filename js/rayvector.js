@@ -11,13 +11,16 @@ function Vector3 (x = 0, y = 0, z = 0) {
 /*
 METHODS:
 
+
 add
 addScalar
 addScaledVector
+addVectors
 copy
 set
 setScalar
 toString
+
 
 */
 
@@ -39,6 +42,13 @@ Vector3.prototype.addScaledVector = function(v, s) {
 	this.x += v.x * s;
 	this.y += v.y * s;
 	this.z += v.z * s;
+	return this;
+};
+
+Vector3.prototype.addVectors = function(a, b) {
+	this.x += a.x + b.x;
+	this.y += a.y + b.y;
+	this.z += a.z + b.z;
 	return this;
 };
 
