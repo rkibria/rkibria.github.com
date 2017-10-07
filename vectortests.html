@@ -35,6 +35,10 @@ rv3.add(rv3.add(rv2));
 console.log("rv3 + (rv3 + rv2):", rv3);
 console.assert(rv3.x == 12 && rv3.y == 18 && rv3.z == 24);
 
+rv3.copy(rv2);
+console.log("rv3.copy(rv2):", rv3);
+console.assert(rv3.x == 1 && rv3.y == 2 && rv3.z == 3);
+
 </script>
 
 </body>
