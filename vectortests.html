@@ -52,6 +52,8 @@ rv3.set(7, 8, 9);
 rv1.addVectors(rv2, rv3);
 console.assert(rv1.x == 8 && rv1.y == 10 && rv1.z == 12);
 
+rv1.sub(rv3);
+console.assert(rv1.x == 1 && rv1.y == 2 && rv1.z == 3);
 
 console.log("Vector3 tests done");
 
