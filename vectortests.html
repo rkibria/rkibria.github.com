@@ -11,33 +11,33 @@
 <script src="js/rayvector.js"></script>
 
 <script>
-console.log("vectors");
+console.log("Running Vector3 tests...");
 
 const rv1 = new Vector3();
-console.log("rv1:", rv1);
+console.log(String(rv1));
 console.assert(rv1.x == 0 && rv1.y == 0 && rv1.z == 0);
 
 const rv2 = new Vector3(1, 2, 3);
-console.log("rv2:", rv2);
 console.assert(rv2.x == 1 && rv2.y == 2 && rv2.z == 3);
 
 const rv3 = new Vector3(4, 5, 6);
-console.log("rv3:", rv3);
 console.assert(rv3.x == 4 && rv3.y == 5 && rv3.z == 6);
 
 rv3.add(rv2);
-console.log("rv3 + rv2:", rv3);
 console.assert(rv3.x == 5 && rv3.y == 7 && rv3.z == 9);
 
 // (5,7,9)+(1,2,3)=(6,9,12)
 // (6,9,12)+(6,9,12)=(12,18,24)
 rv3.add(rv3.add(rv2));
-console.log("rv3 + (rv3 + rv2):", rv3);
 console.assert(rv3.x == 12 && rv3.y == 18 && rv3.z == 24);
 
 rv3.copy(rv2);
-console.log("rv3.copy(rv2):", rv3);
 console.assert(rv3.x == 1 && rv3.y == 2 && rv3.z == 3);
+
+rv2.addScalar(3);
+console.assert(rv2.x == 4 && rv2.y == 5 && rv2.z == 6);
+
+console.log("Vector3 tests done");
 
 </script>
 
