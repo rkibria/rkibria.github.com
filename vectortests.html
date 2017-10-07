@@ -65,6 +65,12 @@ rv3.set(7, 8, 9);
 rv1.subVectors(rv2, rv3);
 console.assert(rv1.x == -6 && rv1.y == -6 && rv1.z == -6);
 
+rv1.set(1, 2, 3);
+rv2.set(1, 2, 3);
+console.assert(rv1.equals(rv2));
+rv2.set(5, 7, 3);
+console.assert(!rv1.equals(rv2));
+
 console.log("Vector3 tests done");
 
 </script>

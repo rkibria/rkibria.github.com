@@ -16,6 +16,7 @@ addScalar
 addScaledVector
 addVectors
 copy
+equals
 set
 setScalar
 sub
@@ -58,6 +59,10 @@ Vector3.prototype.copy = function(v) {
 	this.y = v.y;
 	this.z = v.z;
 	return this;
+};
+
+Vector3.prototype.equals = function(v) {
+	return this.x == v.x && this.y == v.y && this.z == v.z;
 };
 
 Vector3.prototype.set = function(x, y, z) {
