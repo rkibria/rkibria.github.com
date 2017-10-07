@@ -19,6 +19,9 @@ copy
 divide
 divideScalar
 equals
+multiply
+multiplyScalar
+multiplyVectors
 set
 setScalar
 sub
@@ -79,6 +82,27 @@ Vector3.prototype.divideScalar = function(s) {
 
 Vector3.prototype.equals = function(v) {
 	return this.x == v.x && this.y == v.y && this.z == v.z;
+};
+
+Vector3.prototype.multiply = function(v) {
+	this.x *= v.x;
+	this.y *= v.y;
+	this.z *= v.z;
+	return this;
+};
+
+Vector3.prototype.multiplyScalar = function(s) {
+	this.x *= s;
+	this.y *= s;
+	this.z *= s;
+	return this;
+};
+
+Vector3.prototype.multiplyVectors = function(a, b) {
+	this.x = a.x * b.x;
+	this.y = a.y * b.y;
+	this.z = a.z * b.z;
+	return this;
 };
 
 Vector3.prototype.set = function(x, y, z) {
