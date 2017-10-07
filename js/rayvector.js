@@ -19,6 +19,8 @@ copy
 set
 setScalar
 sub
+subScalar
+subVectors
 toString
 
 */
@@ -45,9 +47,9 @@ Vector3.prototype.addScaledVector = function(v, s) {
 };
 
 Vector3.prototype.addVectors = function(a, b) {
-	this.x += a.x + b.x;
-	this.y += a.y + b.y;
-	this.z += a.z + b.z;
+	this.x = a.x + b.x;
+	this.y = a.y + b.y;
+	this.z = a.z + b.z;
 	return this;
 };
 
@@ -76,6 +78,20 @@ Vector3.prototype.sub = function(v) {
 	this.x -= v.x;
 	this.y -= v.y;
 	this.z -= v.z;
+	return this;
+};
+
+Vector3.prototype.subScalar = function(s) {
+	this.x -= s;
+	this.y -= s;
+	this.z -= s;
+	return this;
+};
+
+Vector3.prototype.subVectors = function(a, b) {
+	this.x = a.x - b.x;
+	this.y = a.y - b.y;
+	this.z = a.z - b.z;
 	return this;
 };
 

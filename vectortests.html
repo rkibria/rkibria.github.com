@@ -47,6 +47,7 @@ console.assert(rv2.x == 1 && rv2.y == 2 && rv2.z == 3);
 rv2.addScaledVector(rv3, 3);
 console.assert(rv2.x == 4 && rv2.y == 8 && rv2.z == 12);
 
+rv1.set(99, 99, 99);
 rv2.set(1, 2, 3);
 rv3.set(7, 8, 9);
 rv1.addVectors(rv2, rv3);
@@ -54,6 +55,15 @@ console.assert(rv1.x == 8 && rv1.y == 10 && rv1.z == 12);
 
 rv1.sub(rv3);
 console.assert(rv1.x == 1 && rv1.y == 2 && rv1.z == 3);
+
+rv1.subScalar(1);
+console.assert(rv1.x == 0 && rv1.y == 1 && rv1.z == 2);
+
+rv1.set(99, 99, 99);
+rv2.set(1, 2, 3);
+rv3.set(7, 8, 9);
+rv1.subVectors(rv2, rv3);
+console.assert(rv1.x == -6 && rv1.y == -6 && rv1.z == -6);
 
 console.log("Vector3 tests done");
 
