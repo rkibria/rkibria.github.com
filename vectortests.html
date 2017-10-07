@@ -71,6 +71,15 @@ console.assert(rv1.equals(rv2));
 rv2.set(5, 7, 3);
 console.assert(!rv1.equals(rv2));
 
+rv2.set(4, 9, 10);
+rv3.set(2, 3, 5);
+rv2.divide(rv3);
+console.assert(rv2.x == 2 && rv2.y == 3 && rv2.z == 2);
+
+rv2.set(4, 8, 10);
+rv2.divideScalar(2);
+console.assert(rv2.x == 2 && rv2.y == 4 && rv2.z == 5);
+
 console.log("Vector3 tests done");
 
 </script>

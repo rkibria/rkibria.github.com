@@ -16,6 +16,8 @@ addScalar
 addScaledVector
 addVectors
 copy
+divide
+divideScalar
 equals
 set
 setScalar
@@ -58,6 +60,20 @@ Vector3.prototype.copy = function(v) {
 	this.x = v.x;
 	this.y = v.y;
 	this.z = v.z;
+	return this;
+};
+
+Vector3.prototype.divide = function(v) {
+	this.x /= v.x;
+	this.y /= v.y;
+	this.z /= v.z;
+	return this;
+};
+
+Vector3.prototype.divideScalar = function(s) {
+	this.x /= s;
+	this.y /= s;
+	this.z /= s;
 	return this;
 };
 
