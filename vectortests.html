@@ -37,6 +37,16 @@ console.assert(rv3.x == 1 && rv3.y == 2 && rv3.z == 3);
 rv2.addScalar(3);
 console.assert(rv2.x == 4 && rv2.y == 5 && rv2.z == 6);
 
+rv2.setScalar(0);
+console.assert(rv2.x == 0 && rv2.y == 0 && rv2.z == 0);
+
+rv2.set(1, 2, 3);
+console.assert(rv2.x == 1 && rv2.y == 2 && rv2.z == 3);
+
+// (1,2,3)+3*(1,2,3)=(1,2,3)+(3,6,9)=(4,8,12)
+rv2.addScaledVector(rv3, 3);
+console.assert(rv2.x == 4 && rv2.y == 8 && rv2.z == 12);
+
 console.log("Vector3 tests done");
 
 </script>

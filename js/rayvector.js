@@ -32,3 +32,24 @@ Vector3.prototype.addScalar = function(s) {
 	this.z += s;
 	return this;
 };
+
+Vector3.prototype.setScalar = function(s) {
+	this.x = s;
+	this.y = s;
+	this.z = s;
+	return this;
+};
+
+Vector3.prototype.set = function(x, y, z) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+	return this;
+};
+
+Vector3.prototype.addScaledVector = function(v, s) {
+	this.x += v.x * s;
+	this.y += v.y * s;
+	this.z += v.z * s;
+	return this;
+};
