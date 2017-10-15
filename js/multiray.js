@@ -21,6 +21,19 @@ function Renderer () {
 	this.x = 0;
 }
 
+Renderer.prototype.renderToImageData = function(imgData, sW, sH) {
+	const dataLen = imgData.data.length;
+	for (let i = 0; i < dataLen; i += 4) {
+		const x = (i / 4) % sW;
+		const y = sH - (i / (4 * sH));
+
+		imgData.data[i] = Math.max (0, 255);
+		imgData.data[i+1] = Math.max (0, 0);
+		imgData.data[i+2] = Math.max (0, 0);
+		imgData.data[i+3] = 255;
+	}
+}
+
 Renderer.prototype.renderToCanvas = function(canvas) {
 	// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
 	const sW = canvas.scrollWidth;
@@ -31,6 +44,8 @@ Renderer.prototype.renderToCanvas = function(canvas) {
 	const ctx = canvas.getContext("2d");
 	const imgData = ctx.getImageData(0, 0, sW, sH);
 
+	this.renderToImageData(imgData, sW, sH);
+	ctx.putImageData(imgData, 0, 0);
 };
 
 
