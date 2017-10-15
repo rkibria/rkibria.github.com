@@ -23,6 +23,8 @@ renderToImageData
 
 function Renderer () {
 	this.VECTOR_UP = new Vector3(0, 1, 0);
+
+	this.pixelcolor = new Vector3();
 }
 
 Renderer.prototype.renderToCanvas = function(scene, canvas) {
@@ -47,10 +49,13 @@ Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
 		const x = (i / 4) % sW;
 		const y = sH - (i / (4 * sH));
 
-		imgData.data[i] = scene.backgroundColor.x;
-		imgData.data[i+1] = scene.backgroundColor.y;
-		imgData.data[i+2] = scene.backgroundColor.z;
-		imgData.data[i+3] = 255;
+		this.pixelcolor.copy(scene.backgroundColor);
+
+		const pixel = imgData.data;
+		pixel[i] = Math.max (0, Math.min (255, this.pixelcolor.x * 255));
+		pixel[i+1] = Math.max (0, Math.min (255, this.pixelcolor.y * 255));
+		pixel[i+2] = Math.max (0, Math.min (255, this.pixelcolor.z * 255));
+		pixel[i+3] = 255;
 	}
 }
 
@@ -72,12 +77,9 @@ function Scene () {
 
 	this.objects = [];
 
-	this.backgroundColor = new Vector3(0, 0, 0);
+	this.backgroundColor = new Vector3(0.0, 0.0, 0.0);
 
-	this.ambientLight = new Vector3(0.0, 0.0, 0.0);
-	this.lightIntensity = 0.0;
 	this.light = new Vector3(0.0, 0.0, 0.0);
-
 }
 
 
