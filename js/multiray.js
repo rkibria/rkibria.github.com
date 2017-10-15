@@ -2,11 +2,11 @@
  * @author rkibria / http://rkibria.netlify.com/
  */
 
-function Vector3 (x = 0.0, y = 0.0, z = 0.0) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
-}
+var MULTIRAY = {
+	Vector3: null,
+};
+
+(function (_export) {
 
 /*
 METHODS:
@@ -30,6 +30,12 @@ subVectors
 toString
 
 */
+
+function Vector3 (x = 0.0, y = 0.0, z = 0.0) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+}
 
 Vector3.prototype.add = function(v) {
 	this.x += v.x;
@@ -143,3 +149,8 @@ Vector3.prototype.subVectors = function(a, b) {
 Vector3.prototype.toString = function vector3ToString() {
 	return "Vector3(" + this.x + '/' + this.y + '/' + this.z + ")";
 };
+
+
+_export.Vector3 = Vector3;
+
+}(MULTIRAY));
