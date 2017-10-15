@@ -3,12 +3,41 @@
  */
 
 var MULTIRAY = {
+	Renderer: null,
 	Vector3: null,
 };
 
 (function (_export) {
 
-/*
+/* ************************************
+	Renderer
+***************************************
+
+METHODS:
+
+*/
+
+function Renderer () {
+	this.x = 0;
+}
+
+Renderer.prototype.renderToCanvas = function(canvas) {
+	// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
+	const sW = canvas.scrollWidth;
+	const sH = canvas.scrollHeight;
+	console.log("Canvas size", sW, "x", sH, "=", sW * sH, "rays");
+
+	// Get canvas bitmap
+	const ctx = canvas.getContext("2d");
+	const imgData = ctx.getImageData(0, 0, sW, sH);
+
+};
+
+
+/* ************************************
+	Vector3
+***************************************
+
 METHODS:
 
 add
@@ -150,7 +179,11 @@ Vector3.prototype.toString = function vector3ToString() {
 	return "Vector3(" + this.x + '/' + this.y + '/' + this.z + ")";
 };
 
+/* ************************************
+	Exports
+**************************************/
 
+_export.Renderer = Renderer;
 _export.Vector3 = Vector3;
 
 }(MULTIRAY));
