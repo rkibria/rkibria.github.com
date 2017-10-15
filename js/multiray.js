@@ -21,8 +21,7 @@ renderToImageData
 */
 
 function Renderer () {
-	this.x = new Vector3();
-	console.log(String(this.x));
+	this.VECTOR_UP = new Vector3(0, 1, 0);
 }
 
 Renderer.prototype.renderToCanvas = function(canvas) {
