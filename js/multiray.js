@@ -10,28 +10,19 @@ var MULTIRAY = {
 (function (_export) {
 
 /* ************************************
-	Renderer
+	CLASS: Renderer
 ***************************************
 
 METHODS:
 
+renderToCanvas
+renderToImageData
+
 */
 
 function Renderer () {
-	this.x = 0;
-}
-
-Renderer.prototype.renderToImageData = function(imgData, sW, sH) {
-	const dataLen = imgData.data.length;
-	for (let i = 0; i < dataLen; i += 4) {
-		const x = (i / 4) % sW;
-		const y = sH - (i / (4 * sH));
-
-		imgData.data[i] = Math.max (0, 255);
-		imgData.data[i+1] = Math.max (0, 0);
-		imgData.data[i+2] = Math.max (0, 0);
-		imgData.data[i+3] = 255;
-	}
+	this.x = new Vector3();
+	console.log(String(this.x));
 }
 
 Renderer.prototype.renderToCanvas = function(canvas) {
@@ -48,9 +39,21 @@ Renderer.prototype.renderToCanvas = function(canvas) {
 	ctx.putImageData(imgData, 0, 0);
 };
 
+Renderer.prototype.renderToImageData = function(imgData, sW, sH) {
+	const dataLen = imgData.data.length;
+	for (let i = 0; i < dataLen; i += 4) {
+		const x = (i / 4) % sW;
+		const y = sH - (i / (4 * sH));
+
+		imgData.data[i] = Math.max (0, 255);
+		imgData.data[i+1] = Math.max (0, 0);
+		imgData.data[i+2] = Math.max (0, 0);
+		imgData.data[i+3] = 255;
+	}
+}
 
 /* ************************************
-	Vector3
+	CLASS: Vector3
 ***************************************
 
 METHODS:
@@ -191,7 +194,7 @@ Vector3.prototype.subVectors = function(a, b) {
 };
 
 Vector3.prototype.toString = function vector3ToString() {
-	return "Vector3(" + this.x + '/' + this.y + '/' + this.z + ")";
+	return "MULTIRAY.Vector3(" + this.x + '/' + this.y + '/' + this.z + ")";
 };
 
 /* ************************************
