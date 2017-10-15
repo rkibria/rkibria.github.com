@@ -16,11 +16,14 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 <script>
 let renderer = new MULTIRAY.Renderer();
 
+let scene = new MULTIRAY.Scene();
+scene.backgroundColor.set(50, 20, 10);
+
 const canvas = document.getElementById("myCanvas");
 
 (function drawFrame () {
 	const t0 = performance.now();
-	renderer.renderToCanvas(canvas);
+	renderer.renderToCanvas(scene, canvas);
 	const t1 = performance.now();
 	console.log("render time: " + (t1 - t0) + " ms");
 }());

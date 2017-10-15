@@ -4,6 +4,7 @@
 
 var MULTIRAY = {
 	Renderer: null,
+	Scene: null,
 	Vector3: null,
 };
 
@@ -24,7 +25,7 @@ function Renderer () {
 	this.VECTOR_UP = new Vector3(0, 1, 0);
 }
 
-Renderer.prototype.renderToCanvas = function(canvas) {
+Renderer.prototype.renderToCanvas = function(scene, canvas) {
 	// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
 	const sW = canvas.scrollWidth;
 	const sH = canvas.scrollHeight;
@@ -34,22 +35,51 @@ Renderer.prototype.renderToCanvas = function(canvas) {
 	const ctx = canvas.getContext("2d");
 	const imgData = ctx.getImageData(0, 0, sW, sH);
 
-	this.renderToImageData(imgData, sW, sH);
+	this.renderToImageData(scene, imgData, sW, sH);
 	ctx.putImageData(imgData, 0, 0);
 };
 
-Renderer.prototype.renderToImageData = function(imgData, sW, sH) {
+Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
+	console.log("Rendering objects:", scene.objects.length);
+
 	const dataLen = imgData.data.length;
 	for (let i = 0; i < dataLen; i += 4) {
 		const x = (i / 4) % sW;
 		const y = sH - (i / (4 * sH));
 
-		imgData.data[i] = Math.max (0, 255);
-		imgData.data[i+1] = Math.max (0, 0);
-		imgData.data[i+2] = Math.max (0, 0);
+		imgData.data[i] = scene.backgroundColor.x;
+		imgData.data[i+1] = scene.backgroundColor.y;
+		imgData.data[i+2] = scene.backgroundColor.z;
 		imgData.data[i+3] = 255;
 	}
 }
+
+/* ************************************
+	CLASS: Scene
+***************************************
+
+METHODS:
+
+
+*/
+
+function Scene () {
+	this.camera = {
+		pos: new Vector3(0.0, 0.0, 0.0),
+		point: new Vector3(0.0, 0.0, -1.0),
+		fov: 45.0,
+		};
+
+	this.objects = [];
+
+	this.backgroundColor = new Vector3(0, 0, 0);
+
+	this.ambientLight = new Vector3(0.0, 0.0, 0.0);
+	this.lightIntensity = 0.0;
+	this.light = new Vector3(0.0, 0.0, 0.0);
+
+}
+
 
 /* ************************************
 	CLASS: Vector3
@@ -201,6 +231,7 @@ Vector3.prototype.toString = function vector3ToString() {
 **************************************/
 
 _export.Renderer = Renderer;
+_export.Scene = Scene;
 _export.Vector3 = Vector3;
 
 }(MULTIRAY));
