@@ -23,7 +23,7 @@ const canvas = document.getElementById("myCanvas");
 
 (function drawFrame () {
 	const t0 = performance.now();
-	renderer.renderToCanvas(scene, canvas);
+	renderer.renderToCanvas(scene, 2, canvas);
 	const t1 = performance.now();
 	console.log("render time: " + (t1 - t0) + " ms");
 }());

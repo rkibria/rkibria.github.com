@@ -45,17 +45,19 @@ renderToImageData - main render loop
 function Renderer () {
 	this.VECTOR_UP = new Vector3(0, 1, 0);
 
+	this.maxDepth = 0;
+
 	this._eyeRightVector = new Vector3();
 	this._eyeUpVector = new Vector3();
 	this._eyeVector = new Vector3();
-	this._pixelcolor = new Vector3();
 	this._rayDirection = new Vector3();
 	this._xcomp = new Vector3();
 	this._ycomp = new Vector3();
 	this._eyeRay = new Ray();
+	this._traceStack = [];
 }
 
-Renderer.prototype.renderToCanvas = function(scene, canvas) {
+Renderer.prototype.renderToCanvas = function(scene, depth, canvas) {
 	// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
 	const sW = canvas.scrollWidth;
 	const sH = canvas.scrollHeight;
@@ -65,12 +67,31 @@ Renderer.prototype.renderToCanvas = function(scene, canvas) {
 	const ctx = canvas.getContext("2d");
 	const imgData = ctx.getImageData(0, 0, sW, sH);
 
-	this.renderToImageData(scene, imgData, sW, sH);
+	this.renderToImageData(scene, depth, imgData, sW, sH);
 	ctx.putImageData(imgData, 0, 0);
 };
 
-Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
-	console.log("Rendering objects:", scene.objects.length);
+Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
+	if (depth < 1) {
+		console.log("depth < 1, not rendering");
+		return;
+	}
+	this.maxDepth = depth;
+	console.log("Rendering", scene.objects.length, "objects with depth", this.maxDepth);
+
+	if (this._traceStack.length < this.maxDepth) {
+		this._traceStack = new Array(this.maxDepth);
+		const stackElement = {
+			// Inputs
+			eyeRay: new Ray(),
+
+			// Temps
+
+			// Outputs
+			color: new Vector3(),
+			};
+		this._traceStack.fill(stackElement);
+	}
 
 	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos).normalize();
 	this._eyeRightVector.crossVectors (this._eyeVector, this.VECTOR_UP).normalize();
@@ -106,12 +127,13 @@ Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
 		this._eyeRay.set (scene.camera.pos, this._rayDirection);
 
 		//
-		this._pixelcolor.copy(scene.backgroundColor);
+		const color = this._traceStack[0].color;
+		color.copy(scene.backgroundColor);
 
 		const pixel = imgData.data;
-		pixel[i] = Math.max (0, Math.min (255, this._pixelcolor.x * 255));
-		pixel[i+1] = Math.max (0, Math.min (255, this._pixelcolor.y * 255));
-		pixel[i+2] = Math.max (0, Math.min (255, this._pixelcolor.z * 255));
+		pixel[i] = Math.max (0, Math.min (255, color.x * 255));
+		pixel[i+1] = Math.max (0, Math.min (255, color.y * 255));
+		pixel[i+2] = Math.max (0, Math.min (255, color.z * 255));
 		pixel[i+3] = 255;
 	}
 }
