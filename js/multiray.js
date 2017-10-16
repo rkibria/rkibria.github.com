@@ -61,7 +61,7 @@ Renderer.prototype.renderToCanvas = function(scene, depth, canvas) {
 	// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
 	const sW = canvas.scrollWidth;
 	const sH = canvas.scrollHeight;
-	console.log("Canvas size", sW, "x", sH, "=", sW * sH, "rays");
+	console.log("[MULTIRAY] Canvas size", sW, "x", sH, "=", sW * sH, "rays");
 
 	// Get canvas bitmap
 	const ctx = canvas.getContext("2d");
@@ -73,11 +73,11 @@ Renderer.prototype.renderToCanvas = function(scene, depth, canvas) {
 
 Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 	if (depth < 1) {
-		console.log("depth < 1, not rendering");
+		console.log("[MULTIRAY] depth < 1, not rendering");
 		return;
 	}
 	this.maxDepth = depth;
-	console.log("Rendering", scene.objects.length, "objects with depth", this.maxDepth);
+	console.log("[MULTIRAY] Rendering", scene.objects.length, "objects with depth", this.maxDepth);
 
 	if (this._traceStack.length < this.maxDepth) {
 		this._traceStack = new Array(this.maxDepth);
@@ -340,3 +340,107 @@ _export.Scene = Scene;
 _export.Vector3 = Vector3;
 
 }(MULTIRAY));
+
+/* ************************************
+	TEST: Vector3
+**************************************/
+
+(function () {
+	let Vector3 = MULTIRAY.Vector3;
+
+	console.log("[MULTIRAY] Running Vector3 tests...");
+
+	const rv1 = new Vector3();
+	console.log("[MULTIRAY]", String(rv1));
+	console.assert(rv1.x == 0 && rv1.y == 0 && rv1.z == 0);
+
+	const rv2 = new Vector3(1, 2, 3);
+	console.assert(rv2.x == 1 && rv2.y == 2 && rv2.z == 3);
+
+	const rv3 = new Vector3(4, 5, 6);
+	console.assert(rv3.x == 4 && rv3.y == 5 && rv3.z == 6);
+
+	rv3.add(rv2);
+	console.assert(rv3.x == 5 && rv3.y == 7 && rv3.z == 9);
+
+	// (5,7,9)+(1,2,3)=(6,9,12)
+	// (6,9,12)+(6,9,12)=(12,18,24)
+	rv3.add(rv3.add(rv2));
+	console.assert(rv3.x == 12 && rv3.y == 18 && rv3.z == 24);
+
+	rv3.copy(rv2);
+	console.assert(rv3.x == 1 && rv3.y == 2 && rv3.z == 3);
+
+	rv2.addScalar(3);
+	console.assert(rv2.x == 4 && rv2.y == 5 && rv2.z == 6);
+
+	rv2.setScalar(0);
+	console.assert(rv2.x == 0 && rv2.y == 0 && rv2.z == 0);
+
+	rv2.set(1, 2, 3);
+	console.assert(rv2.x == 1 && rv2.y == 2 && rv2.z == 3);
+
+	// (1,2,3)+3*(1,2,3)=(1,2,3)+(3,6,9)=(4,8,12)
+	rv2.addScaledVector(rv3, 3);
+	console.assert(rv2.x == 4 && rv2.y == 8 && rv2.z == 12);
+
+	rv1.set(99, 99, 99);
+	rv2.set(1, 2, 3);
+	rv3.set(7, 8, 9);
+	rv1.addVectors(rv2, rv3);
+	console.assert(rv1.x == 8 && rv1.y == 10 && rv1.z == 12);
+
+	rv1.sub(rv3);
+	console.assert(rv1.x == 1 && rv1.y == 2 && rv1.z == 3);
+
+	rv1.subScalar(1);
+	console.assert(rv1.x == 0 && rv1.y == 1 && rv1.z == 2);
+
+	rv1.set(99, 99, 99);
+	rv2.set(1, 2, 3);
+	rv3.set(7, 8, 9);
+	rv1.subVectors(rv2, rv3);
+	console.assert(rv1.x == -6 && rv1.y == -6 && rv1.z == -6);
+
+	rv1.set(1, 2, 3);
+	rv2.set(1, 2, 3);
+	console.assert(rv1.equals(rv2));
+	rv2.set(5, 7, 3);
+	console.assert(!rv1.equals(rv2));
+
+	rv2.set(4, 9, 10);
+	rv3.set(2, 3, 5);
+	rv2.divide(rv3);
+	console.assert(rv2.x == 2 && rv2.y == 3 && rv2.z == 2);
+
+	rv2.set(4, 8, 10);
+	rv2.divideScalar(2);
+	console.assert(rv2.x == 2 && rv2.y == 4 && rv2.z == 5);
+
+	rv2.set(4, 9, 10);
+	rv3.set(2, 3, 5);
+	rv2.multiply(rv3);
+	console.assert(rv2.x == 8 && rv2.y == 27 && rv2.z == 50);
+
+	rv2.set(4, 8, 10);
+	rv2.multiplyScalar(2);
+	console.assert(rv2.x == 8 && rv2.y == 16 && rv2.z == 20);
+
+	rv1.set(99, 99, 99);
+	rv2.set(1, 2, 3);
+	rv3.set(7, 8, 9);
+	rv1.multiplyVectors(rv2, rv3);
+	console.assert(rv1.x == 7 && rv1.y == 16 && rv1.z == 27);
+
+	rv1.set(2, 0, 0);
+	console.assert(rv1.length() == 2);
+	rv1.normalize();
+	console.assert(rv1.length() == 1);
+	console.assert(rv1.x == 1 && rv1.y == 0 && rv1.z == 0);
+
+	rv1.set(1, 0, 0);
+	rv2.set(0, 1, 0);
+	rv3.crossVectors(rv1, rv2);
+	console.assert(rv3.length() == 1);
+	console.assert(rv3.x == 0 && rv3.y == 0 && rv3.z == 1);
+}());
