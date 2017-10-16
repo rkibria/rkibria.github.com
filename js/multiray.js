@@ -17,6 +17,7 @@ var MULTIRAY = {
 
 METHODS:
 
+set
 
 */
 
@@ -51,6 +52,7 @@ function Renderer () {
 	this._rayDirection = new Vector3();
 	this._xcomp = new Vector3();
 	this._ycomp = new Vector3();
+	this._eyeRay = new Ray();
 }
 
 Renderer.prototype.renderToCanvas = function(scene, canvas) {
@@ -74,11 +76,36 @@ Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
 	this._eyeRightVector.crossVectors (this._eyeVector, this.VECTOR_UP).normalize();
 	this._eyeUpVector.crossVectors (this._eyeRightVector, this._eyeVector).normalize();
 
+	const fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
+	const halfWidth = Math.tan(fovRadians);
+
+	const heightWidthRatio = sW / sH;
+	const halfHeight = heightWidthRatio * halfWidth;
+
+	const camerawidth = halfWidth * 2.0;
+	const cameraheight = halfHeight * 2.0;
+	const pixelWidth = camerawidth / (sW - 1.0);
+	const pixelHeight = cameraheight / (sH - 1.0);
+
 	const dataLen = imgData.data.length;
 	for (let i = 0; i < dataLen; i += 4) {
 		const x = (i / 4) % sW;
 		const y = sH - (i / (4 * sH));
 
+		// Compute the current eye ray
+		this._xcomp.copy (this._eyeRightVector);
+		this._xcomp.multiplyScalar ((x * pixelWidth) - halfWidth);
+
+		this._ycomp.copy (this._eyeUpVector);
+		this._ycomp.multiplyScalar ((y * pixelHeight) - halfHeight);
+
+		this._rayDirection.copy (this._eyeVector);
+		this._rayDirection.add (this._xcomp);
+		this._rayDirection.add (this._ycomp).normalize();
+
+		this._eyeRay.set (scene.camera.pos, this._rayDirection);
+
+		//
 		this._pixelcolor.copy(scene.backgroundColor);
 
 		const pixel = imgData.data;
