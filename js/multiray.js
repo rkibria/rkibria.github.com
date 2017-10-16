@@ -3,6 +3,7 @@
  */
 
 var MULTIRAY = {
+	Ray: null,
 	Renderer: null,
 	Scene: null,
 	Vector3: null,
@@ -11,20 +12,45 @@ var MULTIRAY = {
 (function (_export) {
 
 /* ************************************
+	CLASS: Ray
+***************************************
+
+METHODS:
+
+
+*/
+
+function Ray () {
+	this.origin = new Vector3();
+	this.direction = new Vector3();
+}
+
+Ray.prototype.set = function(o, d) {
+	this.origin.copy(o);
+	this.direction.copy(d);
+}
+
+/* ************************************
 	CLASS: Renderer
 ***************************************
 
 METHODS:
 
 renderToCanvas
-renderToImageData
+renderToImageData - main render loop
 
 */
 
 function Renderer () {
 	this.VECTOR_UP = new Vector3(0, 1, 0);
 
-	this.pixelcolor = new Vector3();
+	this._eyeRightVector = new Vector3();
+	this._eyeUpVector = new Vector3();
+	this._eyeVector = new Vector3();
+	this._pixelcolor = new Vector3();
+	this._rayDirection = new Vector3();
+	this._xcomp = new Vector3();
+	this._ycomp = new Vector3();
 }
 
 Renderer.prototype.renderToCanvas = function(scene, canvas) {
@@ -44,17 +70,21 @@ Renderer.prototype.renderToCanvas = function(scene, canvas) {
 Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
 	console.log("Rendering objects:", scene.objects.length);
 
+	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos); //.normalize();
+	// this._eyeRightVector.crossVectors (gRenderTemps.eyeVector, VECTOR_UP).normalize();
+	// this._eyeUpVector.crossVectors (gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
+
 	const dataLen = imgData.data.length;
 	for (let i = 0; i < dataLen; i += 4) {
 		const x = (i / 4) % sW;
 		const y = sH - (i / (4 * sH));
 
-		this.pixelcolor.copy(scene.backgroundColor);
+		this._pixelcolor.copy(scene.backgroundColor);
 
 		const pixel = imgData.data;
-		pixel[i] = Math.max (0, Math.min (255, this.pixelcolor.x * 255));
-		pixel[i+1] = Math.max (0, Math.min (255, this.pixelcolor.y * 255));
-		pixel[i+2] = Math.max (0, Math.min (255, this.pixelcolor.z * 255));
+		pixel[i] = Math.max (0, Math.min (255, this._pixelcolor.x * 255));
+		pixel[i+1] = Math.max (0, Math.min (255, this._pixelcolor.y * 255));
+		pixel[i+2] = Math.max (0, Math.min (255, this._pixelcolor.z * 255));
 		pixel[i+3] = 255;
 	}
 }
@@ -232,6 +262,7 @@ Vector3.prototype.toString = function vector3ToString() {
 	Exports
 **************************************/
 
+_export.Ray = Ray;
 _export.Renderer = Renderer;
 _export.Scene = Scene;
 _export.Vector3 = Vector3;
