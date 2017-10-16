@@ -70,7 +70,7 @@ Renderer.prototype.renderToCanvas = function(scene, canvas) {
 Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
 	console.log("Rendering objects:", scene.objects.length);
 
-	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos); //.normalize();
+	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos).normalize();
 	// this._eyeRightVector.crossVectors (gRenderTemps.eyeVector, VECTOR_UP).normalize();
 	// this._eyeUpVector.crossVectors (gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
 
@@ -127,9 +127,11 @@ copy
 divide
 divideScalar
 equals
+length
 multiply
 multiplyScalar
 multiplyVectors
+normalize
 set
 setScalar
 sub
@@ -198,6 +200,10 @@ Vector3.prototype.equals = function(v) {
 	return this.x == v.x && this.y == v.y && this.z == v.z;
 };
 
+Vector3.prototype.length = function() {
+	return Math.sqrt (this.x * this.x + this.y * this.y + this.z * this.z);
+};
+
 Vector3.prototype.multiply = function(v) {
 	this.x *= v.x;
 	this.y *= v.y;
@@ -217,6 +223,10 @@ Vector3.prototype.multiplyVectors = function(a, b) {
 	this.y = a.y * b.y;
 	this.z = a.z * b.z;
 	return this;
+};
+
+Vector3.prototype.normalize = function() {
+	return this.divideScalar (this.length());
 };
 
 Vector3.prototype.set = function(x, y, z) {
