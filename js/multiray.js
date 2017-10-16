@@ -81,16 +81,17 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 
 	if (this._traceStack.length < this.maxDepth) {
 		this._traceStack = new Array(this.maxDepth);
-		const stackElement = {
-			// Inputs
-			eyeRay: new Ray(),
+		for (let i = 0; i < this.maxDepth; i++) {
+			this._traceStack[i] = {
+				// Inputs
+				eyeRay: new Ray(),
 
-			// Temps
+				// Temps
 
-			// Outputs
-			color: new Vector3(),
-			};
-		this._traceStack.fill(stackElement);
+				// Outputs
+				color: new Vector3(),
+				};
+		}
 	}
 
 	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos).normalize();
