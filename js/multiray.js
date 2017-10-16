@@ -71,8 +71,8 @@ Renderer.prototype.renderToImageData = function(scene, imgData, sW, sH) {
 	console.log("Rendering objects:", scene.objects.length);
 
 	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos).normalize();
-	// this._eyeRightVector.crossVectors (gRenderTemps.eyeVector, VECTOR_UP).normalize();
-	// this._eyeUpVector.crossVectors (gRenderTemps.eyeRightVector, gRenderTemps.eyeVector).normalize();
+	this._eyeRightVector.crossVectors (this._eyeVector, this.VECTOR_UP).normalize();
+	this._eyeUpVector.crossVectors (this._eyeRightVector, this._eyeVector).normalize();
 
 	const dataLen = imgData.data.length;
 	for (let i = 0; i < dataLen; i += 4) {
@@ -124,6 +124,7 @@ addScalar
 addScaledVector
 addVectors
 copy
+crossVectors
 divide
 divideScalar
 equals
@@ -179,6 +180,17 @@ Vector3.prototype.copy = function(v) {
 	this.x = v.x;
 	this.y = v.y;
 	this.z = v.z;
+	return this;
+};
+
+Vector3.prototype.crossVectors = function(a, b) {
+	const ax = a.x, ay = a.y, az = a.z;
+	const bx = b.x, by = b.y, bz = b.z;
+
+	this.x = ay * bz - az * by;
+	this.y = az * bx - ax * bz;
+	this.z = ax * by - ay * bx;
+
 	return this;
 };
 

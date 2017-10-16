@@ -103,6 +103,12 @@ rv1.normalize();
 console.assert(rv1.length() == 1);
 console.assert(rv1.x == 1 && rv1.y == 0 && rv1.z == 0);
 
+rv1.set(1, 0, 0);
+rv2.set(0, 1, 0);
+rv3.crossVectors(rv1, rv2);
+console.assert(rv3.length() == 1);
+console.assert(rv3.x == 0 && rv3.y == 0 && rv3.z == 1);
+
 console.log("Vector3 tests done");
 
 </script>
