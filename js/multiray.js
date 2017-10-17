@@ -13,6 +13,26 @@ var MULTIRAY = {
 (function (_export) {
 
 /* ************************************
+	CLASS: Camera
+***************************************
+
+METHODS:
+
+toString
+
+*/
+
+function Camera () {
+	this.fov = 0.0;
+	this.point = new Vector3();
+	this.pos = new Vector3();
+}
+
+Camera.prototype.toString = function cameraToString() {
+	return "Camera(" + String(this.pos) + "," + String(this.point) + "," + String(this.fov) + ")";
+};
+
+/* ************************************
 	CLASS: Ray
 ***************************************
 
@@ -167,17 +187,10 @@ toString
 */
 
 function Scene () {
-	this.camera = {
-		pos: new Vector3(0.0, 0.0, 0.0),
-		point: new Vector3(0.0, 0.0, -1.0),
-		fov: 45.0,
-		};
-
-	this.objects = [];
-
 	this.backgroundColor = new Vector3(0.0, 0.0, 0.0);
-
+	this.camera = new Camera();
 	this.light = new Vector3(0.0, 0.0, 0.0);
+	this.objects = [];
 }
 
 Scene.prototype.addObject = function(obj) {
@@ -185,7 +198,7 @@ Scene.prototype.addObject = function(obj) {
 };
 
 Scene.prototype.toString = function sceneToString() {
-	let out = "Scene(bg:" + String(this.backgroundColor) + ",light:" + this.light + "," + this.objects.length + ":[";
+	let out = "Scene(" + String(this.camera) + ",bg:" + String(this.backgroundColor) + ",light:" + this.light + "," + this.objects.length + ":[";
 	for (let i = 0; i < this.objects.length; i++) {
 		out += String(this.objects[i]) + " ";
 	}
