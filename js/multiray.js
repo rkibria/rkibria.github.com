@@ -17,7 +17,9 @@ var MULTIRAY = {
 
 METHODS:
 
+at
 set
+toString
 
 */
 
@@ -26,10 +28,19 @@ function Ray () {
 	this.direction = new Vector3();
 }
 
+Ray.prototype.at = function(t, result) {
+	return result.copy(this.direction).multiplyScalar(t).add(this.origin);
+}
+
 Ray.prototype.set = function(o, d) {
 	this.origin.copy(o);
 	this.direction.copy(d);
+	return this;
 }
+
+Ray.prototype.toString = function rayToString() {
+	return "Ray(" + String(this.origin) + "," + String(this.direction) + ")";
+};
 
 /* ************************************
 	CLASS: Renderer
@@ -347,7 +358,7 @@ Vector3.prototype.subVectors = function(a, b) {
 };
 
 Vector3.prototype.toString = function vector3ToString() {
-	return "MULTIRAY.Vector3(" + this.x + '/' + this.y + '/' + this.z + ")";
+	return "V3(" + this.x + ',' + this.y + ',' + this.z + ")";
 };
 
 /* ************************************
@@ -360,6 +371,26 @@ _export.Scene = Scene;
 _export.Vector3 = Vector3;
 
 }(MULTIRAY));
+
+/* ************************************
+	TEST: Ray
+**************************************/
+
+(function () {
+	let Ray = MULTIRAY.Ray;
+	let Vector3 = MULTIRAY.Vector3;
+
+	console.log("[MULTIRAY] Running Ray tests...");
+
+	const r1 = new Ray();
+	console.log("[MULTIRAY]", String(r1));
+
+	r1.origin.set(10, 20, 30);
+	r1.direction.set(1, 2, 3);
+	const rv1 = new Vector3();
+	r1.at(2.0, rv1);
+	console.assert(rv1.x == 12 && rv1.y == 24 && rv1.z == 36);
+}());
 
 /* ************************************
 	TEST: Vector3
