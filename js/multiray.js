@@ -161,6 +161,8 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 
 METHODS:
 
+addObject
+toString
 
 */
 
@@ -177,6 +179,19 @@ function Scene () {
 
 	this.light = new Vector3(0.0, 0.0, 0.0);
 }
+
+Scene.prototype.addObject = function(obj) {
+	this.objects.push(obj);
+};
+
+Scene.prototype.toString = function sceneToString() {
+	let out = "Scene(bg:" + String(this.backgroundColor) + ",light:" + this.light + "," + this.objects.length + ":[";
+	for (let i = 0; i < this.objects.length; i++) {
+		out += String(this.objects[i]) + " ";
+	}
+	out += "])";
+	return out;
+};
 
 /* ************************************
 	CLASS: Sphere
@@ -380,7 +395,7 @@ Vector3.prototype.subVectors = function(a, b) {
 };
 
 Vector3.prototype.toString = function vector3ToString() {
-	return "V3(" + this.x + ',' + this.y + ',' + this.z + ")";
+	return "V(" + this.x + ',' + this.y + ',' + this.z + ")";
 };
 
 /* ************************************
@@ -413,6 +428,27 @@ _export.Vector3 = Vector3;
 	const rv1 = new Vector3();
 	r1.at(2.0, rv1);
 	console.assert(rv1.x == 12 && rv1.y == 24 && rv1.z == 36);
+}());
+
+/* ************************************
+	TEST: Scene
+**************************************/
+
+(function () {
+	let Scene = MULTIRAY.Scene;
+	let Sphere = MULTIRAY.Sphere;
+	let Vector3 = MULTIRAY.Vector3;
+
+	console.log("[MULTIRAY] Running Scene tests...");
+
+	const scene = new Scene();
+
+	const s1 = new Sphere();
+	s1.center.set(0, 0, -2);
+	s1.radius = 1;
+
+	scene.addObject(s1);
+	console.log("[MULTIRAY]", String(scene));
 }());
 
 /* ************************************
