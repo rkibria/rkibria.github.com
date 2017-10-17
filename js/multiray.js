@@ -188,9 +188,12 @@ toString
 
 */
 
-function Sphere () {
+function Sphere (center, radius = 0.0) {
 	this.center = new Vector3();
-	this.radius = 0.0;
+	if (center !== undefined) {
+		this.center.copy(center);
+	}
+	this.radius = radius;
 }
 
 Sphere.prototype.toString = function rayToString() {
@@ -424,6 +427,10 @@ _export.Vector3 = Vector3;
 
 	const s1 = new Sphere();
 	console.log("[MULTIRAY]", String(s1));
+
+	const rv1 = new Vector3(1, 2, 3);
+	const s2 = new Sphere(rv1, 4);
+	console.assert(s2.center.x == 1 && s2.center.y == 2 && s2.center.z == 3 && s2.radius == 4);
 }());
 
 /* ************************************
