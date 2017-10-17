@@ -131,6 +131,10 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 		const color = this._traceStack[0].color;
 		color.copy(scene.backgroundColor);
 
+		//
+		// color.copy(this._eyeRay.direction);
+		color.mapFrom(this._eyeRay.direction, Math.abs);
+
 		const pixel = imgData.data;
 		pixel[i] = Math.max (0, Math.min (255, color.x * 255));
 		pixel[i+1] = Math.max (0, Math.min (255, color.y * 255));
@@ -179,6 +183,8 @@ divide
 divideScalar
 equals
 length
+map
+mapFrom
 multiply
 multiplyScalar
 multiplyVectors
@@ -264,6 +270,20 @@ Vector3.prototype.equals = function(v) {
 
 Vector3.prototype.length = function() {
 	return Math.sqrt (this.x * this.x + this.y * this.y + this.z * this.z);
+};
+
+Vector3.prototype.map = function(f) {
+	this.x = f(this.x);
+	this.y = f(this.y);
+	this.z = f(this.z);
+	return this;
+};
+
+Vector3.prototype.mapFrom = function(v, f) {
+	this.x = f(v.x);
+	this.y = f(v.y);
+	this.z = f(v.z);
+	return this;
 };
 
 Vector3.prototype.multiply = function(v) {
@@ -443,4 +463,11 @@ _export.Vector3 = Vector3;
 	rv3.crossVectors(rv1, rv2);
 	console.assert(rv3.length() == 1);
 	console.assert(rv3.x == 0 && rv3.y == 0 && rv3.z == 1);
+
+	rv1.set(-1, -2, -5);
+	rv1.map(Math.abs);
+	console.assert(rv1.x == 1 && rv1.y == 2 && rv1.z == 5);
+	rv2.set(-8, -4, -3);
+	rv1.mapFrom(rv2, Math.abs);
+	console.assert(rv1.x == 8 && rv1.y == 4 && rv1.z == 3);
 }());
