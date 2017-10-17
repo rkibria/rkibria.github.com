@@ -6,6 +6,7 @@ var MULTIRAY = {
 	Ray: null,
 	Renderer: null,
 	Scene: null,
+	Sphere: null,
 	Vector3: null,
 };
 
@@ -177,6 +178,24 @@ function Scene () {
 	this.light = new Vector3(0.0, 0.0, 0.0);
 }
 
+/* ************************************
+	CLASS: Sphere
+***************************************
+
+METHODS:
+
+toString
+
+*/
+
+function Sphere () {
+	this.center = new Vector3();
+	this.radius = 0.0;
+}
+
+Sphere.prototype.toString = function rayToString() {
+	return "Sphere(" + String(this.center) + "," + this.radius + ")";
+};
 
 /* ************************************
 	CLASS: Vector3
@@ -368,6 +387,7 @@ Vector3.prototype.toString = function vector3ToString() {
 _export.Ray = Ray;
 _export.Renderer = Renderer;
 _export.Scene = Scene;
+_export.Sphere = Sphere;
 _export.Vector3 = Vector3;
 
 }(MULTIRAY));
@@ -390,6 +410,20 @@ _export.Vector3 = Vector3;
 	const rv1 = new Vector3();
 	r1.at(2.0, rv1);
 	console.assert(rv1.x == 12 && rv1.y == 24 && rv1.z == 36);
+}());
+
+/* ************************************
+	TEST: Sphere
+**************************************/
+
+(function () {
+	let Sphere = MULTIRAY.Sphere;
+	let Vector3 = MULTIRAY.Vector3;
+
+	console.log("[MULTIRAY] Running Sphere tests...");
+
+	const s1 = new Sphere();
+	console.log("[MULTIRAY]", String(s1));
 }());
 
 /* ************************************
