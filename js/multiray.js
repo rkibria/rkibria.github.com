@@ -255,33 +255,6 @@ function Sphere (center, radius = 0.0) {
 }
 
 Sphere.prototype.hit = function(ray, tMin, tMax, hitRec) {
-	/*
-	vec3 oc = r.origin() - center;
-	float a = dot(r.direction(), r.direction());
-	float b = dot(oc, r.direction());
-	float c = dot(oc, oc) - radius*radius;
-	float discriminant = b*b - a*c;
-	if (discriminant > 0) {
-		float temp = (-b - sqrt(discriminant))/a;
-		if (temp < t_max && temp > t_min) {
-			rec.t = temp;
-			rec.p = r.point_at_parameter(rec.t);
-			rec.normal = (rec.p - center) / radius;
-			rec.mat_ptr = mat_ptr;
-			return true;
-		}
-		temp = (-b + sqrt(discriminant)) / a;
-		if (temp < t_max && temp > t_min) {
-			rec.t = temp;
-			rec.p = r.point_at_parameter(rec.t);
-			rec.normal = (rec.p - center) / radius;
-			rec.mat_ptr = mat_ptr;
-			return true;
-		}
-	}
-	return false;
-	*/
-
 	const oc = hitRec._vec1;
 	oc.subVectors(ray.origin, this.center);
 
@@ -289,21 +262,29 @@ Sphere.prototype.hit = function(ray, tMin, tMax, hitRec) {
 	const b = oc.dot(ray.direction);
 	const c = oc.dot(oc) - this.radius * this.radius;
  	const discriminant = b*b - a*c;
-	console.log("discriminant", discriminant);
 
 	if (discriminant > 0) {
 		const temp1 = (-b - Math.sqrt(discriminant))/a;
-		console.log("temp1", temp1);
 		if (temp1 < tMax && temp1 > tMin) {
+			hitRec.t = temp1;
+			ray.at(temp1, hitRec.p);
+
+			hitRec.normal.subVectors(hitRec.p, this.center);
+			hitRec.normal.divideScalar(this.radius);
+
 			return true;
 		}
 		const temp2 = (-b + Math.sqrt(discriminant)) / a;
 		if (temp2 < tMax && temp2 > tMin) {
+			hitRec.t = temp2;
+			ray.at(temp2, hitRec.p);
+
+			hitRec.normal.subVectors(hitRec.p, this.center);
+			hitRec.normal.divideScalar(this.radius);
+
 			return true;
 		}
 	}
-
-	hitRec.p.copy(oc);
 	return false;
 };
 
@@ -583,6 +564,16 @@ _export.Vector3 = Vector3;
 	s1.radius = 1;
 	let hitResult = s1.hit(r1, 0.01, Infinity, hr1);
 	console.log("[MULTIRAY_TEST]", String(hr1), ":", hitResult);
+	console.assert(hitResult == true
+		&& hr1.t == 1
+		&& hr1.p.x == 0 && hr1.p.y == 0 && hr1.p.z == -1
+		&& hr1.normal.x == 0 && hr1.normal.y == 0 && hr1.normal.z == 1
+	);
+
+	s1.center.set(0, 0, 2);
+	s1.radius = 1;
+	hitResult = s1.hit(r1, 0.01, Infinity, hr1);
+	console.assert(hitResult == false);
 }());
 
 /* ************************************
