@@ -3,6 +3,8 @@
  */
 
 var MULTIRAY = {
+	Camera: null,
+	HitRecord: null,
 	Ray: null,
 	Renderer: null,
 	Scene: null,
@@ -30,6 +32,26 @@ function Camera () {
 
 Camera.prototype.toString = function cameraToString() {
 	return "Camera(" + String(this.pos) + "," + String(this.point) + "," + String(this.fov) + ")";
+};
+
+/* ************************************
+	CLASS: HitRecord
+***************************************
+
+METHODS:
+
+toString
+
+*/
+
+function HitRecord () {
+	this.t = 0.0;
+	this.p = new Vector3();
+	this.normal = new Vector3();
+}
+
+HitRecord.prototype.toString = function hitrecordToString() {
+	return "HitRecord(t:" + String(this.t) + ",p:" + String(this.p) + ",normal:" + String(this.normal) + ")";
 };
 
 /* ************************************
@@ -415,6 +437,8 @@ Vector3.prototype.toString = function vector3ToString() {
 	Exports
 **************************************/
 
+_export.Camera = Camera;
+_export.HitRecord = HitRecord;
 _export.Ray = Ray;
 _export.Renderer = Renderer;
 _export.Scene = Scene;
@@ -428,8 +452,8 @@ _export.Vector3 = Vector3;
 **************************************/
 
 (function () {
-	let Ray = MULTIRAY.Ray;
-	let Vector3 = MULTIRAY.Vector3;
+	const Ray = MULTIRAY.Ray;
+	const Vector3 = MULTIRAY.Vector3;
 
 	console.log("[MULTIRAY] Running Ray tests...");
 
@@ -448,9 +472,9 @@ _export.Vector3 = Vector3;
 **************************************/
 
 (function () {
-	let Scene = MULTIRAY.Scene;
-	let Sphere = MULTIRAY.Sphere;
-	let Vector3 = MULTIRAY.Vector3;
+	const Scene = MULTIRAY.Scene;
+	const Sphere = MULTIRAY.Sphere;
+	const Vector3 = MULTIRAY.Vector3;
 
 	console.log("[MULTIRAY] Running Scene tests...");
 
@@ -469,8 +493,9 @@ _export.Vector3 = Vector3;
 **************************************/
 
 (function () {
-	let Sphere = MULTIRAY.Sphere;
-	let Vector3 = MULTIRAY.Vector3;
+	const Sphere = MULTIRAY.Sphere;
+	const Vector3 = MULTIRAY.Vector3;
+	const HitRecord = MULTIRAY.HitRecord;
 
 	console.log("[MULTIRAY] Running Sphere tests...");
 
@@ -480,6 +505,9 @@ _export.Vector3 = Vector3;
 	const rv1 = new Vector3(1, 2, 3);
 	const s2 = new Sphere(rv1, 4);
 	console.assert(s2.center.x == 1 && s2.center.y == 2 && s2.center.z == 3 && s2.radius == 4);
+
+	const hr1 = new HitRecord();
+	console.log("[MULTIRAY]", String(hr1));
 }());
 
 /* ************************************
@@ -487,7 +515,7 @@ _export.Vector3 = Vector3;
 **************************************/
 
 (function () {
-	let Vector3 = MULTIRAY.Vector3;
+	const Vector3 = MULTIRAY.Vector3;
 
 	console.log("[MULTIRAY] Running Vector3 tests...");
 
