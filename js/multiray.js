@@ -48,6 +48,13 @@ function HitRecord () {
 	this.t = 0.0;
 	this.p = new Vector3();
 	this.normal = new Vector3();
+
+	// Temps for use in hit() methods
+	this._vec1 = new Vector3();
+	this._vec2 = new Vector3();
+	this._vec3 = new Vector3();
+	this._vec4 = new Vector3();
+	this._vec5 = new Vector3();
 }
 
 HitRecord.prototype.toString = function hitrecordToString() {
@@ -234,6 +241,7 @@ Scene.prototype.toString = function sceneToString() {
 
 METHODS:
 
+hit
 toString
 
 */
@@ -245,6 +253,59 @@ function Sphere (center, radius = 0.0) {
 	}
 	this.radius = radius;
 }
+
+Sphere.prototype.hit = function(ray, tMin, tMax, hitRec) {
+	/*
+	vec3 oc = r.origin() - center;
+	float a = dot(r.direction(), r.direction());
+	float b = dot(oc, r.direction());
+	float c = dot(oc, oc) - radius*radius;
+	float discriminant = b*b - a*c;
+	if (discriminant > 0) {
+		float temp = (-b - sqrt(discriminant))/a;
+		if (temp < t_max && temp > t_min) {
+			rec.t = temp;
+			rec.p = r.point_at_parameter(rec.t);
+			rec.normal = (rec.p - center) / radius;
+			rec.mat_ptr = mat_ptr;
+			return true;
+		}
+		temp = (-b + sqrt(discriminant)) / a;
+		if (temp < t_max && temp > t_min) {
+			rec.t = temp;
+			rec.p = r.point_at_parameter(rec.t);
+			rec.normal = (rec.p - center) / radius;
+			rec.mat_ptr = mat_ptr;
+			return true;
+		}
+	}
+	return false;
+	*/
+
+	const oc = hitRec._vec1;
+	oc.subVectors(ray.origin, this.center);
+
+ 	const a = ray.direction.dot(ray.direction);
+	const b = oc.dot(ray.direction);
+	const c = oc.dot(oc) - this.radius * this.radius;
+ 	const discriminant = b*b - a*c;
+	console.log("discriminant", discriminant);
+
+	if (discriminant > 0) {
+		const temp1 = (-b - Math.sqrt(discriminant))/a;
+		console.log("temp1", temp1);
+		if (temp1 < tMax && temp1 > tMin) {
+			return true;
+		}
+		const temp2 = (-b + Math.sqrt(discriminant)) / a;
+		if (temp2 < tMax && temp2 > tMin) {
+			return true;
+		}
+	}
+
+	hitRec.p.copy(oc);
+	return false;
+};
 
 Sphere.prototype.toString = function rayToString() {
 	return "Sphere(" + String(this.center) + "," + this.radius + ")";
@@ -264,6 +325,7 @@ copy
 crossVectors
 divide
 divideScalar
+dot
 equals
 length
 map
@@ -345,6 +407,10 @@ Vector3.prototype.divideScalar = function(s) {
 	this.y /= s;
 	this.z /= s;
 	return this;
+};
+
+Vector3.prototype.dot = function(v) {
+	return this.x * v.x + this.y * v.y + this.z * v.z;
 };
 
 Vector3.prototype.equals = function(v) {
@@ -451,14 +517,14 @@ _export.Vector3 = Vector3;
 	TEST: Ray
 **************************************/
 
-(function () {
+(function MULTIRAY_TEST_Ray() {
 	const Ray = MULTIRAY.Ray;
 	const Vector3 = MULTIRAY.Vector3;
 
-	console.log("[MULTIRAY] Running Ray tests...");
+	console.log("[MULTIRAY_TEST] Running Ray tests...");
 
 	const r1 = new Ray();
-	console.log("[MULTIRAY]", String(r1));
+	console.log("[MULTIRAY_TEST]", String(r1));
 
 	r1.origin.set(10, 20, 30);
 	r1.direction.set(1, 2, 3);
@@ -471,12 +537,12 @@ _export.Vector3 = Vector3;
 	TEST: Scene
 **************************************/
 
-(function () {
+(function MULTIRAY_TEST_Scene() {
 	const Scene = MULTIRAY.Scene;
 	const Sphere = MULTIRAY.Sphere;
 	const Vector3 = MULTIRAY.Vector3;
 
-	console.log("[MULTIRAY] Running Scene tests...");
+	console.log("[MULTIRAY_TEST] Running Scene tests...");
 
 	const scene = new Scene();
 
@@ -485,42 +551,51 @@ _export.Vector3 = Vector3;
 	s1.radius = 1;
 
 	scene.addObject(s1);
-	console.log("[MULTIRAY]", String(scene));
+	console.log("[MULTIRAY_TEST]", String(scene));
 }());
 
 /* ************************************
 	TEST: Sphere
 **************************************/
 
-(function () {
+(function MULTIRAY_TEST_Sphere() {
+	const Ray = MULTIRAY.Ray;
 	const Sphere = MULTIRAY.Sphere;
 	const Vector3 = MULTIRAY.Vector3;
 	const HitRecord = MULTIRAY.HitRecord;
 
-	console.log("[MULTIRAY] Running Sphere tests...");
+	console.log("[MULTIRAY_TEST] Running Sphere tests...");
 
 	const s1 = new Sphere();
-	console.log("[MULTIRAY]", String(s1));
+	console.log("[MULTIRAY_TEST]", String(s1));
 
 	const rv1 = new Vector3(1, 2, 3);
 	const s2 = new Sphere(rv1, 4);
 	console.assert(s2.center.x == 1 && s2.center.y == 2 && s2.center.z == 3 && s2.radius == 4);
 
+	const r1 = new Ray();
+	r1.origin.set(0, 0, 0);
+	r1.direction.set(0, 0, -1);
+
 	const hr1 = new HitRecord();
-	console.log("[MULTIRAY]", String(hr1));
+
+	s1.center.set(0, 0, -2);
+	s1.radius = 1;
+	let hitResult = s1.hit(r1, 0.01, Infinity, hr1);
+	console.log("[MULTIRAY_TEST]", String(hr1), ":", hitResult);
 }());
 
 /* ************************************
 	TEST: Vector3
 **************************************/
 
-(function () {
+(function MULTIRAY_TEST_Vector3() {
 	const Vector3 = MULTIRAY.Vector3;
 
-	console.log("[MULTIRAY] Running Vector3 tests...");
+	console.log("[MULTIRAY_TEST] Running Vector3 tests...");
 
 	const rv1 = new Vector3();
-	console.log("[MULTIRAY]", String(rv1));
+	console.log("[MULTIRAY_TEST]", String(rv1));
 	console.assert(rv1.x == 0 && rv1.y == 0 && rv1.z == 0);
 
 	const rv2 = new Vector3(1, 2, 3);
