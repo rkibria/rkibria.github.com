@@ -20,6 +20,7 @@ var MULTIRAY = {
 
 METHODS:
 
+getRay
 setView
 toString
 
@@ -30,6 +31,17 @@ function Camera () {
 	this.point = new Vector3();
 	this.pos = new Vector3();
 }
+
+Camera.prototype.getRay = function(ray, x, y, sW, sH) {
+	const imageAspectRatio = sW / sH;
+	const tanFov = Math.tan(this.fov / 2.0 * Math.PI / 180.0);
+
+	const px = (2.0 * ((x + 0.5) / sW) - 1) * tanFov * imageAspectRatio;
+	const py = (1.0 - 2.0 * ((y + 0.5) / sH)) * tanFov;
+
+	ray.origin.copy(this.pos);
+	ray.direction.set(px, py, -1.0).normalize(); // TODO
+};
 
 Camera.prototype.setView = function(pos, point, fov) {
 	this.pos.copy(pos);
@@ -115,16 +127,7 @@ trace
 */
 
 function Renderer () {
-	this.VECTOR_UP = new Vector3(0, 1, 0);
-
 	this.maxDepth = 0;
-
-	this._eyeRightVector = new Vector3();
-	this._eyeUpVector = new Vector3();
-	this._eyeVector = new Vector3();
-	this._rayDirection = new Vector3();
-	this._xcomp = new Vector3();
-	this._ycomp = new Vector3();
 
 	this._traceStack = [];
 }
@@ -158,42 +161,13 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 		}
 	}
 
-	this._eyeVector.subVectors (scene.camera.point, scene.camera.pos).normalize();
-	this._eyeRightVector.crossVectors (this._eyeVector, this.VECTOR_UP).normalize();
-	this._eyeUpVector.crossVectors (this._eyeRightVector, this._eyeVector).normalize();
-
-	const fovRadians = Math.PI * (scene.camera.fov / 2) / 180;
-	const halfWidth = Math.tan(fovRadians);
-
-	const heightWidthRatio = sW / sH;
-	const halfHeight = heightWidthRatio * halfWidth;
-
-	const camerawidth = halfWidth * 2.0;
-	const cameraheight = halfHeight * 2.0;
-	const pixelWidth = camerawidth / (sW - 1.0);
-	const pixelHeight = cameraheight / (sH - 1.0);
-
 	const dataLen = imgData.data.length;
 	for (let i = 0; i < dataLen; i += 4) {
 		const x = (i / 4) % sW;
-		const y = sH - (i / (4 * sH));
+		const y = Math.floor(i / (4 * sW));
 
 		const traceStackFirst = this._traceStack[0];
-
-		// Compute the current eye ray
-		this._xcomp.copy (this._eyeRightVector);
-		this._xcomp.multiplyScalar ((x * pixelWidth) - halfWidth);
-
-		this._ycomp.copy (this._eyeUpVector);
-		this._ycomp.multiplyScalar ((y * pixelHeight) - halfHeight);
-
-		this._rayDirection.copy (this._eyeVector);
-		this._rayDirection.add (this._xcomp);
-		this._rayDirection.add (this._ycomp).normalize();
-
-		traceStackFirst.ray.set (scene.camera.pos, this._rayDirection);
-
-		//
+		scene.camera.getRay(traceStackFirst.ray, x, y, sW, sH);
 		this.trace(scene, 0);
 
 		const color = traceStackFirst.color;
