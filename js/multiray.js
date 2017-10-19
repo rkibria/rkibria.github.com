@@ -205,16 +205,26 @@ Renderer.prototype.trace = function(scene, curDepth) {
 	const hitRec = traceStackElement.hitRec;
 	const ray = traceStackElement.ray;
 
+	let hitAnything = false;
+	let lowestT = Infinity;
+
 	const nSceneObjects = scene.objects.length;
 	for (let i = 0; i < nSceneObjects; i++) {
 		const curObject = scene.objects[i];
 		const isHit = curObject.hit(ray, 0.01, Infinity, hitRec);
 		if (isHit) {
-			color.mapFrom(hitRec.normal, Math.abs);
+			hitAnything = true;
+			if (hitRec.t < lowestT) {
+				lowestT = hitRec.t;
+				color.mapFrom(hitRec.normal, Math.abs);
+			}
 		}
-		else {
-			color.copy(scene.backgroundColor);
-		}
+	}
+
+	if (hitAnything) {
+	}
+	else {
+		color.copy(scene.backgroundColor);
 	}
 }
 
