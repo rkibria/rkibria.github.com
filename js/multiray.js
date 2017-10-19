@@ -55,6 +55,9 @@ function HitRecord () {
 	this._vec3 = new Vector3();
 	this._vec4 = new Vector3();
 	this._vec5 = new Vector3();
+	this._vec6 = new Vector3();
+	this._vec7 = new Vector3();
+	this._vec8 = new Vector3();
 }
 
 HitRecord.prototype.toString = function hitrecordToString() {
@@ -198,7 +201,21 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 Renderer.prototype.trace = function(scene, curDepth) {
 	const traceStackElement = this._traceStack[curDepth];
 
-	traceStackElement.color.copy(scene.backgroundColor);
+	const color = traceStackElement.color;
+	const hitRec = traceStackElement.hitRec;
+	const ray = traceStackElement.ray;
+
+	const nSceneObjects = scene.objects.length;
+	for (let i = 0; i < nSceneObjects; i++) {
+		const curObject = scene.objects[i];
+		const isHit = curObject.hit(ray, 0.01, Infinity, hitRec);
+		if (isHit) {
+			color.mapFrom(hitRec.normal, Math.abs);
+		}
+		else {
+			color.copy(scene.backgroundColor);
+		}
+	}
 }
 
 /* ************************************
@@ -300,8 +317,9 @@ toString
 */
 
 function TraceStackElement () {
-	this.ray = new Ray();
 	this.color = new Vector3();
+	this.hitRec = new HitRecord();
+	this.ray = new Ray();
 }
 
 TraceStackElement.prototype.toString = function traceStackElementToString() {
