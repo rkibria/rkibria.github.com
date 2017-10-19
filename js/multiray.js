@@ -100,6 +100,7 @@ METHODS:
 
 renderToCanvas
 renderToImageData - main render loop
+trace
 
 */
 
@@ -114,7 +115,7 @@ function Renderer () {
 	this._rayDirection = new Vector3();
 	this._xcomp = new Vector3();
 	this._ycomp = new Vector3();
-	this._eyeRay = new Ray();
+
 	this._traceStack = [];
 }
 
@@ -143,15 +144,7 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 	if (this._traceStack.length < this.maxDepth) {
 		this._traceStack = new Array(this.maxDepth);
 		for (let i = 0; i < this.maxDepth; i++) {
-			this._traceStack[i] = {
-				// Inputs
-				eyeRay: new Ray(),
-
-				// Temps
-
-				// Outputs
-				color: new Vector3(),
-				};
+			this._traceStack[i] = new TraceStackElement();
 		}
 	}
 
@@ -175,6 +168,8 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 		const x = (i / 4) % sW;
 		const y = sH - (i / (4 * sH));
 
+		const traceStackFirst = this._traceStack[0];
+
 		// Compute the current eye ray
 		this._xcomp.copy (this._eyeRightVector);
 		this._xcomp.multiplyScalar ((x * pixelWidth) - halfWidth);
@@ -186,22 +181,24 @@ Renderer.prototype.renderToImageData = function(scene, depth, imgData, sW, sH) {
 		this._rayDirection.add (this._xcomp);
 		this._rayDirection.add (this._ycomp).normalize();
 
-		this._eyeRay.set (scene.camera.pos, this._rayDirection);
+		traceStackFirst.ray.set (scene.camera.pos, this._rayDirection);
 
 		//
-		const color = this._traceStack[0].color;
-		color.copy(scene.backgroundColor);
+		this.trace(scene, 0);
 
-		//
-		// color.copy(this._eyeRay.direction);
-		color.mapFrom(this._eyeRay.direction, Math.abs);
-
+		const color = traceStackFirst.color;
 		const pixel = imgData.data;
 		pixel[i] = Math.max (0, Math.min (255, color.x * 255));
 		pixel[i+1] = Math.max (0, Math.min (255, color.y * 255));
 		pixel[i+2] = Math.max (0, Math.min (255, color.z * 255));
 		pixel[i+3] = 255;
 	}
+}
+
+Renderer.prototype.trace = function(scene, curDepth) {
+	const traceStackElement = this._traceStack[curDepth];
+
+	traceStackElement.color.copy(scene.backgroundColor);
 }
 
 /* ************************************
@@ -290,6 +287,25 @@ Sphere.prototype.hit = function(ray, tMin, tMax, hitRec) {
 
 Sphere.prototype.toString = function rayToString() {
 	return "Sphere(" + String(this.center) + "," + this.radius + ")";
+};
+
+/* ************************************
+	CLASS: TraceStackElement
+***************************************
+
+METHODS:
+
+toString
+
+*/
+
+function TraceStackElement () {
+	this.ray = new Ray();
+	this.color = new Vector3();
+}
+
+TraceStackElement.prototype.toString = function traceStackElementToString() {
+	return "TraceStackElement(" + String(this.ray) + ",color:" + String(this.color) + ")";
 };
 
 /* ************************************
