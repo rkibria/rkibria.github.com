@@ -17,8 +17,7 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 const renderer = new MULTIRAY.Renderer();
 
 const scene = new MULTIRAY.Scene();
-scene.camera.point.set(0, 0, -1);
-scene.camera.fov = 90.0;
+scene.camera.setView(new MULTIRAY.Vector3(0, 0, 0), new MULTIRAY.Vector3(0, 0, -1), 90.0);
 scene.backgroundColor.set(0.8, 0.1, 0.1);
 
 scene.addObject(new MULTIRAY.Sphere());

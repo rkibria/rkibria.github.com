@@ -20,6 +20,7 @@ var MULTIRAY = {
 
 METHODS:
 
+setView
 toString
 
 */
@@ -29,6 +30,12 @@ function Camera () {
 	this.point = new Vector3();
 	this.pos = new Vector3();
 }
+
+Camera.prototype.setView = function(pos, point, fov) {
+	this.pos.copy(pos);
+	this.point.copy(point);
+	this.fov = fov;
+};
 
 Camera.prototype.toString = function cameraToString() {
 	return "Camera(" + String(this.pos) + "," + String(this.point) + "," + String(this.fov) + ")";
