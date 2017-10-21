@@ -124,7 +124,7 @@ camera.position.z = 0;
 
 // RENDERER + FOG
 var FogColor = 0xffffff;
-scene.fog = new THREE.FogExp2( FogColor, 0.01 );
+scene.fog = new THREE.FogExp2( FogColor, 0.003 );
 
 if ( Detector.webgl )
 	renderer = new THREE.WebGLRenderer( {antialias:true} );
