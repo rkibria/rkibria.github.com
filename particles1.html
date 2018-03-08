@@ -146,12 +146,19 @@ function getForce(ball1, ball2) {
         return [0, 0];
     }
 
-    var G = 1.0;
-    var force = G * ball1.mass * ball2.mass / (r * r);
-    var angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
+    const angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
 
-    var fx = force * Math.cos(angle);
-    var fy = force * Math.sin(angle);
+	// Attracting force
+    var G = 1.0;
+    var force = G * ball1.mass * ball2.mass / (r * r * r);
+
+	// Repulse
+	const R = 1.0;
+	const forceR = R * ball1.mass * ball2.mass / (r * r );
+
+    var fx = (force - forceR) * Math.cos(angle);
+    var fy = (force - forceR) * Math.sin(angle);
+
     return [fx, fy];
 }
 
@@ -169,17 +176,17 @@ function move(ball) {
     }
 
     if (ball.x > canvas.width) {
-        ball.x = 0;
+        ball.x = 1;
     }
     else if (ball.x < 0) {
-        ball.x = canvas.width;
+        ball.x = canvas.width - 1;
     }
 
     if (ball.y > canvas.height) {
-        ball.y = 0;
+        ball.y = 1;
     }
     else if (ball.y < 0) {
-        ball.y = canvas.height;
+        ball.y = canvas.height - 1;
     }
 }
 
