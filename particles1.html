@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Particle flurry</title>
+</head>
+
+<body>
+
+<canvas id="canvas" width="800" height="800" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+/**
+ * Keeps track of the current mouse position, relative to an element.
+ * @param {HTMLElement} element
+ * @return {object} Contains properties: x, y, event
+ */
+function captureMouse(element) {
+  var mouse = {x: 0, y: 0, event: null},
+      body_scrollLeft = document.body.scrollLeft,
+      element_scrollLeft = document.documentElement.scrollLeft,
+      body_scrollTop = document.body.scrollTop,
+      element_scrollTop = document.documentElement.scrollTop,
+      offsetLeft = element.offsetLeft,
+      offsetTop = element.offsetTop;
+  
+  element.addEventListener('mousemove', function (event) {
+    var x, y;
+    
+    if (event.pageX || event.pageY) {
+      x = event.pageX;
+      y = event.pageY;
+    } else {
+      x = event.clientX + body_scrollLeft + element_scrollLeft;
+      y = event.clientY + body_scrollTop + element_scrollTop;
+    }
+    x -= offsetLeft;
+    y -= offsetTop;
+    
+    mouse.x = x;
+    mouse.y = y;
+    mouse.event = event;
+  }, false);
+  
+  return mouse;
+};
+
+function Ball (radius, color) {
+    if (radius === undefined) { radius = 40; }
+    if (color === undefined) { color = "#ff0000"; }
+    this.x = 0;
+    this.y = 0;
+    this.radius = radius;
+    this.vx = 0;
+    this.vy = 0;
+    this.mass = 50;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.color = color;
+    this.lineWidth = 1;
+    this.lockX = false;
+    this.lockY = false;
+}
+
+Ball.prototype.draw = function (context) {
+    context.save();
+    context.translate(this.x, this.y);
+    context.scale(this.scaleX, this.scaleY);
+
+    context.lineWidth = this.lineWidth;
+    context.fillStyle = this.color;
+    context.beginPath();
+    //x, y, radius, start_angle, end_angle, anti-clockwise
+    context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
+    context.closePath();
+    context.fill();
+    if (this.lineWidth > 0) {
+        context.stroke();
+    }
+    context.restore();
+};
+
+Ball.prototype.getBounds = function () {
+    return {
+        x: this.x - this.radius,
+        y: this.y - this.radius,
+        width: this.radius * 2,
+        height: this.radius * 2
+    };
+};
+
+var gAnimCounter = 0;
+
+var canvas = document.getElementById('canvas');
+var centreX = canvas.width / 2;
+var centreY = canvas.height / 2;
+
+var ballsList = []
+
+ball = new Ball(2, "#ff2222");
+ball.x = 400;
+ball.y = 400;
+ball.mass = 50;
+ballsList.push(ball);
+
+var CSS_COLOR_NAMES = ["AliceBlue","AntiqueWhite","Aqua","Aquamarine","Azure","Beige","Bisque","BlanchedAlmond","Blue","BlueViolet","Brown","BurlyWood","CadetBlue","Chartreuse","Chocolate","Coral","CornflowerBlue","Cornsilk","Crimson","Cyan","DarkBlue","DarkCyan","DarkGoldenRod","DarkGray","DarkGrey","DarkGreen","DarkKhaki","DarkMagenta","DarkOliveGreen","Darkorange","DarkOrchid","DarkRed","DarkSalmon","DarkSeaGreen","DarkSlateBlue","DarkSlateGray","DarkSlateGrey","DarkTurquoise","DarkViolet","DeepPink","DeepSkyBlue","DimGray","DimGrey","DodgerBlue","FireBrick","FloralWhite","ForestGreen","Fuchsia","Gainsboro","GhostWhite","Gold","GoldenRod","Gray","Grey","Green","GreenYellow","HoneyDew","HotPink","IndianRed","Indigo","Ivory","Khaki","Lavender","LavenderBlush","LawnGreen","LemonChiffon","LightBlue","LightCoral","LightCyan","LightGoldenRodYellow","LightGray","LightGrey","LightGreen","LightPink","LightSalmon","LightSeaGreen","LightSkyBlue","LightSlateGray","LightSlateGrey","LightSteelBlue","LightYellow","Lime","LimeGreen","Linen","Magenta","Maroon","MediumAquaMarine","MediumBlue","MediumOrchid","MediumPurple","MediumSeaGreen","MediumSlateBlue","MediumSpringGreen","MediumTurquoise","MediumVioletRed","MidnightBlue","MintCream","MistyRose","Moccasin","NavajoWhite","Navy","OldLace","Olive","OliveDrab","Orange","OrangeRed","Orchid","PaleGoldenRod","PaleGreen","PaleTurquoise","PaleVioletRed","PapayaWhip","PeachPuff","Peru","Pink","Plum","PowderBlue","Purple","Red","RosyBrown","RoyalBlue","SaddleBrown","Salmon","SandyBrown","SeaGreen","SeaShell","Sienna","Silver","SkyBlue","SlateBlue","SlateGray","SlateGrey","Snow","SpringGreen","SteelBlue","Tan","Teal","Thistle","Tomato","Turquoise","Violet","Wheat","White","WhiteSmoke","Yellow","YellowGreen"];
+
+for (i = 0; i < 40; i++) {
+    var ball = new Ball(10, CSS_COLOR_NAMES[i]);
+    ball.x = Math.random() * 400;
+    ball.y = Math.random() * 400;
+    ball.vx = Math.random() * 5 - 3;
+    ball.vy = Math.random() * 5 - 3;
+    // ball.lockX = true;
+    ballsList.push(ball);
+}
+
+var CONTROL_BALL_I = 0;
+var PLAY_BALL_1_I = 1;
+var PLAY_BALL_2_I = 2;
+
+function getDistance(ball1, ball2) {
+    var xsq = ball1.x - ball2.x
+    xsq = xsq * xsq
+    var ysq = ball1.y - ball2.y
+    ysq = ysq * ysq
+    return Math.sqrt(xsq + ysq);
+}
+
+function getForce(ball1, ball2) {
+    var r = getDistance(ball1, ball2);
+    if (r < 20) {
+        return [0, 0];
+    }
+
+    var G = 1.0;
+    var force = G * ball1.mass * ball2.mass / (r * r);
+    var angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
+
+    var fx = force * Math.cos(angle);
+    var fy = force * Math.sin(angle);
+    return [fx, fy];
+}
+
+function move(ball) {
+    var friction = 0.999;
+    ball.vx *= friction;
+    ball.vy *= friction;
+
+    if (!ball.lockX) {
+        ball.x += ball.vx;
+    }
+
+    if (!ball.lockY) {
+        ball.y += ball.vy;
+    }
+
+    if (ball.x > canvas.width) {
+        ball.x = 0;
+    }
+    else if (ball.x < 0) {
+        ball.x = canvas.width;
+    }
+
+    if (ball.y > canvas.height) {
+        ball.y = 0;
+    }
+    else if (ball.y < 0) {
+        ball.y = canvas.height;
+    }
+}
+
+function attractTo(ball1, ball2) {
+    var ball1mass = ball1.mass;
+    var force = getForce(ball1, ball2);
+    ball1.vx += force[0] / ball1mass; // a = F/m
+    ball1.vy += force[1] / ball1mass;
+}
+
+window.onload = function() {
+    var canvas = document.getElementById('canvas'),
+    context = canvas.getContext('2d'),
+    mouse = captureMouse(canvas);
+
+    (function drawFrame () {
+        window.requestAnimationFrame(drawFrame, canvas);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        ballsList[CONTROL_BALL_I].x = mouse.x
+        ballsList[CONTROL_BALL_I].y = mouse.y
+
+        for (i = 0; i < ballsList.length; i++) {
+            for (j = 0; j < ballsList.length; j++) {
+                if (i != j) {
+                    if (i != 0) {attractTo(ballsList[i], ballsList[j]);}
+                    if (j != 0) {attractTo(ballsList[j], ballsList[i]);}
+                }
+            }
+        }
+
+        ballsList.forEach(move);
+        ballsList.forEach(function(ball) {ball.draw(context);});
+
+        gAnimCounter = (gAnimCounter + 1) % 1000;
+    }());
+}
+
+</script>
+
+</body>
+</html>
