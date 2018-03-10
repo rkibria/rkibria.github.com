@@ -118,10 +118,10 @@ ballsList.push(ball);
 
 var CSS_COLOR_NAMES = ["AliceBlue","AntiqueWhite","Aqua","Aquamarine","Azure","Beige","Bisque","BlanchedAlmond","Blue","BlueViolet","Brown","BurlyWood","CadetBlue","Chartreuse","Chocolate","Coral","CornflowerBlue","Cornsilk","Crimson","Cyan","DarkBlue","DarkCyan","DarkGoldenRod","DarkGray","DarkGrey","DarkGreen","DarkKhaki","DarkMagenta","DarkOliveGreen","Darkorange","DarkOrchid","DarkRed","DarkSalmon","DarkSeaGreen","DarkSlateBlue","DarkSlateGray","DarkSlateGrey","DarkTurquoise","DarkViolet","DeepPink","DeepSkyBlue","DimGray","DimGrey","DodgerBlue","FireBrick","FloralWhite","ForestGreen","Fuchsia","Gainsboro","GhostWhite","Gold","GoldenRod","Gray","Grey","Green","GreenYellow","HoneyDew","HotPink","IndianRed","Indigo","Ivory","Khaki","Lavender","LavenderBlush","LawnGreen","LemonChiffon","LightBlue","LightCoral","LightCyan","LightGoldenRodYellow","LightGray","LightGrey","LightGreen","LightPink","LightSalmon","LightSeaGreen","LightSkyBlue","LightSlateGray","LightSlateGrey","LightSteelBlue","LightYellow","Lime","LimeGreen","Linen","Magenta","Maroon","MediumAquaMarine","MediumBlue","MediumOrchid","MediumPurple","MediumSeaGreen","MediumSlateBlue","MediumSpringGreen","MediumTurquoise","MediumVioletRed","MidnightBlue","MintCream","MistyRose","Moccasin","NavajoWhite","Navy","OldLace","Olive","OliveDrab","Orange","OrangeRed","Orchid","PaleGoldenRod","PaleGreen","PaleTurquoise","PaleVioletRed","PapayaWhip","PeachPuff","Peru","Pink","Plum","PowderBlue","Purple","Red","RosyBrown","RoyalBlue","SaddleBrown","Salmon","SandyBrown","SeaGreen","SeaShell","Sienna","Silver","SkyBlue","SlateBlue","SlateGray","SlateGrey","Snow","SpringGreen","SteelBlue","Tan","Teal","Thistle","Tomato","Turquoise","Violet","Wheat","White","WhiteSmoke","Yellow","YellowGreen"];
 
-for (i = 0; i < 40; i++) {
+for (i = 0; i < 50; i++) {
     var ball = new Ball(10, CSS_COLOR_NAMES[i]);
-    ball.x = Math.random() * 400;
-    ball.y = Math.random() * 400;
+    ball.x = Math.random() * 700;
+    ball.y = Math.random() * 700;
     ball.vx = Math.random() * 5 - 3;
     ball.vy = Math.random() * 5 - 3;
     // ball.lockX = true;
@@ -141,23 +141,21 @@ function getDistance(ball1, ball2) {
 }
 
 function getForce(ball1, ball2) {
-    var r = getDistance(ball1, ball2);
-    if (r < 20) {
-        return [0, 0];
+    let r = getDistance(ball1, ball2);
+
+    const nullDist = 20;
+    if (r < nullDist) {
+        r = nullDist + 1;
     }
 
     const angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
 
-	// Attracting force
-    var G = 1.0;
-    var force = G * ball1.mass * ball2.mass / (r * r * r);
+    const G = 0.01;
+    let force = G * ball1.mass * ball2.mass * -1 / Math.pow(r - nullDist, 2);
+    // force = Math.min(-1, force);
 
-	// Repulse
-	const R = 1.0;
-	const forceR = R * ball1.mass * ball2.mass / (r * r );
-
-    var fx = (force - forceR) * Math.cos(angle);
-    var fy = (force - forceR) * Math.sin(angle);
+    var fx = force * Math.cos(angle);
+    var fy = force * Math.sin(angle);
 
     return [fx, fy];
 }
@@ -166,6 +164,13 @@ function move(ball) {
     var friction = 0.999;
     ball.vx *= friction;
     ball.vy *= friction;
+
+    const maxSpeed = 5;
+    const curSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+    if (curSpeed > maxSpeed) {
+        ball.vx /= curSpeed * maxSpeed;
+        ball.vy /= curSpeed * maxSpeed;
+    }
 
     if (!ball.lockX) {
         ball.x += ball.vx;
