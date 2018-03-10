@@ -104,24 +104,25 @@ Ball.prototype.getBounds = function () {
 
 var gAnimCounter = 0;
 
-var canvas = document.getElementById('canvas');
-var centreX = canvas.width / 2;
-var centreY = canvas.height / 2;
+const canvas = document.getElementById('canvas');
+const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
+var centreX = canvasW / 2;
+var centreY = canvasH / 2;
 
 var ballsList = []
 
 ball = new Ball(2, "#ff2222");
-ball.x = 400;
-ball.y = 400;
+ball.x = centreX;
+ball.y = centreY;
 ball.mass = 50;
 ballsList.push(ball);
 
 var CSS_COLOR_NAMES = ["AliceBlue","AntiqueWhite","Aqua","Aquamarine","Azure","Beige","Bisque","BlanchedAlmond","Blue","BlueViolet","Brown","BurlyWood","CadetBlue","Chartreuse","Chocolate","Coral","CornflowerBlue","Cornsilk","Crimson","Cyan","DarkBlue","DarkCyan","DarkGoldenRod","DarkGray","DarkGrey","DarkGreen","DarkKhaki","DarkMagenta","DarkOliveGreen","Darkorange","DarkOrchid","DarkRed","DarkSalmon","DarkSeaGreen","DarkSlateBlue","DarkSlateGray","DarkSlateGrey","DarkTurquoise","DarkViolet","DeepPink","DeepSkyBlue","DimGray","DimGrey","DodgerBlue","FireBrick","FloralWhite","ForestGreen","Fuchsia","Gainsboro","GhostWhite","Gold","GoldenRod","Gray","Grey","Green","GreenYellow","HoneyDew","HotPink","IndianRed","Indigo","Ivory","Khaki","Lavender","LavenderBlush","LawnGreen","LemonChiffon","LightBlue","LightCoral","LightCyan","LightGoldenRodYellow","LightGray","LightGrey","LightGreen","LightPink","LightSalmon","LightSeaGreen","LightSkyBlue","LightSlateGray","LightSlateGrey","LightSteelBlue","LightYellow","Lime","LimeGreen","Linen","Magenta","Maroon","MediumAquaMarine","MediumBlue","MediumOrchid","MediumPurple","MediumSeaGreen","MediumSlateBlue","MediumSpringGreen","MediumTurquoise","MediumVioletRed","MidnightBlue","MintCream","MistyRose","Moccasin","NavajoWhite","Navy","OldLace","Olive","OliveDrab","Orange","OrangeRed","Orchid","PaleGoldenRod","PaleGreen","PaleTurquoise","PaleVioletRed","PapayaWhip","PeachPuff","Peru","Pink","Plum","PowderBlue","Purple","Red","RosyBrown","RoyalBlue","SaddleBrown","Salmon","SandyBrown","SeaGreen","SeaShell","Sienna","Silver","SkyBlue","SlateBlue","SlateGray","SlateGrey","Snow","SpringGreen","SteelBlue","Tan","Teal","Thistle","Tomato","Turquoise","Violet","Wheat","White","WhiteSmoke","Yellow","YellowGreen"];
 
-for (i = 0; i < 50; i++) {
-    var ball = new Ball(10, CSS_COLOR_NAMES[i]);
-    ball.x = Math.random() * 700;
-    ball.y = Math.random() * 700;
+for (i = 0; i < 200; i++) {
+    var ball = new Ball(10, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
+    ball.x = Math.random() * canvasW;
+    ball.y = Math.random() * canvasH;
     ball.vx = Math.random() * 5 - 3;
     ball.vy = Math.random() * 5 - 3;
     // ball.lockX = true;
@@ -134,21 +135,21 @@ var PLAY_BALL_2_I = 2;
 
 let lockedBall = ballsList[1]
 lockedBall.x = 400;
-lockedBall.y = 400;
-lockedBall.radius = 40;
+lockedBall.y = 300;
+lockedBall.radius = 80;
 lockedBall.lockX = true;
 lockedBall.lockY = true;
 
 lockedBall = ballsList[2]
-lockedBall.x = 150;
-lockedBall.y = 400;
+lockedBall.x = 270;
+lockedBall.y = 500;
 lockedBall.radius = 40;
 lockedBall.lockX = true;
 lockedBall.lockY = true;
 
 lockedBall = ballsList[3]
-lockedBall.x = 650;
-lockedBall.y = 400;
+lockedBall.x = 530;
+lockedBall.y = 500;
 lockedBall.radius = 40;
 lockedBall.lockX = true;
 lockedBall.lockY = true;
@@ -163,38 +164,50 @@ function getDistance(ball1, ball2) {
 }
 
 function getForce(ball1, ball2) {
+    let fx = 0, fy =  0;
     let r = getDistance(ball1, ball2);
 
     const nullDist = ball1.radius + ball2.radius + 1;
     if (r < nullDist) {
         r = nullDist + 1;
+
+        const angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
+
+        const G = 0.01;
+        let force = G * ball1.mass * ball2.mass * -1 / Math.pow(r - nullDist, 4);
+        // force = Math.min(20, force);
+
+        fx = force * Math.cos(angle);
+        fy = force * Math.sin(angle);
     }
 
-    const angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
-
-    const G = 0.01;
-    let force = G * ball1.mass * ball2.mass * -1 / Math.pow(r - nullDist, 2);
-    // force = Math.min(-1, force);
-
-    var fx = force * Math.cos(angle);
-    var fy = force * Math.sin(angle);
-
     const gravAcc = 0.1;
-    // fy += gravAcc;
+    fy += gravAcc;
 
     return [fx, fy];
 }
 
 function move(ball) {
-    var friction = 0.999;
-    ball.vx *= friction;
-    ball.vy *= friction;
+/*
+    var friction = 0.9;
+    const speedsq = ball.vx * ball.vx + ball.vy * ball.vy;
+    if (speedsq > 5) {
+        ball.vx *= friction;
+        ball.vy *= friction;
+    }
+*/
 
-    const maxSpeed = 5;
+    var friction = 0.99;
+    const maxSpeed = 3;
     const curSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
     if (curSpeed > maxSpeed) {
+/*
         ball.vx /= curSpeed * maxSpeed;
         ball.vy /= curSpeed * maxSpeed;
+        */
+        const factor = Math.max(0.01, Math.pow(0.9, curSpeed - maxSpeed));
+        ball.vx *= factor;
+        ball.vy *= factor;
     }
 
     if (!ball.lockX) {
@@ -205,19 +218,26 @@ function move(ball) {
         ball.y += ball.vy;
     }
 
+/*
     if (ball.x > canvas.width) {
         ball.x = 1;
     }
     else if (ball.x < 0) {
         ball.x = canvas.width - 1;
     }
+*/
 
-    if (ball.y > canvas.height) {
+    if (ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width) {
         ball.y = 1;
+        ball.x = centreX + (Math.random() * 100 - 50);
+        ball.vx = Math.random() * 2 - 1;
+        ball.vy = Math.random() * 5 - 3;
     }
+    /*
     else if (ball.y < 0) {
         ball.y = canvas.height - 1;
     }
+    */
 }
 
 function attractTo(ball1, ball2) {
@@ -225,6 +245,9 @@ function attractTo(ball1, ball2) {
     var force = getForce(ball1, ball2);
     ball1.vx += force[0] / ball1mass; // a = F/m
     ball1.vy += force[1] / ball1mass;
+
+    ball1.vx = Math.min(10, ball1.vx);
+    ball1.vy = Math.min(10, ball1.vy);
 }
 
 window.onload = function() {
@@ -234,7 +257,8 @@ window.onload = function() {
 
     (function drawFrame () {
         window.requestAnimationFrame(drawFrame, canvas);
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "white";
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
         ballsList[CONTROL_BALL_I].x = mouse.x
         ballsList[CONTROL_BALL_I].y = mouse.y
