@@ -132,6 +132,28 @@ var CONTROL_BALL_I = 0;
 var PLAY_BALL_1_I = 1;
 var PLAY_BALL_2_I = 2;
 
+let lockedBall = ballsList[1]
+lockedBall.x = 400;
+lockedBall.y = 400;
+lockedBall.radius = 40;
+lockedBall.lockX = true;
+lockedBall.lockY = true;
+
+lockedBall = ballsList[2]
+lockedBall.x = 150;
+lockedBall.y = 400;
+lockedBall.radius = 40;
+lockedBall.lockX = true;
+lockedBall.lockY = true;
+
+lockedBall = ballsList[3]
+lockedBall.x = 650;
+lockedBall.y = 400;
+lockedBall.radius = 40;
+lockedBall.lockX = true;
+lockedBall.lockY = true;
+
+
 function getDistance(ball1, ball2) {
     var xsq = ball1.x - ball2.x
     xsq = xsq * xsq
@@ -143,7 +165,7 @@ function getDistance(ball1, ball2) {
 function getForce(ball1, ball2) {
     let r = getDistance(ball1, ball2);
 
-    const nullDist = 20;
+    const nullDist = ball1.radius + ball2.radius + 1;
     if (r < nullDist) {
         r = nullDist + 1;
     }
@@ -156,6 +178,9 @@ function getForce(ball1, ball2) {
 
     var fx = force * Math.cos(angle);
     var fy = force * Math.sin(angle);
+
+    const gravAcc = 0.1;
+    // fy += gravAcc;
 
     return [fx, fy];
 }
