@@ -194,6 +194,8 @@ function Physics() {
     this.pos = new Vector2();
     this.v = new Vector2();
     this.mass = 0;
+
+    this.tmp1 = new Vector2();
 }
 
 Physics.prototype.torusSpace = function(sW, sH) {
@@ -212,9 +214,17 @@ Physics.prototype.torusSpace = function(sW, sH) {
     }
 }
 
-Physics.prototype.run = function(dt) {
+Physics.prototype.linearMovement = function(dt) {
     this.pos.addScaledVector(this.v, dt);
 }
+
+Physics.prototype.drag = function(dt, k) {
+    this.tmp1.copyScaled(this.v, k * dt);
+    this.tmp1.map(Math.abs);
+    this.tmp1.addScalar(1);
+    this.v.divide(this.tmp1);
+}
+
 
 function Ball() {
     this.phys = new Physics();
@@ -239,7 +249,7 @@ var ballsList = []
 for (i = 0; i < 5; ++i) {
     var ball = new Ball();
     ball.phys.pos.set(Math.random() * canvasW, Math.random() * canvasH);
-    ball.phys.v.set(Math.random() * 5 - 3, Math.random() * 5 - 3);
+    ball.phys.v.set(Math.random() * 50 - 25, Math.random() * 50 - 25);
     ballsList.push(ball);
 }
 
@@ -252,7 +262,14 @@ window.onload = function() {
         context.fillStyle = "white";
         context.fillRect(0, 0, canvas.width, canvas.height);
         ballsList.forEach(function(ball) {ball.draw(context);});
-        ballsList.forEach(function(ball) {ball.phys.run(1); ball.phys.torusSpace(canvasW, canvasH); });
+
+        const dt = 1;
+        const dragFactor = 0.01;
+        ballsList.forEach(function(ball) {
+            ball.phys.drag(dt, dragFactor);
+            ball.phys.linearMovement(dt);
+            ball.phys.torusSpace(canvasW, canvasH);
+        });
     }());
 }
 
