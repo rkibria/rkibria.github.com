@@ -225,18 +225,25 @@ Physics.prototype.drag = function(dt, k) {
     this.v.divide(this.tmp1);
 }
 
+Physics.prototype.fall = function(dt, g) {
+    this.v.y += g * dt;
+}
 
-function Ball() {
+
+function Ball(color = "#ff0000") {
     this.phys = new Physics();
     this.radius = 10;
+    this.color = color;
 }
 
 Ball.prototype.draw = function(context) {
     context.save();
     context.translate(this.phys.pos.x, this.phys.pos.y);
+    context.fillStyle = this.color;
     context.beginPath();
     context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
     context.closePath();
+    context.fill();
     context.stroke();
     context.restore();
 }
@@ -245,11 +252,15 @@ Ball.prototype.draw = function(context) {
 const canvas = document.getElementById('canvas');
 const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
 
+function resetPos(ball) {
+    ball.phys.pos.set(canvasW/2 + Math.random() * 30, canvasH/2 + Math.random() * 30);
+    ball.phys.v.set(Math.random() * 50 - 25, -Math.random() * 50);
+}
+
 var ballsList = []
 for (i = 0; i < 5; ++i) {
-    var ball = new Ball();
-    ball.phys.pos.set(Math.random() * canvasW, Math.random() * canvasH);
-    ball.phys.v.set(Math.random() * 50 - 25, Math.random() * 50 - 25);
+    var ball = new Ball(CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
+    resetPos(ball);
     ballsList.push(ball);
 }
 
@@ -265,7 +276,9 @@ window.onload = function() {
 
         const dt = 1;
         const dragFactor = 0.01;
+        const gravity = 0.5;
         ballsList.forEach(function(ball) {
+            ball.phys.fall(dt, gravity);
             ball.phys.drag(dt, dragFactor);
             ball.phys.linearMovement(dt);
             ball.phys.torusSpace(canvasW, canvasH);
