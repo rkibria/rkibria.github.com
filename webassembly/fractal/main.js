@@ -1,6 +1,6 @@
 "use strict";
 
-const canvas = document.getElementById("myCanvas");
+const canvas = document.getElementById("wasmCanvas");
 
 // https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
 const SCREEN_WIDTH = canvas.scrollWidth;
@@ -27,7 +27,7 @@ function js_mandelbrot(cx, cy, range) {
 
 function js_render(imgData) {
     const range = 255;
-    const animTime = performance.now() - START_TIME;
+    const animTime = 0; // performance.now() - START_TIME;
     const zoomTimed = (1 + Math.cos(animTime/1000)) / 2;
     const zoom = SCREEN_WIDTH * (0.2 + zoomTimed * 20);
     // const zoom = SCREEN_WIDTH / 3 * 1.2;
@@ -93,13 +93,32 @@ function c_render(imgData) {
     console.log("image buffer transfer time: " + (t1 - t0) + " ms");
 }
 
+function captionText(canvas, txt) {
+    const ctx = canvas.getContext("2d");
+    const x = canvas.width/2;
+    const y = canvas.height - 12;
+    ctx.save();
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'black';
+    ctx.fillStyle = 'white';
+    ctx.miterLimit = 2;
+    ctx.lineJoin = 'circle';
+    ctx.lineWidth = 3;
+    ctx.strokeText(txt, x, y);
+    ctx.lineWidth = 1;
+    ctx.fillText(txt, x, y);
+    ctx.restore();
+}
+
 (function drawFrame () {
     // window.requestAnimationFrame(drawFrame, canvas);
 
     const t0 = performance.now();
     c_render (imgData);
     const t1 = performance.now();
-    console.log("total render time: " + (t1 - t0) + " ms");
 
     ctx.putImageData(imgData, 0, 0);
+    captionText(document.getElementById("wasmCanvas"), "WebAssembly render time: " + (t1 - t0) + " ms");
 }());
