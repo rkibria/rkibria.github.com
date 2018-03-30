@@ -1,12 +1,5 @@
 "use strict";
 
-const canvas = document.getElementById("wasmCanvas");
-
-// https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
-const SCREEN_WIDTH = canvas.scrollWidth;
-const SCREEN_HEIGHT = canvas.scrollHeight;
-console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT, "=", SCREEN_WIDTH*SCREEN_HEIGHT, "pixels");
-
 const START_TIME = performance.now();
 
 function js_mandelbrot(cx, cy, range) {
@@ -25,7 +18,16 @@ function js_mandelbrot(cx, cy, range) {
     return k;
 }
 
-function js_render(imgData) {
+function js_render(canvas) {
+    // https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
+    const SCREEN_WIDTH = canvas.scrollWidth;
+    const SCREEN_HEIGHT = canvas.scrollHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle="black";
+    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     const range = 255;
     const animTime = 0; // performance.now() - START_TIME;
     const zoomTimed = (1 + Math.cos(animTime/1000)) / 2;
@@ -67,15 +69,18 @@ function js_render(imgData) {
         imgData.data[i+2] = Math.max (0, Math.min (255, color.z * 255));
         imgData.data[i+3] = 255;
     }
+    ctx.putImageData(imgData, 0, 0);
 }
 
-// Get canvas bitmap
-const ctx = canvas.getContext("2d");
-ctx.fillStyle="black";
-ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+function c_render(canvas) {
+    const SCREEN_WIDTH = canvas.scrollWidth;
+    const SCREEN_HEIGHT = canvas.scrollHeight;
 
-function c_render(imgData) {
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle="black";
+    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     let t0 = performance.now();
     const imgPointer = _c_render_mandelbrot(SCREEN_WIDTH, SCREEN_HEIGHT);
     let t1 = performance.now();
@@ -89,6 +94,7 @@ function c_render(imgData) {
         else
             imgData.data[i] = Module.HEAPU8[imgPointer + (j++)];
     }
+    ctx.putImageData(imgData, 0, 0);
     t1 = performance.now();
     console.log("image buffer transfer time: " + (t1 - t0) + " ms");
 }
@@ -115,10 +121,16 @@ function captionText(canvas, txt) {
 (function drawFrame () {
     // window.requestAnimationFrame(drawFrame, canvas);
 
+    const wasmCanvas = document.getElementById("wasmCanvas");
     const t0 = performance.now();
-    c_render (imgData);
+    c_render (wasmCanvas);
     const t1 = performance.now();
+    captionText(wasmCanvas, "WebAssembly render time: " + (t1 - t0) + " ms");
 
-    ctx.putImageData(imgData, 0, 0);
-    captionText(document.getElementById("wasmCanvas"), "WebAssembly render time: " + (t1 - t0) + " ms");
+    const jsCanvas = document.getElementById("jsCanvas");
+    const t0js = performance.now();
+    js_render (jsCanvas);
+    const t1js = performance.now();
+    captionText(jsCanvas, "JS render time: " + (t1js - t0js) + " ms");
+
 }());
