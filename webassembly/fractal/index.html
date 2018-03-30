@@ -8,7 +8,7 @@
 
 <body>
 
-<canvas id="myCanvas" width="300" height="300" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas" width="600" height="600" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
@@ -19,12 +19,45 @@ const SCREEN_WIDTH = canvas.scrollWidth;
 const SCREEN_HEIGHT = canvas.scrollHeight;
 console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT);
 
+const START_TIME = performance.now();
+
 function render(imgData) {
+	const range = 255;
+	const animTime = performance.now() - START_TIME;
+	const zoomTimed = (1 + Math.cos(animTime/1000)) / 2;
+	// const zoom = SCREEN_WIDTH * (1 + zoomTimed * 1);
+	const zoom = SCREEN_WIDTH / 3;
+
 	for (let i = 0; i < imgData.data.length; i += 4) {
 		const x = (i / 4) % SCREEN_WIDTH;
 		const y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
-		const color = {x: 0.2, y: 0.4, z: 0.6};
+		let k = 0;
+		const cx = 0 + -2 + x / zoom;
+		const cy = (SCREEN_WIDTH/2 - y) / zoom;
+		let zx = 0;
+		let zy = 0;
+		do
+		{
+			const xt = zx * zy;
+			zx = zx * zx - zy * zy + cx;
+			zy = 2 * xt + cy;
+			k++;
+		}
+		while(k < range && (zx * zx + zy * zy) < 4);
+		k /= range;
+
+		const color = {x: 0, y: 0, z: 0};
+
+		const firstRange = 0.1;
+		const secondRange = 0.9;
+		if (k <= firstRange)
+			color.x = Math.sqrt(k / firstRange);
+		else if (k <= secondRange)
+			color.y = Math.sqrt(k / secondRange);
+		else
+			color.z = k;
+
 		imgData.data[i] = Math.max (0, Math.min (255, color.x * 255));
 		imgData.data[i+1] = Math.max (0, Math.min (255, color.y * 255));
 		imgData.data[i+2] = Math.max (0, Math.min (255, color.z * 255));
@@ -39,7 +72,7 @@ ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 (function drawFrame () {
-	// window.requestAnimationFrame(drawFrame, canvas);
+	//window.requestAnimationFrame(drawFrame, canvas);
 
 	const t0 = performance.now();
 	render (imgData);
