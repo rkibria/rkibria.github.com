@@ -1,9 +1,11 @@
+"use strict";
+
 const canvas = document.getElementById("myCanvas");
 
 // https://stackoverflow.com/questions/4032179/how-do-i-get-the-width-and-height-of-a-html5-canvas
 const SCREEN_WIDTH = canvas.scrollWidth;
 const SCREEN_HEIGHT = canvas.scrollHeight;
-console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT);
+console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT, "=", SCREEN_WIDTH*SCREEN_HEIGHT, "pixels");
 
 const START_TIME = performance.now();
 
@@ -23,7 +25,7 @@ function js_mandelbrot(cx, cy, range) {
     return k;
 }
 
-function render(imgData) {
+function js_render(imgData) {
 	const range = 255;
 	const animTime = performance.now() - START_TIME;
 	const zoomTimed = (1 + Math.cos(animTime/1000)) / 2;
@@ -41,8 +43,7 @@ function render(imgData) {
 		const cx = (centerX - SCREEN_WIDTH/2/zoom) + x / zoom;
 		const cy = (centerY - SCREEN_WIDTH/2/zoom) + y / zoom;
 
-        // const k = js_mandelbrot(cx, cy, range);
-        const k = _c_mandelbrot(cx, cy, range);
+        const k = js_mandelbrot(cx, cy, range);
 
 		const color = {x: 0, y: 0, z: 0};
 
@@ -74,11 +75,17 @@ ctx.fillStyle="black";
 ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+function c_render(imgData) {
+    const result = _c_render_mandelbrot(SCREEN_WIDTH, SCREEN_HEIGHT);
+    console.log("result array pointer:", result, "type:", typeof result)
+    console.log("value in result array at index 0:", Module.HEAPU8[result]);
+}
+
 (function drawFrame () {
-	window.requestAnimationFrame(drawFrame, canvas);
+	// window.requestAnimationFrame(drawFrame, canvas);
 
 	const t0 = performance.now();
-	render (imgData);
+	c_render (imgData);
 	const t1 = performance.now();
 	console.log("render time: " + (t1 - t0) + " ms");
 
