@@ -76,9 +76,15 @@ ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 function c_render(imgData) {
-    const result = _c_render_mandelbrot(SCREEN_WIDTH, SCREEN_HEIGHT);
-    console.log("result array pointer:", result, "type:", typeof result)
-    console.log("value in result array at index 0:", Module.HEAPU8[result]);
+    const imgPointer = _c_render_mandelbrot(SCREEN_WIDTH, SCREEN_HEIGHT);
+    console.log("imgPointer:", imgPointer)
+    let j = 0;
+    for (let i = 0; i < imgData.data.length; ++i) {
+        if (i % 4 == 3)
+            imgData.data[i] = 255;
+        else
+            imgData.data[i] = Module.HEAPU8[imgPointer + (j++)];
+    }
 }
 
 (function drawFrame () {

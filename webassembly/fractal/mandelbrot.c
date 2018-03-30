@@ -36,7 +36,7 @@ uint8_t* EMSCRIPTEN_KEEPALIVE c_render_mandelbrot(int width, int height)
     printf("[C] dimensions %d x %d, with 3 bytes/pixel returning buffer size %d\n", width, height, bufSize);
     uint8_t values[bufSize];
     for (int i = 0; i < bufSize; i++) {
-        values[i] = 13;
+        values[i] = (uint8_t) (i % 256);
     }
     return &values[0];
 }
