@@ -7,6 +7,22 @@ console.log("Canvas size", SCREEN_WIDTH, "x", SCREEN_HEIGHT);
 
 const START_TIME = performance.now();
 
+function js_mandelbrot(cx, cy, range) {
+    let k = 0;
+    let zx = 0;
+    let zy = 0;
+    do
+    {
+        const xt = zx * zy;
+        zx = zx * zx - zy * zy + cx;
+        zy = 2 * xt + cy;
+        k++;
+    }
+    while(k < range && (zx * zx + zy * zy) < 4);
+    k /= range;
+    return k;
+}
+
 function render(imgData) {
 	const range = 255;
 	const animTime = performance.now() - START_TIME;
@@ -22,20 +38,9 @@ function render(imgData) {
 		const x = (i / 4) % SCREEN_WIDTH;
 		const y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
-		let k = 0;
 		const cx = (centerX - SCREEN_WIDTH/2/zoom) + x / zoom;
 		const cy = (centerY - SCREEN_WIDTH/2/zoom) + y / zoom;
-		let zx = 0;
-		let zy = 0;
-		do
-		{
-			const xt = zx * zy;
-			zx = zx * zx - zy * zy + cx;
-			zy = 2 * xt + cy;
-			k++;
-		}
-		while(k < range && (zx * zx + zy * zy) < 4);
-		k /= range;
+        const k = js_mandelbrot(cx, cy, range);
 
 		const color = {x: 0, y: 0, z: 0};
 
