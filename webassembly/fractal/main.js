@@ -76,8 +76,12 @@ ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 function c_render(imgData) {
+    let t0 = performance.now();
     const imgPointer = _c_render_mandelbrot(SCREEN_WIDTH, SCREEN_HEIGHT);
-    console.log("imgPointer:", imgPointer)
+    let t1 = performance.now();
+    console.log("c_render_mandelbrot time: " + (t1 - t0) + " ms");
+
+    t0 = performance.now();
     let j = 0;
     for (let i = 0; i < imgData.data.length; ++i) {
         if (i % 4 == 3)
@@ -85,6 +89,8 @@ function c_render(imgData) {
         else
             imgData.data[i] = Module.HEAPU8[imgPointer + (j++)];
     }
+    t1 = performance.now();
+    console.log("image buffer transfer time: " + (t1 - t0) + " ms");
 }
 
 (function drawFrame () {
@@ -93,7 +99,7 @@ function c_render(imgData) {
 	const t0 = performance.now();
 	c_render (imgData);
 	const t1 = performance.now();
-	console.log("render time: " + (t1 - t0) + " ms");
+	console.log("total render time: " + (t1 - t0) + " ms");
 
 	ctx.putImageData(imgData, 0, 0);
 }());
