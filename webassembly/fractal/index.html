@@ -25,16 +25,20 @@ function render(imgData) {
 	const range = 255;
 	const animTime = performance.now() - START_TIME;
 	const zoomTimed = (1 + Math.cos(animTime/1000)) / 2;
-	// const zoom = SCREEN_WIDTH * (1 + zoomTimed * 1);
-	const zoom = SCREEN_WIDTH / 3;
+	const zoom = SCREEN_WIDTH * (0.2 + zoomTimed * 20);
+	// const zoom = SCREEN_WIDTH / 3 * 1.2;
+	const offsetX = Math.cos(animTime/1000)/10;
+	const offsetY = offsetX * 1.2;
+	const centerX = 0.3 + offsetX;
+	const centerY = 0 + offsetY;
 
 	for (let i = 0; i < imgData.data.length; i += 4) {
 		const x = (i / 4) % SCREEN_WIDTH;
 		const y = SCREEN_HEIGHT - (i / (4 * SCREEN_HEIGHT));
 
 		let k = 0;
-		const cx = 0 + -2 + x / zoom;
-		const cy = (SCREEN_WIDTH/2 - y) / zoom;
+		const cx = (centerX - SCREEN_WIDTH/2/zoom) + x / zoom;
+		const cy = (centerY - SCREEN_WIDTH/2/zoom) + y / zoom;
 		let zx = 0;
 		let zy = 0;
 		do
@@ -58,6 +62,12 @@ function render(imgData) {
 		else
 			color.z = k;
 
+		if (cx*cx+cy*cy < 0.0001) {
+			color.x = 1;
+			color.y = 1;
+			color.z = 1;
+		}
+
 		imgData.data[i] = Math.max (0, Math.min (255, color.x * 255));
 		imgData.data[i+1] = Math.max (0, Math.min (255, color.y * 255));
 		imgData.data[i+2] = Math.max (0, Math.min (255, color.z * 255));
@@ -72,7 +82,7 @@ ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 const imgData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 (function drawFrame () {
-	//window.requestAnimationFrame(drawFrame, canvas);
+	window.requestAnimationFrame(drawFrame, canvas);
 
 	const t0 = performance.now();
 	render (imgData);
