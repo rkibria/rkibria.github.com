@@ -40,7 +40,9 @@ function render(imgData) {
 
 		const cx = (centerX - SCREEN_WIDTH/2/zoom) + x / zoom;
 		const cy = (centerY - SCREEN_WIDTH/2/zoom) + y / zoom;
-        const k = js_mandelbrot(cx, cy, range);
+
+        // const k = js_mandelbrot(cx, cy, range);
+        const k = _c_mandelbrot(cx, cy, range);
 
 		const color = {x: 0, y: 0, z: 0};
 
