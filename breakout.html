@@ -22,13 +22,16 @@
 const BORDER_X = 8;
 const BALL_RADIUS = 0.3;
 const BORDER_Z = 30;
-
-const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+const BAT_WIDTH = 2;
+const BAT_THICKNESS = 1;
+const BALL_SPEED = 20;
+const DEFLECT_SKEW = 10;
 
 // SCENE
 const scene = new THREE.Scene();
 
 // CAMERA
+const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 const VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 const camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.x = 0;
@@ -114,7 +117,7 @@ const ball = new THREE.Mesh( new THREE.SphereGeometry( BALL_RADIUS, 16, 16 ), ne
 ball.castShadow = true;
 scene.add( ball );
 
-const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0x1010ff} ) );
+const bat = new THREE.Mesh( new THREE.BoxGeometry( BAT_WIDTH, 0.5, BAT_THICKNESS ), new THREE.MeshLambertMaterial( {color: 0x1010ff} ) );
 bat.castShadow = true;
 scene.add( bat );
 
@@ -145,8 +148,9 @@ let batX = 0;
 const ballSpeed = new THREE.Vector2();
 
 function resetBall() {
-	ballSpeed.x = (Math.random() < 0.5 ? -1 : 1) * 8;
-	ballSpeed.y = -8;
+	const initSpeed = BALL_SPEED / Math.sqrt(2);
+	ballSpeed.x = (Math.random() < 0.5 ? -1 : 1) * initSpeed;
+	ballSpeed.y = -initSpeed;
 	ball.position.x = -BORDER_X/2 + Math.random() * BORDER_X;
 	ball.position.z = -3;
 }
@@ -163,6 +167,11 @@ function onMouseMove(e) {
 
 window.onload = function() {
 	this.addEventListener('mousemove', onMouseMove);
+}
+
+function ballCollides(blockX, blockZ, blockWidth, blockThickness) {
+	return (Math.abs(ball.position.z - blockZ) <= blockThickness / 2)
+		&& (Math.abs(ball.position.x - blockX) <= blockWidth / 2 + BALL_RADIUS);
 }
 
 // RENDER LOOP
@@ -189,10 +198,18 @@ function render() {
 		ball.position.x = maxLeft;
 		ballSpeed.x *= -1;
 	}
-	const maxTop = -BORDER_Z + BALL_RADIUS;
+	const maxTop = (-BORDER_Z + BALL_RADIUS);
 	if (ball.position.z < maxTop) {
 		ball.position.z = maxTop;
 		ballSpeed.y *= -1;
+	}
+	else if (ballCollides(bat.position.x, bat.position.z, BAT_WIDTH, BAT_THICKNESS)) {
+		if (ballSpeed.y > 0) {
+			ballSpeed.y = -Math.abs(ballSpeed.y);
+			const deflectSpeed = DEFLECT_SKEW * (ball.position.x - bat.position.x);
+			ballSpeed.x = deflectSpeed;
+			ballSpeed.normalize().multiplyScalar(BALL_SPEED);
+		}
 	}
 	else if (ball.position.z > 5) {
 		resetBall();
