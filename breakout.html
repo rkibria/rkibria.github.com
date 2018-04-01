@@ -1,6 +1,20 @@
 <!doctype html>
 <html>
 
+<style>
+.score {
+	position: absolute;
+	left: 0;
+	top: 5%;
+	width: 100%;
+	text-align: center;
+	font-size: 30px;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	color: white;
+	text-shadow: 3px 2px black;
+}
+</style>
+
 <head>
 <meta charset="utf-8">
 <title>Three.js Breakout</title>
@@ -9,6 +23,8 @@
 <body>
 
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+<div id="scoreDiv" class="score"></div>
 
 <script src="js/three.min.js"></script>
 <script src="js/Detector.js"></script>
@@ -143,19 +159,6 @@ topBorder.position.y = BORDER_POS_Y;
 topBorder.castShadow = true;
 scene.add( topBorder );
 
-// GAME DATA
-let batX = 0;
-const ballSpeed = new THREE.Vector2();
-
-function resetBall() {
-	const initSpeed = BALL_SPEED / Math.sqrt(2);
-	ballSpeed.x = (Math.random() < 0.5 ? -1 : 1) * initSpeed;
-	ballSpeed.y = -initSpeed;
-	ball.position.x = -BORDER_X/2 + Math.random() * BORDER_X;
-	ball.position.z = -3;
-}
-resetBall();
-
 // MOUSE
 function onMouseMove(e) {
 	let x = e.pageX;
@@ -169,12 +172,33 @@ window.onload = function() {
 	this.addEventListener('mousemove', onMouseMove);
 }
 
+// GAME LOGIC
+let score = 0;
+let highscore = 0;
+let batX = 0;
+const ballSpeed = new THREE.Vector2();
+
+function resetBall() {
+	const initSpeed = BALL_SPEED / Math.sqrt(2);
+	ballSpeed.x = (Math.random() < 0.5 ? -1 : 1) * initSpeed;
+	ballSpeed.y = -initSpeed;
+	ball.position.x = -BORDER_X/2 + Math.random() * BORDER_X;
+	ball.position.z = -3;
+}
+
 function ballCollides(blockX, blockZ, blockWidth, blockThickness) {
 	return (Math.abs(ball.position.z - blockZ) <= blockThickness / 2)
 		&& (Math.abs(ball.position.x - blockX) <= blockWidth / 2 + BALL_RADIUS);
 }
 
+function drawScore() {
+	document.getElementById("scoreDiv").innerHTML = "SCORE: " + score + " (HIGH " + highscore + ")";
+}
+
 // RENDER LOOP
+resetBall();
+drawScore();
+
 var clock = new THREE.Clock();
 function render() {
 	requestAnimationFrame( render );
@@ -206,12 +230,19 @@ function render() {
 	else if (ballCollides(bat.position.x, bat.position.z, BAT_WIDTH, BAT_THICKNESS)) {
 		if (ballSpeed.y > 0) {
 			ballSpeed.y = -Math.abs(ballSpeed.y);
-			const deflectSpeed = DEFLECT_SKEW * (ball.position.x - bat.position.x);
+			const deflectSpeed = DEFLECT_SKEW * (ball.position.x - bat.position.x + 3.0*(Math.random()-0.5));
 			ballSpeed.x = deflectSpeed;
 			ballSpeed.normalize().multiplyScalar(BALL_SPEED);
+
+			score++;
+			if (score > highscore)
+			highscore = score;
+			drawScore();
 		}
 	}
 	else if (ball.position.z > 5) {
+		score = 0;
+		drawScore();
 		resetBall();
 	}
 
