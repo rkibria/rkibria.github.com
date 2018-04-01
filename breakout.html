@@ -65,15 +65,31 @@ groundPlane.position.y = -0.5;
 groundPlane.rotation.x = Math.PI/2;
 scene.add( groundPlane );
 
-const cube = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xa0a0a0} ) );
-scene.add( cube );
+const ball = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 16, 16 ), new THREE.MeshLambertMaterial( {color: 0xa00000} ) );
+scene.add( ball );
+ball.position.z = -3;
+
+const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xa0a0a0} ) );
+scene.add( bat );
+
+// MOUSE
+let mouseX = 0;
+function mouse_monitor(e) {
+	const x = e.pageX;
+	mouseX = x / window.innerWidth;
+}
+
+window.onload = function() {
+	this.addEventListener('mousemove', mouse_monitor);
+}
 
 // RENDER LOOP
-const clock = new THREE.Clock();
 function render() {
 	requestAnimationFrame( render );
 	stats.update();
-	const deltaT = clock.getDelta();
+
+	bat.position.x = -6 + 12 * mouseX;
+
 	renderer.render(scene, camera);
 };
 render();
