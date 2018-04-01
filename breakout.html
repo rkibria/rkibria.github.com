@@ -60,6 +60,10 @@ const ambLight = new THREE.AmbientLight(0xaaaaaa);
 scene.add(ambLight);
 
 // GEOMETRY
+const BORDER_X = 8;
+const BALL_RADIUS = 0.3;
+const BORDER_Z = 30;
+
 const groundPlane = new THREE.Mesh(
 	new THREE.PlaneGeometry( 80, 80, 20, 20 ),
 	new THREE.MeshBasicMaterial( {color: 0x00f000, side: THREE.DoubleSide, wireframe: true, transparent: true, opacity: 0.1} )
@@ -68,36 +72,45 @@ groundPlane.position.y = -0.5;
 groundPlane.rotation.x = Math.PI/2;
 scene.add( groundPlane );
 
-const ball = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 16, 16 ), new THREE.MeshLambertMaterial( {color: 0xa00000} ) );
+const ball = new THREE.Mesh( new THREE.SphereGeometry( BALL_RADIUS, 16, 16 ), new THREE.MeshLambertMaterial( {color: 0xa00000} ) );
 scene.add( ball );
-ball.position.z = -3;
 
 const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xa0a0a0} ) );
 scene.add( bat );
 
 const leftBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
-leftBorder.position.x = -8;
+leftBorder.position.x = -BORDER_X;
 leftBorder.position.z = -15;
 scene.add( leftBorder );
 
 const rightBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
-rightBorder.position.x = 8;
+rightBorder.position.x = BORDER_X;
 rightBorder.position.z = -15;
 scene.add( rightBorder );
 
 const topBorder = new THREE.Mesh( new THREE.BoxGeometry( 16, 0.5, 0.25 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
-topBorder.position.z = -30;
+topBorder.position.z = -BORDER_Z;
 scene.add( topBorder );
 
+// GAME DATA
+let batX = 0;
+const ballSpeed = new THREE.Vector2();
+
+function resetBall() {
+	ballSpeed.x = 8;
+	ballSpeed.y = -8;
+	ball.position.x = -BORDER_X/2 + Math.random() * BORDER_X/2;
+	ball.position.z = -3;
+}
+resetBall();
+
 // MOUSE
-let mouseX = 0;
 function onMouseMove(e) {
 	let x = e.pageX;
 	const margin = window.innerWidth / 4;
 	x = Math.max(margin, x);
 	x = Math.min(window.innerWidth - margin, x);
-	mouseX = (x - margin) / (window.innerWidth - 2 * margin);
-	console.log(mouseX);
+	batX = (x - margin) / (window.innerWidth - 2 * margin);
 }
 
 window.onload = function() {
@@ -105,11 +118,35 @@ window.onload = function() {
 }
 
 // RENDER LOOP
+var clock = new THREE.Clock();
 function render() {
 	requestAnimationFrame( render );
 	stats.update();
+	const deltaT = clock.getDelta();
 
-	bat.position.x = -6.5 + 13 * mouseX;
+	bat.position.x = -6.5 + 13 * batX;
+
+	// Move ball
+	ball.position.x += ballSpeed.x * deltaT;
+	ball.position.z += ballSpeed.y * deltaT;
+	const maxRight = BORDER_X - BALL_RADIUS;
+	const maxLeft = -BORDER_X + BALL_RADIUS;
+	if (ball.position.x > maxRight) {
+		ball.position.x = maxRight;
+		ballSpeed.x *= -1;
+	}
+	else if (ball.position.x < maxLeft) {
+		ball.position.x = maxLeft;
+		ballSpeed.x *= -1;
+	}
+	const maxTop = -BORDER_Z + BALL_RADIUS;
+	if (ball.position.z < maxTop) {
+		ball.position.z = maxTop;
+		ballSpeed.y *= -1;
+	}
+	else if (ball.position.z > 3) {
+		resetBall();
+	}
 
 	renderer.render(scene, camera);
 };
