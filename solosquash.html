@@ -2,13 +2,36 @@
 <html>
 
 <style>
+.links {
+	position: absolute;
+	left: 0%;
+	top: 0%;
+	width: 100%;
+	text-align: left;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 10px;
+	color: white;
+}
+
+.gametitle {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	text-align: center;
+	font-size: 40px;
+	font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+	color: lightgray;
+	text-shadow: 3px 2px black;
+}
+
 .score {
 	position: absolute;
 	left: 0;
-	top: 5%;
+	top: 10%;
 	width: 100%;
 	text-align: center;
-	font-size: 30px;
+	font-size: 26px;
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	color: white;
 	text-shadow: 3px 2px black;
@@ -17,7 +40,7 @@
 .instructions {
 	position: absolute;
 	left: 0%;
-	top: 20%;
+	top: 25%;
 	width: 100%;
 	text-align: center;
 	font-size: 18px;
@@ -33,11 +56,11 @@
 </head>
 
 <body>
-
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 
+<div id="linksDiv" class="links">http://rkibria.netlify.com</div>
+<div id="titleDiv" class="gametitle">SOLO SQUASH</div>
 <div id="scoreDiv" class="score"></div>
-
 <div id="instructionsDiv" class="instructions">Mouse position controls bat acceleration</div>
 
 <script src="js/three.min.js"></script>
@@ -94,6 +117,8 @@ THREEx.WindowResize(renderer, camera);
 // STATS
 const stats = new Stats();
 stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '90%';
+stats.domElement.style.top = '0%';
 stats.domElement.style.bottom = '0px';
 stats.domElement.style.zIndex = 100;
 container.appendChild( stats.domElement );
