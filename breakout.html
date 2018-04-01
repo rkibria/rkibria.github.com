@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Three.js Breakout</title>
+</head>
+
+<body>
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+<script src="js/three.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/threex.windowresize.js"></script>
+
+<script>
+// CONSTS
+const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+
+// SCENE
+const scene = new THREE.Scene();
+
+// CAMERA
+const VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+const camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+camera.position.x = 0;
+camera.position.y = 3;
+camera.position.z = 10;
+
+// RENDERER
+if ( Detector.webgl )
+	renderer = new THREE.WebGLRenderer( {antialias:true} );
+else
+	renderer = new THREE.CanvasRenderer();
+renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+const container = document.getElementById( 'ThreeJS' );
+container.appendChild( renderer.domElement );
+
+// EVENTS
+THREEx.WindowResize(renderer, camera);
+
+// STATS
+const stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.bottom = '0px';
+stats.domElement.style.zIndex = 100;
+container.appendChild( stats.domElement );
+
+// LIGHT
+var light = new THREE.PointLight(0xffffff, 1, 0);
+light.position.set( 0, 100, 0 );
+scene.add( light );
+
+const ambLight = new THREE.AmbientLight(0xaaaaaa);
+scene.add(ambLight);
+
+// GEOMETRY
+const groundPlane = new THREE.Mesh(
+	new THREE.PlaneGeometry( 80, 80, 20, 20 ),
+	new THREE.MeshBasicMaterial( {color: 0x00f000, side: THREE.DoubleSide, wireframe: true, transparent: true, opacity: 0.1} )
+	);
+groundPlane.position.y = -0.5;
+groundPlane.rotation.x = Math.PI/2;
+scene.add( groundPlane );
+
+const cube = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xa0a0a0} ) );
+scene.add( cube );
+
+// RENDER LOOP
+const clock = new THREE.Clock();
+function render() {
+	requestAnimationFrame( render );
+	stats.update();
+	const deltaT = clock.getDelta();
+	renderer.render(scene, camera);
+};
+render();
+
+</script>
+
+</body>
+
+</html>
