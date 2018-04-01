@@ -42,6 +42,8 @@ const BAT_WIDTH = 2;
 const BAT_THICKNESS = 1;
 const BALL_SPEED = 20;
 const DEFLECT_SKEW = 10;
+const BAT_X_EDGE_POS = 6.5;
+const BAT_SPEED_FACTOR = 1.0;
 
 // SCENE
 const scene = new THREE.Scene();
@@ -160,12 +162,14 @@ topBorder.castShadow = true;
 scene.add( topBorder );
 
 // MOUSE
+// Set batAccX to -1 (left edge of control zone) to 1 (right edge)
 function onMouseMove(e) {
 	let x = e.pageX;
 	const margin = window.innerWidth / 4;
 	x = Math.max(margin, x);
 	x = Math.min(window.innerWidth - margin, x);
-	batX = (x - margin) / (window.innerWidth - 2 * margin);
+	batAccX = 2 * ((x - margin) / (window.innerWidth - 2 * margin) - 0.5);
+	console.log(batAccX);
 }
 
 window.onload = function() {
@@ -175,7 +179,7 @@ window.onload = function() {
 // GAME LOGIC
 let score = 0;
 let highscore = 0;
-let batX = 0;
+let batAccX = 0;
 const ballSpeed = new THREE.Vector2();
 
 function resetBall() {
@@ -205,11 +209,13 @@ function render() {
 	stats.update();
 	const deltaT = clock.getDelta();
 
-	ball.position.y = -0.5 + Math.abs(Math.sin(clock.elapsedTime*3));
-
-	bat.position.x = -6.5 + 13 * batX;
+	// Move bat
+	bat.position.x += BAT_SPEED_FACTOR * batAccX;
+	bat.position.x = Math.min(Math.max(bat.position.x, -BAT_X_EDGE_POS), BAT_X_EDGE_POS);
 
 	// Move ball
+	ball.position.y = -0.5 + Math.abs(Math.sin(clock.elapsedTime*3));
+
 	ball.position.x += ballSpeed.x * deltaT;
 	ball.position.z += ballSpeed.y * deltaT;
 	const maxRight = BORDER_X - BALL_RADIUS;
