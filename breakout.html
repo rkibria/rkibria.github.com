@@ -36,12 +36,16 @@ camera.position.y = 3;
 camera.position.z = 10;
 
 // RENDERER
+var FogColor = 0xffffff;
+scene.fog = new THREE.FogExp2( FogColor, 0.003 );
+
 let renderer = null;
 if ( Detector.webgl )
 	renderer = new THREE.WebGLRenderer( {antialias:true} );
 else
 	renderer = new THREE.CanvasRenderer();
 renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+renderer.setClearColor( FogColor );
 const container = document.getElementById( 'ThreeJS' );
 container.appendChild( renderer.domElement );
 
@@ -58,8 +62,20 @@ stats.domElement.style.bottom = '0px';
 stats.domElement.style.zIndex = 100;
 container.appendChild( stats.domElement );
 
+// SKYBOX
+scene.background = new THREE.CubeTextureLoader()
+.setPath( 'images/' )
+.load( [
+"sky-px.jpg",
+"sky-nx.jpg",
+"sky-py.jpg",
+"sky-ny.jpg",
+"sky-pz.jpg",
+"sky-nz.jpg"
+] );
+
 // LIGHT
-const ambLight = new THREE.AmbientLight(0x555555);
+const ambLight = new THREE.AmbientLight(0xaaaaaa);
 scene.add(ambLight);
 
 var spotLight = new THREE.SpotLight( 0xffffff );
@@ -78,13 +94,21 @@ scene.add( spotLight.target );
 
 // GEOMETRY
 const groundPlane = new THREE.Mesh(
+	new THREE.PlaneGeometry( 1000, 1000 ),
+	new THREE.MeshBasicMaterial( {color: 0x00a000} )
+	);
+groundPlane.position.y = -1;
+groundPlane.rotation.x = -Math.PI/2;
+scene.add( groundPlane );
+
+const playingField = new THREE.Mesh(
 	new THREE.PlaneGeometry( 2.5*BORDER_X, 2.5*BORDER_Z ),
 	new THREE.MeshStandardMaterial( {color: 0xa0a0a0, dithering: true} )
 	);
-groundPlane.position.y = -0.75;
-groundPlane.rotation.x = -Math.PI/2;
-groundPlane.receiveShadow = true;
-scene.add( groundPlane );
+playingField.position.y = -0.75;
+playingField.rotation.x = -Math.PI/2;
+playingField.receiveShadow = true;
+scene.add( playingField );
 
 const ball = new THREE.Mesh( new THREE.SphereGeometry( BALL_RADIUS, 16, 16 ), new THREE.MeshLambertMaterial( {color: 0xf00000} ) );
 ball.castShadow = true;
