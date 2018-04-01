@@ -145,7 +145,7 @@ let batX = 0;
 const ballSpeed = new THREE.Vector2();
 
 function resetBall() {
-	ballSpeed.x = 8;
+	ballSpeed.x = (Math.random() < 0.5 ? -1 : 1) * 8;
 	ballSpeed.y = -8;
 	ball.position.x = -BORDER_X/2 + Math.random() * BORDER_X;
 	ball.position.z = -3;
@@ -194,7 +194,7 @@ function render() {
 		ball.position.z = maxTop;
 		ballSpeed.y *= -1;
 	}
-	else if (ball.position.z > 3) {
+	else if (ball.position.z > 5) {
 		resetBall();
 	}
 
