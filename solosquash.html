@@ -179,8 +179,13 @@ const ball = new THREE.Mesh( new THREE.SphereGeometry( BALL_RADIUS, 16, 16 ), ne
 ball.castShadow = true;
 scene.add( ball );
 
-const bat = new THREE.Mesh( new THREE.BoxGeometry( BAT_WIDTH, 0.5, BAT_THICKNESS ), new THREE.MeshLambertMaterial( {color: 0x1010ff} ) );
+const woodTexture = new THREE.TextureLoader().load( "images/wood.jpg" );
+woodTexture.wrapS = THREE.RepeatWrapping;
+woodTexture.wrapT = THREE.RepeatWrapping;
+woodTexture.repeat.set( 1, 1 );
+const bat = new THREE.Mesh( new THREE.BoxGeometry( BAT_WIDTH, 1, BAT_THICKNESS ), new THREE.MeshLambertMaterial( {map: woodTexture} ) );
 bat.castShadow = true;
+bat.position.y = 0;
 scene.add( bat );
 
 const BORDER_HEIGHT = 1;
