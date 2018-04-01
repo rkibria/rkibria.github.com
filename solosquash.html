@@ -17,7 +17,7 @@
 .instructions {
 	position: absolute;
 	left: 0%;
-	top: 15%;
+	top: 20%;
 	width: 100%;
 	text-align: center;
 	font-size: 18px;
@@ -54,7 +54,8 @@ const BALL_RADIUS = 0.3;
 const BORDER_Z = 30;
 const BAT_WIDTH = 2;
 const BAT_THICKNESS = 1;
-const BALL_SPEED = 20;
+const BALL_BASE_SPEED = 20;
+const BALL_SPEED_INCREMENT = 1.0;
 const DEFLECT_SKEW = 10;
 const BAT_X_EDGE_POS = 6.5;
 const BAT_SPEED_FACTOR = 1.0;
@@ -198,9 +199,11 @@ let score = 0;
 let highscore = 0;
 let batAccX = 0;
 const ballSpeed = new THREE.Vector2();
+let ballSpeedIncrease = 0;
 
 function resetBall() {
-	const initSpeed = BALL_SPEED / Math.sqrt(2);
+	ballSpeedIncrease = 0;
+	const initSpeed = BALL_BASE_SPEED / Math.sqrt(2);
 	ballSpeed.x = (Math.random() < 0.5 ? -1 : 1) * initSpeed;
 	ballSpeed.y = -initSpeed;
 	ball.position.x = -BORDER_X/2 + Math.random() * BORDER_X;
@@ -213,7 +216,8 @@ function ballCollides(blockX, blockZ, blockWidth, blockThickness) {
 }
 
 function drawScore() {
-	document.getElementById("scoreDiv").innerHTML = "SCORE " + score + " (HIGH " + highscore + ")";
+	const text = "SCORE " + score + " (HIGH " + highscore + ")<br><small>Ball speed " + ballSpeed.length().toFixed(1) + "</small>";
+	document.getElementById("scoreDiv").innerHTML = text;
 }
 
 // RENDER LOOP
@@ -255,7 +259,9 @@ function render() {
 			ballSpeed.y = -Math.abs(ballSpeed.y);
 			const deflectSpeed = DEFLECT_SKEW * (ball.position.x - bat.position.x + 3.0*(Math.random()-0.5));
 			ballSpeed.x = deflectSpeed;
-			ballSpeed.normalize().multiplyScalar(BALL_SPEED);
+			ballSpeed.normalize();
+			ballSpeedIncrease += BALL_SPEED_INCREMENT;
+			ballSpeed.multiplyScalar(BALL_BASE_SPEED + ballSpeedIncrease);
 
 			score++;
 			if (score > highscore)
@@ -265,8 +271,8 @@ function render() {
 	}
 	else if (ball.position.z > 15) {
 		score = 0;
-		drawScore();
 		resetBall();
+		drawScore();
 	}
 
 	renderer.render(scene, camera);
