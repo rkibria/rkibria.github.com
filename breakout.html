@@ -94,20 +94,25 @@ const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLa
 bat.castShadow = true;
 scene.add( bat );
 
-const leftBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
+const BORDER_HEIGHT = 1;
+const BORDER_POS_Y = 0.25;
+const leftBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, BORDER_HEIGHT, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
 leftBorder.position.x = -BORDER_X;
+leftBorder.position.y = BORDER_POS_Y;
 leftBorder.position.z = -15;
 leftBorder.castShadow = true;
 scene.add( leftBorder );
 
-const rightBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
+const rightBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, BORDER_HEIGHT, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
 rightBorder.position.x = BORDER_X;
+rightBorder.position.y = BORDER_POS_Y;
 rightBorder.position.z = -15;
 rightBorder.castShadow = true;
 scene.add( rightBorder );
 
-const topBorder = new THREE.Mesh( new THREE.BoxGeometry( 16, 0.5, 0.25 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
+const topBorder = new THREE.Mesh( new THREE.BoxGeometry( 16, BORDER_HEIGHT, 0.25 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
 topBorder.position.z = -BORDER_Z;
+topBorder.position.y = BORDER_POS_Y;
 topBorder.castShadow = true;
 scene.add( topBorder );
 
@@ -142,6 +147,8 @@ function render() {
 	requestAnimationFrame( render );
 	stats.update();
 	const deltaT = clock.getDelta();
+
+	ball.position.y = -0.5 + Math.abs(Math.sin(clock.elapsedTime*3));
 
 	bat.position.x = -6.5 + 13 * batX;
 
