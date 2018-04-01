@@ -16,6 +16,8 @@
 <script src="js/threex.windowresize.js"></script>
 
 <script>
+"use strict";
+
 // CONSTS
 const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 
@@ -30,6 +32,7 @@ camera.position.y = 3;
 camera.position.z = 10;
 
 // RENDERER
+let renderer = null;
 if ( Detector.webgl )
 	renderer = new THREE.WebGLRenderer( {antialias:true} );
 else
@@ -72,15 +75,33 @@ ball.position.z = -3;
 const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xa0a0a0} ) );
 scene.add( bat );
 
+const leftBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
+leftBorder.position.x = -8;
+leftBorder.position.z = -15;
+scene.add( leftBorder );
+
+const rightBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
+rightBorder.position.x = 8;
+rightBorder.position.z = -15;
+scene.add( rightBorder );
+
+const topBorder = new THREE.Mesh( new THREE.BoxGeometry( 16, 0.5, 0.25 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
+topBorder.position.z = -30;
+scene.add( topBorder );
+
 // MOUSE
 let mouseX = 0;
-function mouse_monitor(e) {
-	const x = e.pageX;
-	mouseX = x / window.innerWidth;
+function onMouseMove(e) {
+	let x = e.pageX;
+	const margin = window.innerWidth / 4;
+	x = Math.max(margin, x);
+	x = Math.min(window.innerWidth - margin, x);
+	mouseX = (x - margin) / (window.innerWidth - 2 * margin);
+	console.log(mouseX);
 }
 
 window.onload = function() {
-	this.addEventListener('mousemove', mouse_monitor);
+	this.addEventListener('mousemove', onMouseMove);
 }
 
 // RENDER LOOP
@@ -88,7 +109,7 @@ function render() {
 	requestAnimationFrame( render );
 	stats.update();
 
-	bat.position.x = -6 + 12 * mouseX;
+	bat.position.x = -6.5 + 13 * mouseX;
 
 	renderer.render(scene, camera);
 };
