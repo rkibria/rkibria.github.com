@@ -23,6 +23,7 @@
 	font-size: 18px;
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	color: darkblue;
+	text-shadow: 1px 1px black;
 }
 </style>
 
@@ -127,9 +128,13 @@ scene.add( spotLight );
 scene.add( spotLight.target );
 
 // GEOMETRY
+const grassTexture = new THREE.TextureLoader().load( "images/grass.jpg" );
+grassTexture.wrapS = THREE.RepeatWrapping;
+grassTexture.wrapT = THREE.RepeatWrapping;
+grassTexture.repeat.set( 8, 8 );
 const groundPlane = new THREE.Mesh(
 	new THREE.PlaneGeometry( 1000, 1000 ),
-	new THREE.MeshBasicMaterial( {color: 0x00a000} )
+	new THREE.MeshBasicMaterial( {map: grassTexture} )
 	);
 groundPlane.position.y = -1;
 groundPlane.rotation.x = -Math.PI/2;
