@@ -19,6 +19,10 @@
 "use strict";
 
 // CONSTS
+const BORDER_X = 8;
+const BALL_RADIUS = 0.3;
+const BORDER_Z = 30;
+
 const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 
 // SCENE
@@ -41,6 +45,9 @@ renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 const container = document.getElementById( 'ThreeJS' );
 container.appendChild( renderer.domElement );
 
+renderer.shadowMapEnabled = true;
+renderer.shadowMapType = THREE.PCFShadowMap;
+
 // EVENTS
 THREEx.WindowResize(renderer, camera);
 
@@ -52,44 +59,56 @@ stats.domElement.style.zIndex = 100;
 container.appendChild( stats.domElement );
 
 // LIGHT
-var light = new THREE.PointLight(0xffffff, 1, 0);
-light.position.set( 0, 100, 0 );
-scene.add( light );
-
-const ambLight = new THREE.AmbientLight(0xaaaaaa);
+const ambLight = new THREE.AmbientLight(0x555555);
 scene.add(ambLight);
 
-// GEOMETRY
-const BORDER_X = 8;
-const BALL_RADIUS = 0.3;
-const BORDER_Z = 30;
+var spotLight = new THREE.SpotLight( 0xffffff );
+spotLight.position.set( 0, 40, -30 );
+spotLight.angle = Math.PI / 7;
+spotLight.distance = 100;
+spotLight.castShadow = true;
+spotLight.shadow.mapSize.width = 512;
+spotLight.shadow.mapSize.height = 512;
+spotLight.shadow.camera.near = 1;
+spotLight.shadow.camera.far = 100;
+spotLight.shadow.camera.fov = 30;
+spotLight.target.position.set(0, 0, -20);
+scene.add( spotLight );
+scene.add( spotLight.target );
 
+// GEOMETRY
 const groundPlane = new THREE.Mesh(
-	new THREE.PlaneGeometry( 80, 80, 20, 20 ),
-	new THREE.MeshBasicMaterial( {color: 0x00f000, side: THREE.DoubleSide, wireframe: true, transparent: true, opacity: 0.1} )
+	new THREE.PlaneGeometry( 2.5*BORDER_X, 2.5*BORDER_Z ),
+	new THREE.MeshStandardMaterial( {color: 0xa0a0a0, dithering: true} )
 	);
-groundPlane.position.y = -0.5;
-groundPlane.rotation.x = Math.PI/2;
+groundPlane.position.y = -0.75;
+groundPlane.rotation.x = -Math.PI/2;
+groundPlane.receiveShadow = true;
 scene.add( groundPlane );
 
-const ball = new THREE.Mesh( new THREE.SphereGeometry( BALL_RADIUS, 16, 16 ), new THREE.MeshLambertMaterial( {color: 0xa00000} ) );
+const ball = new THREE.Mesh( new THREE.SphereGeometry( BALL_RADIUS, 16, 16 ), new THREE.MeshLambertMaterial( {color: 0xf00000} ) );
+ball.castShadow = true;
 scene.add( ball );
 
-const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xa0a0a0} ) );
+const bat = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.5, 1 ), new THREE.MeshLambertMaterial( {color: 0xf0f0f0} ) );
+bat.castShadow = true;
 scene.add( bat );
 
 const leftBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
 leftBorder.position.x = -BORDER_X;
 leftBorder.position.z = -15;
+leftBorder.castShadow = true;
 scene.add( leftBorder );
 
 const rightBorder = new THREE.Mesh( new THREE.BoxGeometry( 0.25, 0.5, 30 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
 rightBorder.position.x = BORDER_X;
 rightBorder.position.z = -15;
+rightBorder.castShadow = true;
 scene.add( rightBorder );
 
 const topBorder = new THREE.Mesh( new THREE.BoxGeometry( 16, 0.5, 0.25 ), new THREE.MeshLambertMaterial( {color: 0x606060} ) );
 topBorder.position.z = -BORDER_Z;
+topBorder.castShadow = true;
 scene.add( topBorder );
 
 // GAME DATA
