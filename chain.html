@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Chain animation</title>
+</head>
+
+<body>
+
+<canvas id="canvas" width="1400" height="800" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+"use strict";
+
+function circle(context, x, y, radius, color) {
+    context.save();
+    context.translate(x, y);
+    context.lineWidth = 1;
+    context.fillStyle = color;
+    context.beginPath();
+    context.arc(0, 0, radius, 0, (Math.PI * 2), true);
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.restore();
+}
+
+function line(context, x1, y1, x2, y2, color) {
+    context.save();
+    context.strokeStyle = color;
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.stroke();
+    context.restore();
+}
+
+function drawChain(context, tl) {
+    let x = tl.x, y = tl.y;
+    let lx = x, ly = y;
+    const segs = tl.segments;
+    for (let i=0; i < segs.length; ++i) {
+        const seg = segs[i];
+        circle(context, x, y, seg.r, i == 0 ? "red" : (i == segs.length-1 ? "blue" : "gray"));
+        line(context, lx, ly, x, y, "white");
+        circle(context, x, y, 4, "white");
+        lx = x;
+        ly = y;
+        x += Math.cos(seg.angle) * seg.d;
+        y += Math.sin(seg.angle) * seg.d;
+    }
+}
+
+const chain1 = {x: 30, y: 400, segments: []};
+for (let i=0; i < 50; ++i) {
+    chain1.segments.push({r: 10, angle: 0, d: 30});
+}
+
+window.onload = function() {
+    var canvas = document.getElementById('canvas'), context = canvas.getContext('2d');
+    const t0 = performance.now();
+
+    (function drawFrame () {
+        window.requestAnimationFrame(drawFrame, canvas);
+        context.fillStyle = "black";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const dt = (performance.now() - t0) / 1000;
+        drawChain(context, chain1);
+
+        const segs = chain1.segments;
+        for (let i=0; i < segs.length; ++i) {
+            const seg = segs[i];
+            seg.angle = (Math.sin(0.5 + dt) + 0.05 * i) * Math.sin(5.0 * dt + 0.3 * i);
+        }
+    }());
+}
+
+</script>
+
+</body>
+</html>
