@@ -132,7 +132,7 @@ shipBodyShape.lineTo( 0, SHIP_LENGTH/2 ); // 5
 shipBodyShape.lineTo( -COCKPIT_WIDTH_RATIO*SHIP_WIDTH, SHIP_LENGTH/2-COCKPIT_LENGTH_RATIO*SHIP_LENGTH ); // 6
 shipBodyShape.lineTo( -SHIP_WIDTH/2, -SHIP_LENGTH/2 + WING_EDGE_RATIO*SHIP_LENGTH ); // 7
 const shipBody = new THREE.Mesh(
-	new THREE.ExtrudeGeometry( shipBodyShape,
+	new THREE.ExtrudeBufferGeometry( shipBodyShape,
 	{
 		amount: 1.0,
 		bevelEnabled: false,
@@ -147,7 +147,7 @@ shipCockpitShape.lineTo( COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, -SH
 shipCockpitShape.lineTo( COCKPIT_FRONT_RATIO*COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, 0 ); // 3
 shipCockpitShape.lineTo( COCKPIT_FRONT_RATIO*-COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, 0 ); // 4
 const shipCockpit = new THREE.Mesh(
-	new THREE.ExtrudeGeometry( shipCockpitShape,
+	new THREE.ExtrudeBufferGeometry( shipCockpitShape,
 	{
 		amount: 2.0,
 		bevelEnabled: true,
