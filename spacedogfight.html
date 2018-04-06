@@ -69,7 +69,7 @@ const VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 
 const camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.x = 0;
 camera.position.y = 0;
-camera.position.z = 10;
+camera.position.z = 6;
 
 // RENDERER
 var FogColor = 0x000000;
@@ -118,11 +118,19 @@ pointlight.position.set( 0, 100, 0 );
 scene.add( pointlight );
 
 // GEOMETRY
-const SHIP_WIDTH = 1.0, SHIP_LENGTH = 2.0;
+const SHIP_WIDTH = 1.0,
+	SHIP_LENGTH = 1.62,
+	WING_EDGE_RATIO = 0.2,
+	COCKPIT_WIDTH_RATIO = 0.2,
+	COCKPIT_LENGTH_RATIO = 0.5;
 const shipBodyShape = new THREE.Shape();
-shipBodyShape.moveTo( -SHIP_WIDTH/2, -SHIP_LENGTH/2 );
-shipBodyShape.lineTo( SHIP_WIDTH/2, -SHIP_LENGTH/2 );
-shipBodyShape.lineTo( 0, SHIP_LENGTH );
+shipBodyShape.moveTo( -SHIP_WIDTH/2, -SHIP_LENGTH/2 ); // 1
+shipBodyShape.lineTo( SHIP_WIDTH/2, -SHIP_LENGTH/2 ); // 2
+shipBodyShape.lineTo( SHIP_WIDTH/2, -SHIP_LENGTH/2 + WING_EDGE_RATIO*SHIP_LENGTH ); // 3
+shipBodyShape.lineTo( COCKPIT_WIDTH_RATIO*SHIP_WIDTH, SHIP_LENGTH/2-COCKPIT_LENGTH_RATIO*SHIP_LENGTH ); // 4
+shipBodyShape.lineTo( 0, SHIP_LENGTH/2 ); // 5
+shipBodyShape.lineTo( -COCKPIT_WIDTH_RATIO*SHIP_WIDTH, SHIP_LENGTH/2-COCKPIT_LENGTH_RATIO*SHIP_LENGTH ); // 6
+shipBodyShape.lineTo( -SHIP_WIDTH/2, -SHIP_LENGTH/2 + WING_EDGE_RATIO*SHIP_LENGTH ); // 7
 const shipBody = new THREE.Mesh(
 	new THREE.ExtrudeGeometry( shipBodyShape,
 	{
