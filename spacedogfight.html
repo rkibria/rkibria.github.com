@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+
+<style>
+.links {
+	position: absolute;
+	left: 0%;
+	top: 0%;
+	width: 100%;
+	text-align: left;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 10px;
+	color: white;
+}
+
+.gametitle {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	text-align: center;
+	font-size: 40px;
+	font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+	color: lightgray;
+	text-shadow: 3px 2px black;
+}
+
+.score {
+	position: absolute;
+	left: 0;
+	top: 10%;
+	width: 100%;
+	text-align: center;
+	font-size: 26px;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	color: white;
+	text-shadow: 3px 2px black;
+}
+</style>
+
+<head>
+<meta charset="utf-8">
+<title>Three.js Space Dogfight</title>
+</head>
+
+<body>
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+<div id="linksDiv" class="links">http://rkibria.netlify.com</div>
+<div id="titleDiv" class="gametitle">SPACE DOGFIGHT</div>
+<div id="scoreDiv" class="score"></div>
+
+<script src="js/three.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/threex.windowresize.js"></script>
+
+<script>
+"use strict";
+
+// CONSTS
+
+// SCENE
+const scene = new THREE.Scene();
+
+// CAMERA
+const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+const VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+const camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+camera.position.x = 0;
+camera.position.y = 0;
+camera.position.z = 10;
+
+// RENDERER
+var FogColor = 0x000000;
+// scene.fog = new THREE.FogExp2( FogColor, 0.003 );
+
+let renderer = null;
+if ( Detector.webgl )
+	renderer = new THREE.WebGLRenderer( {antialias:true} );
+else
+	renderer = new THREE.CanvasRenderer();
+renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+// renderer.setClearColor( FogColor );
+const container = document.getElementById( 'ThreeJS' );
+container.appendChild( renderer.domElement );
+
+// EVENTS
+THREEx.WindowResize(renderer, camera);
+
+// STATS
+const stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '90%';
+stats.domElement.style.top = '0%';
+stats.domElement.style.bottom = '0px';
+stats.domElement.style.zIndex = 100;
+container.appendChild( stats.domElement );
+
+// SKYBOX
+scene.background = new THREE.CubeTextureLoader()
+.setPath( 'images/' )
+.load( [
+"grid.png",
+"grid.png",
+"grid.png",
+"grid.png",
+"grid.png",
+"grid.png",
+] );
+
+// LIGHT
+const ambLight = new THREE.AmbientLight(0xaaaaaa);
+scene.add(ambLight);
+
+const pointlight = new THREE.PointLight(0xffffff, 1, 0);
+pointlight.position.set( 0, 100, 0 );
+scene.add( pointlight );
+
+// GEOMETRY
+const SHIP_WIDTH = 1.0, SHIP_LENGTH = 2.0;
+const shipBodyShape = new THREE.Shape();
+shipBodyShape.moveTo( -SHIP_WIDTH/2, -SHIP_LENGTH/2 );
+shipBodyShape.lineTo( SHIP_WIDTH/2, -SHIP_LENGTH/2 );
+shipBodyShape.lineTo( 0, SHIP_LENGTH );
+const shipBody = new THREE.Mesh(
+	new THREE.ExtrudeGeometry( shipBodyShape,
+	{
+		amount: 0.2,
+		bevelEnabled: false,
+	} ),
+	new THREE.MeshLambertMaterial( { color: 0xb0c4de } ) ) ;
+scene.add( shipBody );
+
+// MOUSE
+const mousePos = {x:0, y:0};
+function onMouseMove(e) {
+	mousePos.x = e.pageX;
+	mousePos.y = e.pageY;
+	// console.log(mousePos);
+}
+
+window.onload = function() {
+	this.addEventListener('mousemove', onMouseMove);
+}
+
+// GAME LOGIC
+
+function drawScore() {
+	const text = "SCORE";
+	document.getElementById("scoreDiv").innerHTML = text;
+}
+
+// RENDER LOOP
+drawScore();
+
+var clock = new THREE.Clock();
+function render() {
+	requestAnimationFrame( render );
+	stats.update();
+	const deltaT = clock.getDelta();
+
+	drawScore();
+
+	shipBody.rotation.x += 0.01;
+	shipBody.rotation.y += 0.01;
+	shipBody.rotation.z += 0.01;
+
+	renderer.render(scene, camera);
+};
+render();
+
+</script>
+
+</body>
+
+</html>
