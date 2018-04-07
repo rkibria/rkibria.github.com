@@ -139,23 +139,25 @@ const shipBody = new THREE.Mesh(
 	} ),
 	new THREE.MeshLambertMaterial( { color: 0xb0c4de } ) ) ;
 
-const UPPER_COCKPIT_RATIO = 0.9,
-	COCKPIT_FRONT_RATIO = 0.6;
+const TOP_COCKPIT_LENGTH_RATIO = 0.3,
+	TOP_COCKPIT_REAR_RATIO = 0.7,
+	TOP_COCKPIT_FRONT_RATIO = 0.4;
 const shipCockpitShape = new THREE.Shape();
-shipCockpitShape.moveTo( -COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, -SHIP_LENGTH/2*UPPER_COCKPIT_RATIO ); // 1
-shipCockpitShape.lineTo( COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, -SHIP_LENGTH/2*UPPER_COCKPIT_RATIO ); // 2
-shipCockpitShape.lineTo( COCKPIT_FRONT_RATIO*COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, 0 ); // 3
-shipCockpitShape.lineTo( COCKPIT_FRONT_RATIO*-COCKPIT_WIDTH_RATIO*SHIP_WIDTH*UPPER_COCKPIT_RATIO, 0 ); // 4
+shipCockpitShape.moveTo( -TOP_COCKPIT_REAR_RATIO*COCKPIT_WIDTH_RATIO*SHIP_WIDTH, -SHIP_LENGTH/2*TOP_COCKPIT_LENGTH_RATIO ); // 1
+shipCockpitShape.lineTo( TOP_COCKPIT_REAR_RATIO*COCKPIT_WIDTH_RATIO*SHIP_WIDTH, -SHIP_LENGTH/2*TOP_COCKPIT_LENGTH_RATIO ); // 2
+shipCockpitShape.lineTo( TOP_COCKPIT_FRONT_RATIO*COCKPIT_WIDTH_RATIO*SHIP_WIDTH, 0 ); // 3
+shipCockpitShape.lineTo( -TOP_COCKPIT_FRONT_RATIO*COCKPIT_WIDTH_RATIO*SHIP_WIDTH, 0 ); // 4
 const shipCockpit = new THREE.Mesh(
 	new THREE.ExtrudeBufferGeometry( shipCockpitShape,
 	{
-		amount: 2.0,
+		amount: 0.75,
 		bevelEnabled: true,
 		bevelThickness: 0.5,
 		bevelSize: 0.1,
 		bevelSegments: 1
 	} ),
 	new THREE.MeshLambertMaterial( { color: 0x87cefa } ) ) ;
+shipCockpit.position.z = 1;
 
 var ship = new THREE.Group();
 ship.add( shipBody );
