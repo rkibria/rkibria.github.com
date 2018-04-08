@@ -120,6 +120,7 @@ scene.add( pointlight );
 // GEOMETRY
 const BODY_COLOR_CODE = 0xb0c4de;
 const GLASS_COLOR_CODE = 0x87cefa;
+const CANOPY_COLOR_CODE = 0x9eb0c7;
 
 const SHIP_WIDTH = 10.0,
 	SHIP_LENGTH = 16.2,
@@ -165,13 +166,13 @@ shipCockpit.position.z = 1;
 const BODY_LENGTH_RATIO = 0.8,
 	BODY_REAR_RATIO = 0.25,
 	BODY_FRONT_RATIO = 0.3;
-const shipTopBodyShape = new THREE.Shape();
-shipTopBodyShape.moveTo( -BODY_REAR_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*BODY_LENGTH_RATIO ); // 1
-shipTopBodyShape.lineTo( BODY_REAR_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*BODY_LENGTH_RATIO ); // 2
-shipTopBodyShape.lineTo( BODY_FRONT_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*TOP_COCKPIT_LENGTH_RATIO ); // 3
-shipTopBodyShape.lineTo( -BODY_FRONT_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*TOP_COCKPIT_LENGTH_RATIO ); // 4
-const shipTopBody = new THREE.Mesh(
-	new THREE.ExtrudeBufferGeometry( shipTopBodyShape,
+const shipCanopyShape = new THREE.Shape();
+shipCanopyShape.moveTo( -BODY_REAR_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*BODY_LENGTH_RATIO ); // 1
+shipCanopyShape.lineTo( BODY_REAR_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*BODY_LENGTH_RATIO ); // 2
+shipCanopyShape.lineTo( BODY_FRONT_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*TOP_COCKPIT_LENGTH_RATIO ); // 3
+shipCanopyShape.lineTo( -BODY_FRONT_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*TOP_COCKPIT_LENGTH_RATIO ); // 4
+const shipCanopy = new THREE.Mesh(
+	new THREE.ExtrudeBufferGeometry( shipCanopyShape,
 	{
 		amount: 1,
 		bevelEnabled: true,
@@ -179,13 +180,34 @@ const shipTopBody = new THREE.Mesh(
 		bevelSize: 0.1,
 		bevelSegments: 1
 	} ),
-	new THREE.MeshLambertMaterial( { color: BODY_COLOR_CODE } ) ) ;
-shipTopBody.position.z = 1;
+	new THREE.MeshLambertMaterial( { color: CANOPY_COLOR_CODE } ) ) ;
+shipCanopy.position.z = 1;
+
+const ENGINE_LENGTH_RATIO = 1.2,
+	ENGINE_REAR_RATIO = 0.3,
+	ENGINE_FRONT_RATIO = 0.5;
+const engineShape = new THREE.Shape();
+engineShape.moveTo( ENGINE_REAR_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*BODY_LENGTH_RATIO ); // 3
+engineShape.lineTo( -ENGINE_REAR_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*BODY_LENGTH_RATIO ); // 4
+engineShape.lineTo( -ENGINE_FRONT_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*ENGINE_LENGTH_RATIO ); // 1
+engineShape.lineTo( ENGINE_FRONT_RATIO*SHIP_WIDTH/2, -SHIP_LENGTH/2*ENGINE_LENGTH_RATIO ); // 2
+const shipEngine = new THREE.Mesh(
+	new THREE.ExtrudeBufferGeometry( engineShape,
+	{
+		amount: 1.1,
+		bevelEnabled: true,
+		bevelThickness: 0.25,
+		bevelSize: 0.1,
+		bevelSegments: 1
+	} ),
+	new THREE.MeshLambertMaterial( { color: CANOPY_COLOR_CODE } ) ) ;
+shipEngine.position.z = 1;
 
 var ship = new THREE.Group();
 ship.add( shipBody );
 ship.add( shipCockpit );
-ship.add( shipTopBody );
+ship.add( shipCanopy );
+ship.add( shipEngine );
 scene.add( ship );
 
 // MOUSE
