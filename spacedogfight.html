@@ -213,8 +213,8 @@ scene.add( ship );
 // MOUSE
 const mousePos = {x:0, y:0};
 function onMouseMove(e) {
-	mousePos.x = e.pageX;
-	mousePos.y = e.pageY;
+	mousePos.x = e.pageX / window.innerWidth;
+	mousePos.y = e.pageY / window.innerHeight;
 	// console.log(mousePos);
 }
 
@@ -240,9 +240,11 @@ function render() {
 
 	drawScore();
 
-	ship.rotation.x += 0.01;
-	ship.rotation.y += 0.01;
-	ship.rotation.z += 0.01;
+	const controlX = (mousePos.x - 0.5) * 2;
+	const controlY = (mousePos.y - 0.5) * 2;
+
+	ship.rotation.y = controlX * Math.PI;
+	ship.rotation.x = (controlY - 0.5) * Math.PI;
 
 	renderer.render(scene, camera);
 };
