@@ -69,7 +69,7 @@ const VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 
 const camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.x = 0;
 camera.position.y = 0;
-camera.position.z = 60;
+camera.position.z = 100;
 
 // RENDERER
 var FogColor = 0x000000;
@@ -101,12 +101,12 @@ container.appendChild( stats.domElement );
 scene.background = new THREE.CubeTextureLoader()
 .setPath( 'images/' )
 .load( [
-"grid.png",
-"grid.png",
-"grid.png",
-"grid.png",
-"grid.png",
-"grid.png",
+"stars_right1.png",
+"stars_left2.png",
+"stars_top3.png",
+"stars_bottom4.png",
+"stars_front5.png",
+"stars_back6.png",
 ] );
 
 // LIGHT
