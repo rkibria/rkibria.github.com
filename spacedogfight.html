@@ -68,7 +68,7 @@ const SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 const VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 const camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.x = 0;
-camera.position.y = 0;
+camera.position.y = 10;
 camera.position.z = 100;
 
 // RENDERER
@@ -225,7 +225,7 @@ window.onload = function() {
 // GAME LOGIC
 
 function drawScore() {
-	const text = "SCORE";
+	const text = "...";
 	document.getElementById("scoreDiv").innerHTML = text;
 }
 
@@ -245,6 +245,8 @@ function render() {
 
 	ship.rotation.y = controlX * Math.PI;
 	ship.rotation.x = (controlY - 0.5) * Math.PI;
+
+	camera.rotation.z = ship.rotation.y;
 
 	renderer.render(scene, camera);
 };
