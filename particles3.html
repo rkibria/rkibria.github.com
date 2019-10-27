@@ -71,7 +71,7 @@ function Ball (radius, color) {
 	this.scaleX = 1;
 	this.scaleY = 1;
 	this.color = color;
-	this.lineWidth = 1;
+	this.lineWidth = 0;
 }
 
 Ball.prototype.draw = function (context) {
@@ -107,8 +107,8 @@ const canvas = document.getElementById('canvas');
 const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
 
 var ballsList = []
-for (i = 0; i < 200; i++) {
-	var ball = new Ball(10, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
+for (i = 0; i < 500; i++) {
+	var ball = new Ball(3, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
 	ball.x = Math.random() * canvasW;
 	ball.y = Math.random() * canvasH - 800;
 	ball.vx = Math.random() * 5 - 3;
@@ -123,6 +123,7 @@ groundBall.y = 3000;
 groundBall.vx = groundBall.vy = 0
 groundBall.radius = 2300;
 groundBall.mass = 500;
+groundBall.isGround = true;
 
 function getDistance(ball1, ball2) {
 	var xsq = ball1.x - ball2.x
@@ -159,6 +160,13 @@ function move(ball) {
 
 	ball.x += ball.vx;
 	ball.y += ball.vy;
+
+	if (!ball.isGround && (ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width)) {
+		ball.y = 1;
+		ball.x = 400 + 30 * (Math.random() * 2 - 1);
+		ball.vx = Math.random() * 1 - 0.5;
+		ball.vy = Math.random() * 5 - 3;
+	}
 }
 
 function attractTo(ball1, ball2) {
@@ -177,7 +185,7 @@ window.onload = function() {
 
 	(function drawFrame () {
 		window.requestAnimationFrame(drawFrame, canvas);
-		context.fillStyle = "white";
+		context.fillStyle = "black";
 		context.fillRect(0, 0, canvas.width, canvas.height);
 
 		for (i = 0; i < ballsList.length; i++) {
