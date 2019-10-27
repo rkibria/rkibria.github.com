@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Particle flurry</title>
+</head>
+
+<body>
+
+<canvas id="canvas" width="800" height="800" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+var CSS_COLOR_NAMES = ["AliceBlue","AntiqueWhite","Aqua","Aquamarine","Azure","Beige","Bisque","BlanchedAlmond","Blue","BlueViolet","Brown","BurlyWood","CadetBlue","Chartreuse","Chocolate","Coral","CornflowerBlue","Cornsilk","Crimson","Cyan","DarkBlue","DarkCyan","DarkGoldenRod","DarkGray","DarkGrey","DarkGreen","DarkKhaki","DarkMagenta","DarkOliveGreen","Darkorange","DarkOrchid","DarkRed","DarkSalmon","DarkSeaGreen","DarkSlateBlue","DarkSlateGray","DarkSlateGrey","DarkTurquoise","DarkViolet","DeepPink","DeepSkyBlue","DimGray","DimGrey","DodgerBlue","FireBrick","FloralWhite","ForestGreen","Fuchsia","Gainsboro","GhostWhite","Gold","GoldenRod","Gray","Grey","Green","GreenYellow","HoneyDew","HotPink","IndianRed","Indigo","Ivory","Khaki","Lavender","LavenderBlush","LawnGreen","LemonChiffon","LightBlue","LightCoral","LightCyan","LightGoldenRodYellow","LightGray","LightGrey","LightGreen","LightPink","LightSalmon","LightSeaGreen","LightSkyBlue","LightSlateGray","LightSlateGrey","LightSteelBlue","LightYellow","Lime","LimeGreen","Linen","Magenta","Maroon","MediumAquaMarine","MediumBlue","MediumOrchid","MediumPurple","MediumSeaGreen","MediumSlateBlue","MediumSpringGreen","MediumTurquoise","MediumVioletRed","MidnightBlue","MintCream","MistyRose","Moccasin","NavajoWhite","Navy","OldLace","Olive","OliveDrab","Orange","OrangeRed","Orchid","PaleGoldenRod","PaleGreen","PaleTurquoise","PaleVioletRed","PapayaWhip","PeachPuff","Peru","Pink","Plum","PowderBlue","Purple","Red","RosyBrown","RoyalBlue","SaddleBrown","Salmon","SandyBrown","SeaGreen","SeaShell","Sienna","Silver","SkyBlue","SlateBlue","SlateGray","SlateGrey","Snow","SpringGreen","SteelBlue","Tan","Teal","Thistle","Tomato","Turquoise","Violet","Wheat","White","WhiteSmoke","Yellow","YellowGreen"];
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Keeps track of the current mouse position, relative to an element.
+ * @param {HTMLElement} element
+ * @return {object} Contains properties: x, y, event
+ */
+function captureMouse(element) {
+  var mouse = {x: 0, y: 0, event: null},
+	  body_scrollLeft = document.body.scrollLeft,
+	  element_scrollLeft = document.documentElement.scrollLeft,
+	  body_scrollTop = document.body.scrollTop,
+	  element_scrollTop = document.documentElement.scrollTop,
+	  offsetLeft = element.offsetLeft,
+	  offsetTop = element.offsetTop;
+  
+  element.addEventListener('mousemove', function (event) {
+	var x, y;
+	
+	if (event.pageX || event.pageY) {
+	  x = event.pageX;
+	  y = event.pageY;
+	} else {
+	  x = event.clientX + body_scrollLeft + element_scrollLeft;
+	  y = event.clientY + body_scrollTop + element_scrollTop;
+	}
+	x -= offsetLeft;
+	y -= offsetTop;
+	
+	mouse.x = x;
+	mouse.y = y;
+	mouse.event = event;
+  }, false);
+  
+  return mouse;
+};
+
+
+function Ball (radius, color) {
+	if (radius === undefined) { radius = 40; }
+	if (color === undefined) { color = "#ff0000"; }
+	this.x = 0;
+	this.y = 0;
+	this.radius = radius;
+	this.vx = 0;
+	this.vy = 0;
+	this.mass = 1;
+	this.scaleX = 1;
+	this.scaleY = 1;
+	this.color = color;
+	this.lineWidth = 1;
+}
+
+Ball.prototype.draw = function (context) {
+	context.save();
+	context.translate(this.x, this.y);
+	context.scale(this.scaleX, this.scaleY);
+
+	context.lineWidth = this.lineWidth;
+	context.fillStyle = this.color;
+	context.beginPath();
+	//x, y, radius, start_angle, end_angle, anti-clockwise
+	context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
+	context.closePath();
+	context.fill();
+	if (this.lineWidth > 0) {
+		context.stroke();
+	}
+	context.restore();
+};
+
+Ball.prototype.getBounds = function () {
+	return {
+		x: this.x - this.radius,
+		y: this.y - this.radius,
+		width: this.radius * 2,
+		height: this.radius * 2
+	};
+};
+
+var gAnimCounter = 0;
+
+const canvas = document.getElementById('canvas');
+const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
+
+var ballsList = []
+for (i = 0; i < 200; i++) {
+	var ball = new Ball(10, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
+	ball.x = Math.random() * canvasW;
+	ball.y = Math.random() * canvasH - 800;
+	ball.vx = Math.random() * 5 - 3;
+	ball.vy = Math.random() * 5 - 3;
+	ball.mass = 100;
+	ballsList.push(ball);
+}
+
+let groundBall = ballsList[0] // is never moved
+groundBall.x = 400;
+groundBall.y = 3000;
+groundBall.vx = groundBall.vy = 0
+groundBall.radius = 2300;
+groundBall.mass = 500;
+
+function getDistance(ball1, ball2) {
+	var xsq = ball1.x - ball2.x
+	xsq = xsq * xsq
+	var ysq = ball1.y - ball2.y
+	ysq = ysq * ysq
+	return Math.sqrt(xsq + ysq);
+}
+
+function getForce(ball1, ball2) {
+	let fx = 0, fy =  0;
+	let r = getDistance(ball1, ball2);
+
+	const touch_distance = ball1.radius + ball2.radius + 0;
+	if (r < touch_distance) {
+		r = touch_distance + 1;
+		const angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
+		const G = 0.01;
+		let force = G * ball1.mass * ball2.mass * -1 / Math.pow(r - touch_distance, 4);
+		fx = force * Math.cos(angle);
+		fy = force * Math.sin(angle);
+	}
+
+	const gravAcc = 0.1;
+	fy += gravAcc;
+
+	return [fx, fy];
+}
+
+function move(ball) {
+	const friction = 1; // 0.9;
+	ball.vx *= friction;
+	ball.vy *= friction;
+
+	ball.x += ball.vx;
+	ball.y += ball.vy;
+}
+
+function attractTo(ball1, ball2) {
+	var ball1mass = ball1.mass;
+	var force = getForce(ball1, ball2);
+	ball1.vx += force[0] / ball1mass; // a = F/m
+	ball1.vy += force[1] / ball1mass;
+
+	ball1.vx = Math.min(10, ball1.vx);
+	ball1.vy = Math.min(10, ball1.vy);
+}
+
+window.onload = function() {
+	var canvas = document.getElementById('canvas'),
+	context = canvas.getContext('2d');
+
+	(function drawFrame () {
+		window.requestAnimationFrame(drawFrame, canvas);
+		context.fillStyle = "white";
+		context.fillRect(0, 0, canvas.width, canvas.height);
+
+		for (i = 0; i < ballsList.length; i++) {
+			for (j = 0; j < ballsList.length; j++) {
+				if (i != j) {
+					if (i != 0) {attractTo(ballsList[i], ballsList[j]);}
+					if (j != 0) {attractTo(ballsList[j], ballsList[i]);}
+				}
+			}
+		}
+
+		ballsList.forEach(move);
+		ballsList.forEach(function(ball) {ball.draw(context);});
+
+		gAnimCounter = (gAnimCounter + 1) % 1000;
+	}());
+}
+
+</script>
+
+</body>
+</html>
