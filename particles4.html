@@ -100,6 +100,9 @@ function ParticleSwarm(count, width, height) {
 	this.particles_list = [];
 	this.width = width;
 	this.height = height;
+
+	this.friction = 0.99;
+
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(3, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
 		particle.x = Math.random() * this.width;
@@ -140,9 +143,8 @@ ParticleSwarm.prototype.get_force = function(p1, p2) {
 };
 
 ParticleSwarm.prototype.move = function(particle) {
-	const friction = 1; // 0.9;
-	particle.vx *= friction;
-	particle.vy *= friction;
+	particle.vx *= this.friction;
+	particle.vy *= this.friction;
 
 	particle.x += particle.vx;
 	particle.y += particle.vy;
