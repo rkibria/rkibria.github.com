@@ -39,110 +39,110 @@ const canvas = document.getElementById('canvas');
 const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
 
 ///////////////////////////////////////////////////////////////////////////////
-function Vector2(x = 0.0, y = 0.0) {
+function Vec2(x = 0.0, y = 0.0) {
 	this.x = x;
 	this.y = y;
 }
 
-Vector2.prototype.add = function(v) {
+Vec2.prototype.add = function(v) {
 	this.x += v.x;
 	this.y += v.y;
 	return this;
 };
 
-Vector2.prototype.addScalar = function(s) {
+Vec2.prototype.addScalar = function(s) {
 	this.x += s;
 	this.y += s;
 	return this;
 };
 
-Vector2.prototype.addScaledVector = function(v, s) {
+Vec2.prototype.addScaledVector = function(v, s) {
 	this.x += v.x * s;
 	this.y += v.y * s;
 	return this;
 };
 
-Vector2.prototype.addVectors = function(a, b) {
+Vec2.prototype.addVectors = function(a, b) {
 	this.x = a.x + b.x;
 	this.y = a.y + b.y;
 	return this;
 };
 
-Vector2.prototype.copy = function(v) {
+Vec2.prototype.copy = function(v) {
 	this.x = v.x;
 	this.y = v.y;
 	return this;
 };
 
-Vector2.prototype.copyScaled = function(v, s) {
+Vec2.prototype.copyScaled = function(v, s) {
 	this.x = v.x * s;
 	this.y = v.y * s;
 	return this;
 };
 
-Vector2.prototype.divide = function(v) {
+Vec2.prototype.divide = function(v) {
 	this.x /= v.x;
 	this.y /= v.y;
 	return this;
 };
 
-Vector2.prototype.divideScalar = function(s) {
+Vec2.prototype.divideScalar = function(s) {
 	this.x /= s;
 	this.y /= s;
 	return this;
 };
 
-Vector2.prototype.dot = function(v) {
+Vec2.prototype.dot = function(v) {
 	return this.x * v.x + this.y * v.y;
 };
 
-Vector2.prototype.equals = function(v) {
+Vec2.prototype.equals = function(v) {
 	return this.x == v.x && this.y == v.y;
 };
 
-Vector2.prototype.length = function() {
+Vec2.prototype.length = function() {
 	return Math.sqrt(this.x * this.x + this.y * this.y);
 };
 
-Vector2.prototype.lengthSq = function() {
+Vec2.prototype.lengthSq = function() {
 	return (this.x * this.x + this.y * this.y);
 };
 
-Vector2.prototype.map = function(f) {
+Vec2.prototype.map = function(f) {
 	this.x = f(this.x);
 	this.y = f(this.y);
 	return this;
 };
 
-Vector2.prototype.mapFrom = function(v, f) {
+Vec2.prototype.mapFrom = function(v, f) {
 	this.x = f(v.x);
 	this.y = f(v.y);
 	return this;
 };
 
-Vector2.prototype.multiply = function(v) {
+Vec2.prototype.multiply = function(v) {
 	this.x *= v.x;
 	this.y *= v.y;
 	return this;
 };
 
-Vector2.prototype.multiplyScalar = function(s) {
+Vec2.prototype.multiplyScalar = function(s) {
 	this.x *= s;
 	this.y *= s;
 	return this;
 };
 
-Vector2.prototype.multiplyVectors = function(a, b) {
+Vec2.prototype.multiplyVectors = function(a, b) {
 	this.x = a.x * b.x;
 	this.y = a.y * b.y;
 	return this;
 };
 
-Vector2.prototype.normalize = function() {
+Vec2.prototype.normalize = function() {
 	return this.divideScalar(this.length());
 };
 
-Vector2.prototype.randomInUnitDisk = function() {
+Vec2.prototype.randomInUnitDisk = function() {
 	do {
 		this.x = 2.0 * Math.random() - 1.0;
 		this.y = 2.0 * Math.random() - 1.0;
@@ -150,76 +150,65 @@ Vector2.prototype.randomInUnitDisk = function() {
 	return this;
 };
 
-Vector2.prototype.set = function(x, y, z) {
+Vec2.prototype.set = function(x, y, z) {
 	this.x = x;
 	this.y = y;
 	return this;
 };
 
-Vector2.prototype.setScalar = function(s) {
+Vec2.prototype.setScalar = function(s) {
 	this.x = s;
 	this.y = s;
 	return this;
 };
 
-Vector2.prototype.sub = function(v) {
+Vec2.prototype.sub = function(v) {
 	this.x -= v.x;
 	this.y -= v.y;
 	return this;
 };
 
-Vector2.prototype.subScalar = function(s) {
+Vec2.prototype.subScalar = function(s) {
 	this.x -= s;
 	this.y -= s;
 	return this;
 };
 
-Vector2.prototype.subScaledVector = function(v, s) {
+Vec2.prototype.subScaledVector = function(v, s) {
 	this.x -= v.x * s;
 	this.y -= v.y * s;
 	return this;
 };
 
-Vector2.prototype.subVectors = function(a, b) {
+Vec2.prototype.subVectors = function(a, b) {
 	this.x = a.x - b.x;
 	this.y = a.y - b.y;
 	return this;
 };
 
-Vector2.prototype.toString = function Vector2ToString() {
+Vec2.prototype.toString = function Vec2ToString() {
 	return "[" + this.x + ', ' + this.y + "]";
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 function Particle(radius) {
-	if (radius === undefined) { radius = 40; }
-	this.x = 0;
-	this.y = 0;
+	this.pos = new Vec2();
+	this.vel = new Vec2();
 	this.radius = radius;
-	this.vx = 0;
-	this.vy = 0;
 	this.mass = 1;
-	this.scaleX = 1;
-	this.scaleY = 1;
 	this.lineWidth = 0;
 }
 
 Particle.prototype.draw = function (context, color) {
 	if (color === undefined) { color = "#ffffff"; }
-
 	context.save();
-	context.translate(this.x, this.y);
-	context.scale(this.scaleX, this.scaleY);
-
-	context.lineWidth = this.lineWidth;
+	context.translate(this.pos.x, this.pos.y);
+	context.lineWidth = 0;
 	context.fillStyle = color;
 	context.beginPath();
 	context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
 	context.closePath();
 	context.fill();
-	if (this.lineWidth > 0) {
-		context.stroke();
-	}
 	context.restore();
 };
 
@@ -235,31 +224,31 @@ function ParticleSwarm(count, width, height) {
 
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(3);
-		particle.x = Math.random() * this.width;
-		particle.y = Math.random() * this.height;
-		particle.vx = Math.random() * 5 - 3;
-		particle.vy = Math.random() * 5 - 3;
+		particle.pos.x = Math.random() * this.width;
+		particle.pos.y = Math.random() * this.height;
+		particle.vel.x = Math.random() * 5 - 3;
+		particle.vel.y = Math.random() * 5 - 3;
 		particle.mass = 100;
 		this.particles_list.push(particle);
 	}
 }
 
-ParticleSwarm.prototype.get_distance = function(p1, p2) {
-	var xsq = p1.x - p2.x
+ParticleSwarm.prototype.getDistance = function(p1, p2) {
+	var xsq = p1.pos.x - p2.pos.x
 	xsq = xsq * xsq
-	var ysq = p1.y - p2.y
+	var ysq = p1.pos.y - p2.pos.y
 	ysq = ysq * ysq
 	return Math.sqrt(xsq + ysq);
 };
 
-ParticleSwarm.prototype.get_force = function(p1, p2) {
+ParticleSwarm.prototype.getForce = function(p1, p2) {
 	let fx = 0, fy =  0;
-	let r = this.get_distance(p1, p2);
+	let r = this.getDistance(p1, p2);
 
 	const touch_distance = p1.radius + p2.radius + 0;
 	if (r < touch_distance) {
 		r = touch_distance + 1;
-		const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+		const angle = Math.atan2(p2.pos.y - p1.pos.y, p2.pos.x - p1.pos.x);
 		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - touch_distance, 2);
 		fx = force * Math.cos(angle);
 		fy = force * Math.sin(angle);
@@ -271,28 +260,28 @@ ParticleSwarm.prototype.get_force = function(p1, p2) {
 };
 
 ParticleSwarm.prototype.move = function(particle) {
-	particle.vx *= this.friction;
-	particle.vy *= this.friction;
+	particle.vel.x *= this.friction;
+	particle.vel.y *= this.friction;
 
-	particle.x += particle.vx;
-	particle.y += particle.vy;
+	particle.pos.x += particle.vel.x;
+	particle.pos.y += particle.vel.y;
 
-	particle.x = particle.x % this.width;
-	if(particle.x < 0)
-		particle.x += this.width;
-	particle.y = particle.y % this.height;
-	if(particle.y < 0)
-		particle.y += this.height;
+	particle.pos.x = particle.pos.x % this.width;
+	if(particle.pos.x < 0)
+		particle.pos.x += this.width;
+	particle.pos.y = particle.pos.y % this.height;
+	if(particle.pos.y < 0)
+		particle.pos.y += this.height;
 };
 
 ParticleSwarm.prototype.attract_to = function(p1, p2) {
 	const m1 = p1.mass;
-	const force = this.get_force(p1, p2);
-	p1.vx += force[0] / m1; // a = F/m
-	p1.vy += force[1] / m1;
+	const force = this.getForce(p1, p2);
+	p1.vel.x += force[0] / m1; // a = F/m
+	p1.vel.y += force[1] / m1;
 
-	p1.vx = Math.min(10, p1.vx);
-	p1.vy = Math.min(10, p1.vy);
+	p1.vel.x = Math.min(10, p1.vel.x);
+	p1.vel.y = Math.min(10, p1.vel.y);
 };
 
 ParticleSwarm.prototype.mutually_attract = function(p1, p2) {
