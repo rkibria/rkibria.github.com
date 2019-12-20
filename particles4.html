@@ -181,8 +181,8 @@ ParticleSwarm.prototype.draw = function(context) {
 		}
 	}
 
-	const thisPS = this;
-	this.particles_list.forEach(function(particle) {thisPS.move(particle);});
+	const this_instance = this;
+	this.particles_list.forEach(function(particle) {this_instance.move(particle);});
 	this.particles_list.forEach(function(particle) {particle.draw(context);});
 };
 
