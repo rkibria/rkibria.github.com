@@ -102,6 +102,8 @@ function ParticleSwarm(count, width, height) {
 	this.height = height;
 
 	this.friction = 0.99;
+	this.gravitational = 0.01;
+	this.fall_speed = 0.001;
 
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(3, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
@@ -130,14 +132,12 @@ ParticleSwarm.prototype.get_force = function(p1, p2) {
 	if (r < touch_distance) {
 		r = touch_distance + 1;
 		const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-		const G = 0.01;
-		const force = G * p1.mass * p2.mass * -1 / Math.pow(r - touch_distance, 2);
+		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - touch_distance, 2);
 		fx = force * Math.cos(angle);
 		fy = force * Math.sin(angle);
 	}
 
-	const gravAcc = 0.0;
-	fy += gravAcc;
+	fy += this.fall_speed;
 
 	return [fx, fy];
 };
