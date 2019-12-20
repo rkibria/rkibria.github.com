@@ -150,7 +150,7 @@ Vec2.prototype.randomInUnitDisk = function() {
 	return this;
 };
 
-Vec2.prototype.set = function(x, y, z) {
+Vec2.prototype.set = function(x, y) {
 	this.x = x;
 	this.y = y;
 	return this;
@@ -254,8 +254,7 @@ ParticleSwarm.prototype.getForce = function(p1, p2) {
 		r = td + 1;
 		const angle = Math.atan2(p2.pos.y - p1.pos.y, p2.pos.x - p1.pos.x);
 		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - td, 2);
-		f.x = force * Math.cos(angle);
-		f.y = force * Math.sin(angle);
+		f.set(force * Math.cos(angle), force * Math.sin(angle));
 	}
 
 	f.y += this.fall_speed;
@@ -263,22 +262,22 @@ ParticleSwarm.prototype.getForce = function(p1, p2) {
 	return f;
 };
 
+ParticleSwarm.prototype.torusProjection = function(pos) {
+	pos.x = pos.x % this.width;
+	if(pos.x < 0)
+		pos.x += this.width;
+	pos.y = pos.y % this.height;
+	if(pos.y < 0)
+		pos.y += this.height;
+}
+
 ParticleSwarm.prototype.move = function(particle) {
-	particle.vel.x *= this.friction;
-	particle.vel.y *= this.friction;
-
-	particle.pos.x += particle.vel.x;
-	particle.pos.y += particle.vel.y;
-
-	particle.pos.x = particle.pos.x % this.width;
-	if(particle.pos.x < 0)
-		particle.pos.x += this.width;
-	particle.pos.y = particle.pos.y % this.height;
-	if(particle.pos.y < 0)
-		particle.pos.y += this.height;
+	particle.vel.multiplyScalar(this.friction);
+	particle.pos.add(particle.vel);
+	this.torusProjection(particle.pos);
 };
 
-ParticleSwarm.prototype.attract_to = function(p1, p2) {
+ParticleSwarm.prototype.attractTo = function(p1, p2) {
 	const m1 = p1.mass;
 	const force = this.getForce(p1, p2);
 	force.divideScalar(m1);
@@ -288,15 +287,15 @@ ParticleSwarm.prototype.attract_to = function(p1, p2) {
 	p1.vel.y = Math.min(10, p1.vel.y);
 };
 
-ParticleSwarm.prototype.mutually_attract = function(p1, p2) {
-	this.attract_to(p1, p2);
-	this.attract_to(p2, p1);
+ParticleSwarm.prototype.attractParticles = function(p1, p2) {
+	this.attractTo(p1, p2);
+	this.attractTo(p2, p1);
 };
 
 ParticleSwarm.prototype.draw = function(context) {
 	for (i = 0; i < this.particles_list.length; i++) {
 		for (j = i + 1; j < this.particles_list.length; j++) {
-			this.mutually_attract(this.particles_list[i], this.particles_list[j]);
+			this.attractParticles(this.particles_list[i], this.particles_list[j]);
 		}
 	}
 
