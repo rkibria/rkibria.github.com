@@ -148,7 +148,11 @@ ParticleSwarm.prototype.move = function(particle) {
 	particle.y += particle.vy;
 
 	particle.x = particle.x % this.width;
+	if(particle.x < 0)
+		particle.x += this.width;
 	particle.y = particle.y % this.height;
+	if(particle.y < 0)
+		particle.y += this.height;
 };
 
 ParticleSwarm.prototype.attract_to = function(p1, p2) {
