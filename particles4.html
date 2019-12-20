@@ -190,6 +190,18 @@ Vec2.prototype.toString = function Vec2ToString() {
 	return "[" + this.x + ', ' + this.y + "]";
 };
 
+function getVec2DistanceSq(v1, v2) {
+	const dx = v1.x - v2.x;
+	const dy = v1.y - v2.y;
+	return dx * dx + dy * dy;
+}
+
+function getVec2Distance(v1, v2) {
+	const dx = v1.x - v2.x;
+	const dy = v1.y - v2.y;
+	return Math.sqrt(dx * dx + dy * dy);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 function Particle(radius) {
 	this.pos = new Vec2();
@@ -233,17 +245,9 @@ function ParticleSwarm(count, width, height) {
 	}
 }
 
-ParticleSwarm.prototype.getDistance = function(p1, p2) {
-	var xsq = p1.pos.x - p2.pos.x
-	xsq = xsq * xsq
-	var ysq = p1.pos.y - p2.pos.y
-	ysq = ysq * ysq
-	return Math.sqrt(xsq + ysq);
-};
-
 ParticleSwarm.prototype.getForce = function(p1, p2) {
 	let fx = 0, fy =  0;
-	let r = this.getDistance(p1, p2);
+	let r = getVec2Distance(p1.pos, p2.pos);
 
 	const touch_distance = p1.radius + p2.radius + 0;
 	if (r < touch_distance) {
