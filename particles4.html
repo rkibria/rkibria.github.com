@@ -97,7 +97,7 @@ Particle.prototype.draw = function (context) {
 
 ///////////////////////////////////////////////////////////////////////////////
 function ParticleSwarm(count, width, height) {
-	this.particleList = [];
+	this.particles_list = [];
 	this.width = width;
 	this.height = height;
 	for (i = 0; i < count; i++) {
@@ -107,28 +107,28 @@ function ParticleSwarm(count, width, height) {
 		particle.vx = Math.random() * 5 - 3;
 		particle.vy = Math.random() * 5 - 3;
 		particle.mass = 100;
-		this.particleList.push(particle);
+		this.particles_list.push(particle);
 	}
 }
 
-ParticleSwarm.prototype.getDistance = function(particle1, particle2) {
-	var xsq = particle1.x - particle2.x
+ParticleSwarm.prototype.get_distance = function(p1, p2) {
+	var xsq = p1.x - p2.x
 	xsq = xsq * xsq
-	var ysq = particle1.y - particle2.y
+	var ysq = p1.y - p2.y
 	ysq = ysq * ysq
 	return Math.sqrt(xsq + ysq);
 };
 
-ParticleSwarm.prototype.getForce = function(particle1, particle2) {
+ParticleSwarm.prototype.get_force = function(p1, p2) {
 	let fx = 0, fy =  0;
-	let r = this.getDistance(particle1, particle2);
+	let r = this.get_distance(p1, p2);
 
-	const touch_distance = particle1.radius + particle2.radius + 0;
+	const touch_distance = p1.radius + p2.radius + 0;
 	if (r < touch_distance) {
 		r = touch_distance + 1;
-		const angle = Math.atan2(particle2.y - particle1.y, particle2.x - particle1.x);
+		const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
 		const G = 0.01;
-		let force = G * particle1.mass * particle2.mass * -1 / Math.pow(r - touch_distance, 4);
+		const force = G * p1.mass * p2.mass * -1 / Math.pow(r - touch_distance, 2);
 		fx = force * Math.cos(angle);
 		fy = force * Math.sin(angle);
 	}
@@ -151,33 +151,33 @@ ParticleSwarm.prototype.move = function(particle) {
 	particle.y = particle.y % this.height;
 };
 
-ParticleSwarm.prototype.attractTo = function(particle1, particle2) {
-	const m1 = particle1.mass;
-	const force = this.getForce(particle1, particle2);
-	particle1.vx += force[0] / m1; // a = F/m
-	particle1.vy += force[1] / m1;
+ParticleSwarm.prototype.attract_to = function(p1, p2) {
+	const m1 = p1.mass;
+	const force = this.get_force(p1, p2);
+	p1.vx += force[0] / m1; // a = F/m
+	p1.vy += force[1] / m1;
 
-	particle1.vx = Math.min(10, particle1.vx);
-	particle1.vy = Math.min(10, particle1.vy);
+	p1.vx = Math.min(10, p1.vx);
+	p1.vy = Math.min(10, p1.vy);
 };
 
-ParticleSwarm.prototype.mutualAttract = function(particle1, particle2) {
-	this.attractTo(particle1, particle2);
-	this.attractTo(particle2, particle1);
+ParticleSwarm.prototype.mutually_attract = function(p1, p2) {
+	this.attract_to(p1, p2);
+	this.attract_to(p2, p1);
 };
 
 ParticleSwarm.prototype.draw = function(context) {
-	for (i = 0; i < this.particleList.length; i++) {
-		for (j = 0; j < this.particleList.length; j++) {
+	for (i = 0; i < this.particles_list.length; i++) {
+		for (j = 0; j < this.particles_list.length; j++) {
 			if (i != j) {
-				this.mutualAttract(this.particleList[i], this.particleList[j]);
+				this.mutually_attract(this.particles_list[i], this.particles_list[j]);
 			}
 		}
 	}
 
 	const thisPS = this;
-	this.particleList.forEach(function(particle) {thisPS.move(particle);});
-	this.particleList.forEach(function(particle) {particle.draw(context);});
+	this.particles_list.forEach(function(particle) {thisPS.move(particle);});
+	this.particles_list.forEach(function(particle) {particle.draw(context);});
 };
 
 ///////////////////////////////////////////////////////////////////////////////
