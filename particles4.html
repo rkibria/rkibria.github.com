@@ -101,7 +101,7 @@ function ParticleSwarm(count, width, height) {
 	this.width = width;
 	this.height = height;
 
-	this.friction = 0.99;
+	this.friction = 0.999;
 	this.gravitational = 0.01;
 	this.fall_speed = 0.001;
 
@@ -174,10 +174,8 @@ ParticleSwarm.prototype.mutually_attract = function(p1, p2) {
 
 ParticleSwarm.prototype.draw = function(context) {
 	for (i = 0; i < this.particles_list.length; i++) {
-		for (j = 0; j < this.particles_list.length; j++) {
-			if (i != j) {
-				this.mutually_attract(this.particles_list[i], this.particles_list[j]);
-			}
+		for (j = i + 1; j < this.particles_list.length; j++) {
+			this.mutually_attract(this.particles_list[i], this.particles_list[j]);
 		}
 	}
 
