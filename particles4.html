@@ -58,8 +58,12 @@ function captureMouse(element) {
   return mouse;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+const canvas = document.getElementById('canvas');
+const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
 
-function Ball (radius, color) {
+///////////////////////////////////////////////////////////////////////////////
+function Particle(radius, color) {
 	if (radius === undefined) { radius = 40; }
 	if (color === undefined) { color = "#ff0000"; }
 	this.x = 0;
@@ -74,7 +78,7 @@ function Ball (radius, color) {
 	this.lineWidth = 0;
 }
 
-Ball.prototype.draw = function (context) {
+Particle.prototype.draw = function (context) {
 	context.save();
 	context.translate(this.x, this.y);
 	context.scale(this.scaleX, this.scaleY);
@@ -82,7 +86,6 @@ Ball.prototype.draw = function (context) {
 	context.lineWidth = this.lineWidth;
 	context.fillStyle = this.color;
 	context.beginPath();
-	//x, y, radius, start_angle, end_angle, anti-clockwise
 	context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
 	context.closePath();
 	context.fill();
@@ -92,49 +95,40 @@ Ball.prototype.draw = function (context) {
 	context.restore();
 };
 
-Ball.prototype.getBounds = function () {
-	return {
-		x: this.x - this.radius,
-		y: this.y - this.radius,
-		width: this.radius * 2,
-		height: this.radius * 2
-	};
-};
-
-var gAnimCounter = 0;
-
-const canvas = document.getElementById('canvas');
-const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
-
-var ballsList = []
-for (i = 0; i < 500; i++) {
-	var ball = new Ball(3, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
-	ball.x = Math.random() * canvasW;
-	ball.y = Math.random() * canvasH;
-	ball.vx = Math.random() * 5 - 3;
-	ball.vy = Math.random() * 5 - 3;
-	ball.mass = 100;
-	ballsList.push(ball);
+///////////////////////////////////////////////////////////////////////////////
+function ParticleSwarm(count, width, height) {
+	this.particleList = [];
+	this.width = width;
+	this.height = height;
+	for (i = 0; i < count; i++) {
+		var particle = new Particle(3, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
+		particle.x = Math.random() * this.width;
+		particle.y = Math.random() * this.height;
+		particle.vx = Math.random() * 5 - 3;
+		particle.vy = Math.random() * 5 - 3;
+		particle.mass = 100;
+		this.particleList.push(particle);
+	}
 }
 
-function getDistance(ball1, ball2) {
-	var xsq = ball1.x - ball2.x
+ParticleSwarm.prototype.getDistance = function(particle1, particle2) {
+	var xsq = particle1.x - particle2.x
 	xsq = xsq * xsq
-	var ysq = ball1.y - ball2.y
+	var ysq = particle1.y - particle2.y
 	ysq = ysq * ysq
 	return Math.sqrt(xsq + ysq);
-}
+};
 
-function getForce(ball1, ball2) {
+ParticleSwarm.prototype.getForce = function(particle1, particle2) {
 	let fx = 0, fy =  0;
-	let r = getDistance(ball1, ball2);
+	let r = this.getDistance(particle1, particle2);
 
-	const touch_distance = ball1.radius + ball2.radius + 0;
+	const touch_distance = particle1.radius + particle2.radius + 0;
 	if (r < touch_distance) {
 		r = touch_distance + 1;
-		const angle = Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
+		const angle = Math.atan2(particle2.y - particle1.y, particle2.x - particle1.x);
 		const G = 0.01;
-		let force = G * ball1.mass * ball2.mass * -1 / Math.pow(r - touch_distance, 4);
+		let force = G * particle1.mass * particle2.mass * -1 / Math.pow(r - touch_distance, 4);
 		fx = force * Math.cos(angle);
 		fy = force * Math.sin(angle);
 	}
@@ -143,34 +137,51 @@ function getForce(ball1, ball2) {
 	fy += gravAcc;
 
 	return [fx, fy];
-}
+};
 
-function move(ball) {
+ParticleSwarm.prototype.move = function(particle) {
 	const friction = 1; // 0.9;
-	ball.vx *= friction;
-	ball.vy *= friction;
+	particle.vx *= friction;
+	particle.vy *= friction;
 
-	ball.x += ball.vx;
-	ball.y += ball.vy;
+	particle.x += particle.vx;
+	particle.y += particle.vy;
 
-	ball.x = ball.x % canvasW;
-	ball.y = ball.y % canvasH;
-}
+	particle.x = particle.x % this.width;
+	particle.y = particle.y % this.height;
+};
 
-function attractTo(ball1, ball2) {
-	var ball1mass = ball1.mass;
-	var force = getForce(ball1, ball2);
-	ball1.vx += force[0] / ball1mass; // a = F/m
-	ball1.vy += force[1] / ball1mass;
+ParticleSwarm.prototype.attractTo = function(particle1, particle2) {
+	const m1 = particle1.mass;
+	const force = this.getForce(particle1, particle2);
+	particle1.vx += force[0] / m1; // a = F/m
+	particle1.vy += force[1] / m1;
 
-	ball1.vx = Math.min(10, ball1.vx);
-	ball1.vy = Math.min(10, ball1.vy);
-}
+	particle1.vx = Math.min(10, particle1.vx);
+	particle1.vy = Math.min(10, particle1.vy);
+};
 
-function mutualAttract(ball1, ball2) {
-	attractTo(ball1, ball2);
-	attractTo(ball2, ball1);
-}
+ParticleSwarm.prototype.mutualAttract = function(particle1, particle2) {
+	this.attractTo(particle1, particle2);
+	this.attractTo(particle2, particle1);
+};
+
+ParticleSwarm.prototype.draw = function(context) {
+	for (i = 0; i < this.particleList.length; i++) {
+		for (j = 0; j < this.particleList.length; j++) {
+			if (i != j) {
+				this.mutualAttract(this.particleList[i], this.particleList[j]);
+			}
+		}
+	}
+
+	const thisPS = this;
+	this.particleList.forEach(function(particle) {thisPS.move(particle);});
+	this.particleList.forEach(function(particle) {particle.draw(context);});
+};
+
+///////////////////////////////////////////////////////////////////////////////
+const particles = new ParticleSwarm(500, canvasW, canvasH);
 
 window.onload = function() {
 	var canvas = document.getElementById('canvas'),
@@ -179,20 +190,9 @@ window.onload = function() {
 	(function drawFrame () {
 		window.requestAnimationFrame(drawFrame, canvas);
 		context.fillStyle = "black";
-		context.fillRect(0, 0, canvas.width, canvas.height);
+		context.fillRect(0, 0, canvasW, canvasH);
 
-		for (i = 0; i < ballsList.length; i++) {
-			for (j = 0; j < ballsList.length; j++) {
-				if (i != j) {
-					mutualAttract(ballsList[i], ballsList[j]);
-				}
-			}
-		}
-
-		ballsList.forEach(move);
-		ballsList.forEach(function(ball) {ball.draw(context);});
-
-		gAnimCounter = (gAnimCounter + 1) % 1000;
+		particles.draw(context);
 	}());
 }
 
