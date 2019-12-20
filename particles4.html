@@ -246,21 +246,21 @@ function ParticleSwarm(count, width, height) {
 }
 
 ParticleSwarm.prototype.getForce = function(p1, p2) {
-	let fx = 0, fy =  0;
+	const f = new Vec2();
 	let r = getVec2Distance(p1.pos, p2.pos);
 
-	const touch_distance = p1.radius + p2.radius + 0;
-	if (r < touch_distance) {
-		r = touch_distance + 1;
+	const td = p1.radius + p2.radius;
+	if (r < td) {
+		r = td + 1;
 		const angle = Math.atan2(p2.pos.y - p1.pos.y, p2.pos.x - p1.pos.x);
-		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - touch_distance, 2);
-		fx = force * Math.cos(angle);
-		fy = force * Math.sin(angle);
+		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - td, 2);
+		f.x = force * Math.cos(angle);
+		f.y = force * Math.sin(angle);
 	}
 
-	fy += this.fall_speed;
+	f.y += this.fall_speed;
 
-	return [fx, fy];
+	return f;
 };
 
 ParticleSwarm.prototype.move = function(particle) {
@@ -281,8 +281,8 @@ ParticleSwarm.prototype.move = function(particle) {
 ParticleSwarm.prototype.attract_to = function(p1, p2) {
 	const m1 = p1.mass;
 	const force = this.getForce(p1, p2);
-	p1.vel.x += force[0] / m1; // a = F/m
-	p1.vel.y += force[1] / m1;
+	force.divideScalar(m1);
+	p1.vel.add(force); // a = F/m
 
 	p1.vel.x = Math.min(10, p1.vel.x);
 	p1.vel.y = Math.min(10, p1.vel.y);
