@@ -63,9 +63,8 @@ const canvas = document.getElementById('canvas');
 const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
 
 ///////////////////////////////////////////////////////////////////////////////
-function Particle(radius, color) {
+function Particle(radius) {
 	if (radius === undefined) { radius = 40; }
-	if (color === undefined) { color = "#ff0000"; }
 	this.x = 0;
 	this.y = 0;
 	this.radius = radius;
@@ -74,17 +73,18 @@ function Particle(radius, color) {
 	this.mass = 1;
 	this.scaleX = 1;
 	this.scaleY = 1;
-	this.color = color;
 	this.lineWidth = 0;
 }
 
-Particle.prototype.draw = function (context) {
+Particle.prototype.draw = function (context, color) {
+	if (color === undefined) { color = "#ffffff"; }
+
 	context.save();
 	context.translate(this.x, this.y);
 	context.scale(this.scaleX, this.scaleY);
 
 	context.lineWidth = this.lineWidth;
-	context.fillStyle = this.color;
+	context.fillStyle = color;
 	context.beginPath();
 	context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
 	context.closePath();
@@ -106,7 +106,7 @@ function ParticleSwarm(count, width, height) {
 	this.fall_speed = 0.001;
 
 	for (i = 0; i < count; i++) {
-		var particle = new Particle(3, CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length]);
+		var particle = new Particle(3);
 		particle.x = Math.random() * this.width;
 		particle.y = Math.random() * this.height;
 		particle.vx = Math.random() * 5 - 3;
@@ -179,9 +179,13 @@ ParticleSwarm.prototype.draw = function(context) {
 		}
 	}
 
-	const this_instance = this;
-	this.particles_list.forEach(function(particle) {this_instance.move(particle);});
-	this.particles_list.forEach(function(particle) {particle.draw(context);});
+	for (i = 0; i < this.particles_list.length; i++) {
+		const particle = this.particles_list[i];
+		this.move(particle);
+
+		const color = CSS_COLOR_NAMES[i % CSS_COLOR_NAMES.length];
+		particle.draw(context, color);
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
