@@ -214,11 +214,11 @@ function Particle(radius) {
 Particle.prototype.draw = function (context, color) {
 	if (color === undefined) { color = "#ffffff"; }
 	context.save();
-	context.translate(this.pos.x, this.pos.y);
+	context.translate(Math.trunc(this.pos.x), Math.trunc(this.pos.y));
 	context.lineWidth = 0;
 	context.fillStyle = color;
 	context.beginPath();
-	context.arc(0, 0, this.radius, 0, (Math.PI * 2), true);
+	context.arc(0, 0, Math.trunc(this.radius), 0, (Math.PI * 2), true);
 	context.closePath();
 	context.fill();
 	context.restore();
