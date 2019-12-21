@@ -246,7 +246,8 @@ function ParticleSwarm(count, width, height) {
 
 	this.friction = 0.999;
 	this.gravitational = 0.01;
-	this.fall_speed = 0.001;
+	this.fall_acc = 0.001;
+	this.clamp_speed = 10;
 
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(3);
@@ -260,7 +261,6 @@ function ParticleSwarm(count, width, height) {
 ParticleSwarm.prototype.getForce = function(p1, p2) {
 	const f = new Vec2();
 	let r = getVec2Distance(p1.pos, p2.pos);
-
 	const td = p1.radius + p2.radius;
 	if (r < td) {
 		r = td + 1;
@@ -268,9 +268,7 @@ ParticleSwarm.prototype.getForce = function(p1, p2) {
 		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - td, 2);
 		f.set(force * Math.cos(angle), force * Math.sin(angle));
 	}
-
-	f.y += this.fall_speed;
-
+	f.y += this.fall_acc;
 	return f;
 };
 
@@ -294,7 +292,7 @@ ParticleSwarm.prototype.attractTo = function(p1, p2) {
 	const force = this.getForce(p1, p2);
 	force.divideScalar(m1);
 	p1.vel.add(force); // a = F/m
-	p1.vel.clampLength(1);
+	p1.vel.clampLength(this.clamp_speed);
 };
 
 ParticleSwarm.prototype.attractParticles = function(p1, p2) {
