@@ -150,6 +150,12 @@ Vec2.prototype.randomInUnitDisk = function() {
 	return this;
 };
 
+Vec2.prototype.randomInRange = function(x1, x2, y1, y2) {
+	this.x = Math.floor(Math.random() * (x2 - x1 + 1)) + x1;
+	this.y = Math.floor(Math.random() * (y2 - y1 + 1)) + y1;
+	return this;
+};
+
 Vec2.prototype.set = function(x, y) {
 	this.x = x;
 	this.y = y;
@@ -183,6 +189,14 @@ Vec2.prototype.subScaledVector = function(v, s) {
 Vec2.prototype.subVectors = function(a, b) {
 	this.x = a.x - b.x;
 	this.y = a.y - b.y;
+	return this;
+};
+
+Vec2.prototype.clampLength = function(r) {
+	const l = this.length();
+	if(l > r) {
+		this.multiplyScalar(r / l);
+	}
 	return this;
 };
 
@@ -236,10 +250,8 @@ function ParticleSwarm(count, width, height) {
 
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(3);
-		particle.pos.x = Math.random() * this.width;
-		particle.pos.y = Math.random() * this.height;
-		particle.vel.x = Math.random() * 5 - 3;
-		particle.vel.y = Math.random() * 5 - 3;
+		particle.pos.randomInRange(0, this.width, 0, this.height);
+		particle.vel.randomInUnitDisk().multiplyScalar(3);
 		particle.mass = 100;
 		this.particles_list.push(particle);
 	}
@@ -282,9 +294,7 @@ ParticleSwarm.prototype.attractTo = function(p1, p2) {
 	const force = this.getForce(p1, p2);
 	force.divideScalar(m1);
 	p1.vel.add(force); // a = F/m
-
-	p1.vel.x = Math.min(10, p1.vel.x);
-	p1.vel.y = Math.min(10, p1.vel.y);
+	p1.vel.clampLength(1);
 };
 
 ParticleSwarm.prototype.attractParticles = function(p1, p2) {
