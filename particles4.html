@@ -216,6 +216,10 @@ function getVec2Distance(v1, v2) {
 	return Math.sqrt(dx * dx + dy * dy);
 }
 
+function getVec2Angle(v1, v2) {
+	return Math.atan2(v2.y - v1.y, v2.x - v1.x);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 function Particle(radius) {
 	this.pos = new Vec2();
@@ -245,9 +249,10 @@ function ParticleSwarm(count, width, height) {
 	this.height = height;
 
 	this.friction = 0.999;
-	this.gravitational = 0.01;
-	this.fall_acc = 0.001;
-	this.clamp_speed = 10;
+	this.fall_acc = 0.0;
+	this.clamp_speed = 7;
+	this.collision_factor = 0.05;
+	this.attraction_factor = 0.5;
 
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(3);
@@ -258,15 +263,25 @@ function ParticleSwarm(count, width, height) {
 	}
 }
 
+ParticleSwarm.prototype.getGravitationalForce = function(f, p1, p2, r, factor) {
+	const angle = getVec2Angle(p1.pos, p2.pos);
+	const force = factor * p1.mass * p2.mass * 1 / Math.pow(r, 2);
+	f.set(force * Math.cos(angle), force * Math.sin(angle));
+}
+
 ParticleSwarm.prototype.getForce = function(p1, p2) {
 	const f = new Vec2();
 	let r = getVec2Distance(p1.pos, p2.pos);
 	const td = p1.radius + p2.radius;
 	if (r < td) {
-		r = td + 1;
-		const angle = Math.atan2(p2.pos.y - p1.pos.y, p2.pos.x - p1.pos.x);
-		const force = this.gravitational * p1.mass * p2.mass * -1 / Math.pow(r - td, 2);
-		f.set(force * Math.cos(angle), force * Math.sin(angle));
+		if(this.collision_factor != 0 && r != 0) {
+			this.getGravitationalForce(f, p1, p2, r, -this.collision_factor);
+		}
+	}
+	else {
+		if(this.attraction_factor != 0) {
+			this.getGravitationalForce(f, p1, p2, r, this.attraction_factor);
+		}
 	}
 	f.y += this.fall_acc;
 	return f;
