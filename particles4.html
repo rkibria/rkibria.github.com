@@ -334,15 +334,23 @@ ParticleSwarm.prototype.draw = function(context) {
 ///////////////////////////////////////////////////////////////////////////////
 const particles = new ParticleSwarm(500, canvasW, canvasH);
 
+function darkenImage(context, factor) {
+	context.save();
+	context.fillStyle = 'rgba(0,0,0,' + factor + ')';
+	context.fillRect(0, 0, canvasW, canvasH);
+	context.restore();
+}
+
 window.onload = function() {
 	var canvas = document.getElementById('canvas'),
 	context = canvas.getContext('2d');
+	context.fillStyle = "black";
+	context.fillRect(0, 0, canvasW, canvasH);
 
 	(function drawFrame () {
 		window.requestAnimationFrame(drawFrame, canvas);
-		context.fillStyle = "black";
-		context.fillRect(0, 0, canvasW, canvasH);
 
+		darkenImage(context, 0.1);
 		particles.draw(context);
 	}());
 }
