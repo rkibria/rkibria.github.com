@@ -342,7 +342,7 @@ ParticleSwarm.prototype.draw = function(context) {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-const particles = new ParticleSwarm(500, canvasW, canvasH, 2);
+const particles = new ParticleSwarm(500, canvasW, canvasH, 3);
 
 function darkenImage(context, factor) {
 	context.save();
@@ -351,16 +351,19 @@ function darkenImage(context, factor) {
 	context.restore();
 }
 
-function blurImage(context) {
-	var imgData = context.getImageData(0, 0, canvasW, canvasH);
-	var i;
-	for (i = 4; i < imgData.data.length; i += 4) {
-		imgData.data[i] = (imgData.data[i] + imgData.data[i - 4]) / 2;
-		imgData.data[i+1] = (imgData.data[i+1] + imgData.data[i - 3]) / 2;
-		imgData.data[i+2] = (imgData.data[i+2] + imgData.data[i - 2]) / 2;
-		imgData.data[i+3] = 255;
+// https://www.htmlgoodies.com/html5/other/create-negative-blur-and-rotate-image-effects-using-the-html5-canvas.html
+function blurImage(context, passes=1) {
+	const imgData = context.getImageData(0, 0, canvasW, canvasH);
+	var i, x, y;
+	context.globalAlpha = 0.125;
+	for (i = 1; i <= passes; i++) {
+		for (y = -1; y < 2; y++) {
+			for (x = -1; x < 2; x++) {
+				context.drawImage(imgData, x, y);
+			}
+		}
 	}
-	context.putImageData(imgData, 0, 0);
+	context.globalAlpha = 1.0;
 }
 
 window.onload = function() {
@@ -372,7 +375,7 @@ window.onload = function() {
 	(function drawFrame () {
 		window.requestAnimationFrame(drawFrame, canvas);
 
-		darkenImage(context, 0.1);
+		darkenImage(context, 0.5);
 		particles.draw(context);
 		blurImage(context);
 	}());
