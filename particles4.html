@@ -231,19 +231,29 @@ function Particle(radius) {
 
 Particle.prototype.draw = function (context, color) {
 	if (color === undefined) { color = "#ffffff"; }
+	const x = Math.trunc(this.pos.x);
+	const y = Math.trunc(this.pos.y);
+	const r = Math.trunc(this.radius);
+
 	context.save();
-	context.translate(Math.trunc(this.pos.x), Math.trunc(this.pos.y));
-	context.lineWidth = 0;
 	context.fillStyle = color;
-	context.beginPath();
-	context.arc(0, 0, Math.trunc(this.radius), 0, (Math.PI * 2), true);
-	context.closePath();
-	context.fill();
+	if(r <= 3) {
+		const d = r * 2;
+		context.fillRect(x - r, y - r, d, d);
+	}
+	else {
+		context.translate(Math.trunc(this.pos.x), Math.trunc(this.pos.y));
+		context.lineWidth = 0;
+		context.beginPath();
+		context.arc(0, 0, Math.trunc(this.radius), 0, (Math.PI * 2), true);
+		context.closePath();
+		context.fill();
+	}
 	context.restore();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-function ParticleSwarm(count, width, height) {
+function ParticleSwarm(count, width, height, radius) {
 	this.particles_list = [];
 	this.width = width;
 	this.height = height;
@@ -255,7 +265,7 @@ function ParticleSwarm(count, width, height) {
 	this.attraction_factor = 0.5;
 
 	for (i = 0; i < count; i++) {
-		var particle = new Particle(3);
+		var particle = new Particle(radius);
 		particle.pos.randomInRange(0, this.width, 0, this.height);
 		particle.vel.randomInUnitDisk().multiplyScalar(3);
 		particle.mass = 100;
@@ -332,7 +342,7 @@ ParticleSwarm.prototype.draw = function(context) {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-const particles = new ParticleSwarm(500, canvasW, canvasH);
+const particles = new ParticleSwarm(500, canvasW, canvasH, 2);
 
 function darkenImage(context, factor) {
 	context.save();
