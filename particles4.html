@@ -67,9 +67,10 @@ body {
 	<p style="margin-top: 20px;"> </p>
 	<button class="button button1" onclick="onResetButton()">Reset</button><br>
 	<button class="button button1" onclick="onRandomizeButton()">Randomize</button><br>
-	Particles: <input type="number" id="ID_PARTICLES" min="1" value="50" onkeydown="onResetButton()"><br>
-	Radius: <input type="number" id="ID_RADIUS" min="1" max="50" value="3" onkeydown="onResetButton()"><br>
+	Particles: <input type="number" id="ID_PARTICLES" min="1" value="50" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+	Radius: <input type="number" id="ID_RADIUS" min="1" max="50" value="3" onclick="onResetButton()" onkeydown="onResetButton()"><br>
 	<input type="checkbox" id="ID_RADIUS_RANDOM" value=false onclick="onResetButton()">Randomize radius<br>
+	On-contact repulsion: <input type="number" id="ID_REPULSION" min="0" max="100" value="0.05" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
 	</div>
 </div>
 
@@ -335,7 +336,7 @@ function ParticleSwarm(width, height) {
 	this.friction = 0.999;
 	this.fall_acc = 0.0;
 	this.clamp_speed = 7;
-	this.collision_factor = 0.05;
+	this.repulsion_factor = 0.05;
 	this.attraction_factor = 0.5;
 
 	this.reset();
@@ -364,8 +365,8 @@ ParticleSwarm.prototype.getForce = function(p1, p2) {
 	let r = getVec2Distance(p1.pos, p2.pos);
 	const td = p1.radius + p2.radius;
 	if (r < td) {
-		if(this.collision_factor != 0 && r != 0) {
-			this.getGravitationalForce(f, p1, p2, r, -this.collision_factor);
+		if(this.repulsion_factor != 0 && r != 0) {
+			this.getGravitationalForce(f, p1, p2, r, -this.repulsion_factor);
 		}
 	}
 	else {
@@ -428,6 +429,7 @@ function readParameters() {
 	particles.count = parseFloat(document.getElementById("ID_PARTICLES").value);
 	particles.radius = parseFloat(document.getElementById("ID_RADIUS").value);
 	particles.radiusRandom = document.getElementById("ID_RADIUS_RANDOM").checked;
+	particles.repulsion_factor = parseFloat(document.getElementById("ID_REPULSION").value);
 }
 readParameters();
 particles.reset();
