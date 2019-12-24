@@ -4,12 +4,40 @@
 <head>
 <meta charset="utf-8">
 <title>Particle flurry</title>
+<style>
+body {background-color: gray;}
+
+.float-left-child {
+  float: left
+}
+
+/* base css */
+body {
+  padding: 0px;
+}
+.parent {
+  padding: 0px
+}
+.child {
+  padding: 5px
+}
+</style>
 </head>
 
 <body>
 
-<canvas id="canvas" width="800" height="800" style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+<div class='parent'>
+	<div class='child float-left-child'>
+	<canvas id="canvas" width="800" height="800" style="border:0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+	</div>
+
+	<div class='child float-left-child'>
+	<p style="margin-top: 20px;"> </p>
+	<button onclick="onResetButton()">Reset</button><br>
+	<button onclick="onRandomizeButton()">Randomize</button><br>
+	Particles: <input type="number" id="ID_PARTICLES" min="1" value="500"><br>
+	</div>
+</div>
 
 <script>
 
@@ -237,7 +265,7 @@ Particle.prototype.draw = function (context, color) {
 
 	context.save();
 	context.fillStyle = color;
-	if(r <= 3) {
+	if(r <= 1) {
 		const d = r * 2;
 		context.fillRect(x - r, y - r, d, d);
 	}
