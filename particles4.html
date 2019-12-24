@@ -3,9 +3,41 @@
 
 <head>
 <meta charset="utf-8">
-<title>Particle flurry</title>
+<title>Particles</title>
 <style>
 body {background-color: black;}
+
+html *
+{
+   font-size: 1em;
+   color: lightgray;
+   font-family: Arial;
+}
+
+.button {
+  background-color: DarkGreen;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.button1 {font-size: 20px;}
+
+input {
+  width: 100%;
+  background-color: DarkBlue;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
 .float-left-child {
   float: left
@@ -33,8 +65,8 @@ body {
 
 	<div class='child float-left-child'>
 	<p style="margin-top: 20px;"> </p>
-	<button onclick="onResetButton()">Reset</button><br>
-	<button onclick="onRandomizeButton()">Randomize</button><br>
+	<button class="button button1" onclick="onResetButton()">Reset</button><br>
+	<button class="button button1" onclick="onRandomizeButton()">Randomize</button><br>
 	Particles: <input type="number" id="ID_PARTICLES" min="1" value="500"><br>
 	</div>
 </div>
