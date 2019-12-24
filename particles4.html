@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <title>Particle flurry</title>
 <style>
-body {background-color: gray;}
+body {background-color: black;}
 
 .float-left-child {
   float: left
@@ -282,7 +282,6 @@ Particle.prototype.draw = function (context, color) {
 
 ///////////////////////////////////////////////////////////////////////////////
 function ParticleSwarm(count, width, height, radius) {
-	this.particles_list = [];
 	this.width = width;
 	this.height = height;
 
@@ -292,6 +291,11 @@ function ParticleSwarm(count, width, height, radius) {
 	this.collision_factor = 0.05;
 	this.attraction_factor = 0.5;
 
+	this.reset(count, radius);
+}
+
+ParticleSwarm.prototype.reset = function(count, radius) {
+	this.particles_list = [];
 	for (i = 0; i < count; i++) {
 		var particle = new Particle(radius);
 		particle.pos.randomInRange(0, this.width, 0, this.height);
@@ -370,7 +374,9 @@ ParticleSwarm.prototype.draw = function(context) {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-const particles = new ParticleSwarm(500, canvasW, canvasH, 3);
+let gCount = 500;
+
+const particles = new ParticleSwarm(gCount, canvasW, canvasH, 3);
 
 function darkenImage(context, factor) {
 	context.save();
@@ -395,8 +401,7 @@ function blurImage(context, passes=1) {
 }
 
 window.onload = function() {
-	var canvas = document.getElementById('canvas'),
-	context = canvas.getContext('2d');
+	const context = canvas.getContext('2d');
 	context.fillStyle = "black";
 	context.fillRect(0, 0, canvasW, canvasH);
 
@@ -407,6 +412,17 @@ window.onload = function() {
 		particles.draw(context);
 		blurImage(context);
 	}());
+}
+
+function onResetButton()
+{
+	const context = canvas.getContext('2d');
+	context.save();
+	context.fillStyle = 'black';
+	context.clearRect(0, 0, canvasW, canvasH);
+	context.restore();
+
+	particles.reset(gCount, 3);
 }
 
 </script>
