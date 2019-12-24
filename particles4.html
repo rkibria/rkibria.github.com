@@ -324,23 +324,25 @@ Particle.prototype.draw = function (context, color) {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-function ParticleSwarm(count, width, height, radius) {
+function ParticleSwarm(width, height) {
 	this.width = width;
 	this.height = height;
 
+	this.count = 10;
+	this.radius = 3;
 	this.friction = 0.999;
 	this.fall_acc = 0.0;
 	this.clamp_speed = 7;
 	this.collision_factor = 0.05;
 	this.attraction_factor = 0.5;
 
-	this.reset(count, radius);
+	this.reset();
 }
 
-ParticleSwarm.prototype.reset = function(count, radius) {
+ParticleSwarm.prototype.reset = function() {
 	this.particles_list = [];
-	for (i = 0; i < count; i++) {
-		var particle = new Particle(radius);
+	for (i = 0; i < this.count; i++) {
+		var particle = new Particle(this.radius);
 		particle.pos.randomInRange(0, this.width, 0, this.height);
 		particle.vel.randomInUnitDisk().multiplyScalar(3);
 		particle.mass = 100;
@@ -417,15 +419,13 @@ ParticleSwarm.prototype.draw = function(context) {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-let gCount = 0;
-let gRadius = 0;
+const particles = new ParticleSwarm(canvasW, canvasH);
+
 function readParameters() {
-	gCount = parseFloat(document.getElementById("ID_PARTICLES").value);
-	gRadius = parseFloat(document.getElementById("ID_RADIUS").value);
+	particles.count = parseFloat(document.getElementById("ID_PARTICLES").value);
+	particles.radius = parseFloat(document.getElementById("ID_RADIUS").value);
 }
 readParameters();
-
-const particles = new ParticleSwarm(gCount, canvasW, canvasH, gRadius);
 
 function darkenImage(context, factor) {
 	context.save();
@@ -472,7 +472,7 @@ function onResetButton()
 	context.restore();
 
 	readParameters();
-	particles.reset(gCount, gRadius);
+	particles.reset();
 }
 
 </script>
