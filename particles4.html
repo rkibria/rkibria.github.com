@@ -16,9 +16,9 @@ html *
 
 .button {
   background-color: DarkGreen;
-  border: none;
+  border: solid 2px LightGreen;
   color: white;
-  padding: 15px 32px;
+  padding: 5px 3px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -26,16 +26,16 @@ html *
   cursor: pointer;
 }
 
-.button1 {font-size: 20px;}
+.button1 {font-size: 16px;}
 
 input {
-  width: 100%;
+  width: 30%;
   background-color: DarkBlue;
   color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
+  padding: 1px 2px;
+  margin: 2px 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 1px;
   cursor: pointer;
 }
 
@@ -67,7 +67,8 @@ body {
 	<p style="margin-top: 20px;"> </p>
 	<button class="button button1" onclick="onResetButton()">Reset</button><br>
 	<button class="button button1" onclick="onRandomizeButton()">Randomize</button><br>
-	Particles: <input type="number" id="ID_PARTICLES" min="1" value="500"><br>
+	Particles: <input type="number" id="ID_PARTICLES" min="1" value="500" onkeydown="onResetButton()"><br>
+	Radius: <input type="number" id="ID_RADIUS" min="1" max="50" value="3" onkeydown="onResetButton()"><br>
 	</div>
 </div>
 
@@ -97,6 +98,16 @@ var CSS_COLOR_NAMES = ["AliceBlue","AntiqueWhite","Aqua","Aquamarine","Azure","B
 ///////////////////////////////////////////////////////////////////////////////
 const canvas = document.getElementById('canvas');
 const canvasW = canvas.scrollWidth, canvasH = canvas.scrollHeight;
+
+///////////////////////////////////////////////////////////////////////////////
+function gaussianRand()
+{
+	let rand = 0;
+	for(let i = 0; i < 6; i += 1) {
+		rand += Math.random();
+	}
+	return rand / 6;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 function Vec2(x = 0.0, y = 0.0) {
@@ -406,13 +417,15 @@ ParticleSwarm.prototype.draw = function(context) {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-let gCount = 500;
+let gCount = 0;
+let gRadius = 0;
 function readParameters() {
 	gCount = parseFloat(document.getElementById("ID_PARTICLES").value);
+	gRadius = parseFloat(document.getElementById("ID_RADIUS").value);
 }
 readParameters();
 
-const particles = new ParticleSwarm(gCount, canvasW, canvasH, 3);
+const particles = new ParticleSwarm(gCount, canvasW, canvasH, gRadius);
 
 function darkenImage(context, factor) {
 	context.save();
@@ -459,7 +472,7 @@ function onResetButton()
 	context.restore();
 
 	readParameters();
-	particles.reset(gCount, 3);
+	particles.reset(gCount, gRadius);
 }
 
 </script>
