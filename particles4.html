@@ -67,8 +67,9 @@ body {
 	<p style="margin-top: 20px;"> </p>
 	<button class="button button1" onclick="onResetButton()">Reset</button><br>
 	<button class="button button1" onclick="onRandomizeButton()">Randomize</button><br>
-	Particles: <input type="number" id="ID_PARTICLES" min="1" value="500" onkeydown="onResetButton()"><br>
+	Particles: <input type="number" id="ID_PARTICLES" min="1" value="50" onkeydown="onResetButton()"><br>
 	Radius: <input type="number" id="ID_RADIUS" min="1" max="50" value="3" onkeydown="onResetButton()"><br>
+	<input type="checkbox" id="ID_RADIUS_RANDOM" value=false onclick="onResetButton()">Randomize radius<br>
 	</div>
 </div>
 
@@ -330,6 +331,7 @@ function ParticleSwarm(width, height) {
 
 	this.count = 10;
 	this.radius = 3;
+	this.radiusRandom = false;
 	this.friction = 0.999;
 	this.fall_acc = 0.0;
 	this.clamp_speed = 7;
@@ -342,7 +344,8 @@ function ParticleSwarm(width, height) {
 ParticleSwarm.prototype.reset = function() {
 	this.particles_list = [];
 	for (i = 0; i < this.count; i++) {
-		var particle = new Particle(this.radius);
+		const radius = this.radiusRandom ? Math.trunc(1 + Math.random() * this.radius) : this.radius;
+		var particle = new Particle(radius);
 		particle.pos.randomInRange(0, this.width, 0, this.height);
 		particle.vel.randomInUnitDisk().multiplyScalar(3);
 		particle.mass = 100;
@@ -424,8 +427,10 @@ const particles = new ParticleSwarm(canvasW, canvasH);
 function readParameters() {
 	particles.count = parseFloat(document.getElementById("ID_PARTICLES").value);
 	particles.radius = parseFloat(document.getElementById("ID_RADIUS").value);
+	particles.radiusRandom = document.getElementById("ID_RADIUS_RANDOM").checked;
 }
 readParameters();
+particles.reset();
 
 function darkenImage(context, factor) {
 	context.save();
