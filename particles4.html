@@ -407,6 +407,10 @@ ParticleSwarm.prototype.draw = function(context) {
 
 ///////////////////////////////////////////////////////////////////////////////
 let gCount = 500;
+function readParameters() {
+	gCount = parseFloat(document.getElementById("ID_PARTICLES").value);
+}
+readParameters();
 
 const particles = new ParticleSwarm(gCount, canvasW, canvasH, 3);
 
@@ -454,6 +458,7 @@ function onResetButton()
 	context.clearRect(0, 0, canvasW, canvasH);
 	context.restore();
 
+	readParameters();
 	particles.reset(gCount, 3);
 }
 
