@@ -9,49 +9,50 @@ body {background-color: black;}
 
 html *
 {
-   font-size: 1em;
-   color: lightgray;
-   font-family: Arial;
+	font-size: 1em;
+	color: lightgray;
+	font-family: Arial;
 }
 
 .button {
-  background-color: DarkGreen;
-  border: solid 2px LightGreen;
-  color: white;
-  padding: 5px 3px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  margin: 4px 2px;
-  cursor: pointer;
+	background-color: #303030;
+	width: 150px;
+	border: solid 2px lightgray;
+	color: lightgray;
+	padding: 5px 3px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	margin: 4px 2px;
+	cursor: pointer;
 }
 
 .button1 {font-size: 16px;}
 
 input {
-  width: 30%;
-  background-color: DarkBlue;
-  color: white;
-  padding: 1px 2px;
-  margin: 2px 0;
-  border: none;
-  border-radius: 1px;
-  cursor: pointer;
+	width: 30%;
+	background-color: #303030;
+	color: white;
+	padding: 1px 2px;
+	margin: 2px 0;
+	border: none;
+	border-radius: 1px;
+	cursor: pointer;
 }
 
 .float-left-child {
-  float: left
+	float: left;
 }
 
 /* base css */
 body {
-  padding: 0px;
+	padding: 0px;
 }
 .parent {
-  padding: 0px
+	padding: 0px
 }
 .child {
-  padding: 5px
+	padding: 5px
 }
 </style>
 </head>
@@ -60,18 +61,33 @@ body {
 
 <div class='parent'>
 	<div class='child float-left-child'>
-	<canvas id="canvas" width="800" height="800" style="border:0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+		<canvas id="canvas" width="800" height="800" style="border:0px;">Your browser does not support the HTML5 canvas tag.</canvas>
 	</div>
-
 	<div class='child float-left-child'>
-	<p style="margin-top: 20px;"> </p>
-	<button class="button button1" onclick="onResetButton()">Reset</button><br>
-	<button class="button button1" onclick="onRandomizeButton()">Randomize</button><br>
-	Particles: <input type="number" id="ID_PARTICLES" min="1" value="50" onclick="onResetButton()" onkeydown="onResetButton()"><br>
-	Radius: <input type="number" id="ID_RADIUS" min="1" max="50" value="3" onclick="onResetButton()" onkeydown="onResetButton()"><br>
-	<input type="checkbox" id="ID_RADIUS_RANDOM" value=false onclick="onResetButton()">Randomize radius<br>
-	On-contact repulsion: <input type="number" id="ID_REPULSION" min="0" max="100" value="0.05" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
-	Attraction: <input type="number" id="ID_ATTRACTION" min="0" max="100" value="0.5" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+		<button class="button button1" onclick="onResetButton()">Reset</button><br>
+		<button class="button button1" onclick="onRandomizeButton()">Randomize</button><br>
+
+		<p style="margin-bottom:1px;">
+		<form>
+			<fieldset>
+			<legend>Postprocessing</legend>
+				Fading: <input type="number" id="ID_FADE" min="0" max="1" value="0.5" step="0.05" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+				<input type="checkbox" id="ID_BLUR" onclick="onResetButton()">Blur (reload page to disable!)<br>
+			</fieldset>
+		</form>
+
+		<p style="margin-bottom:1px;">
+		<form>
+			<fieldset>
+			<legend>Particles</legend>
+				Amount: <input type="number" id="ID_PARTICLES" min="1" value="50" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+				Radius: <input type="number" id="ID_RADIUS" min="1" max="50" value="3" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+				<input type="checkbox" id="ID_RADIUS_RANDOM" onclick="onResetButton()">Randomize radius<br>
+				Repulsion: <input type="number" id="ID_REPULSION" min="0" max="100" value="0.1" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+				Attraction: <input type="number" id="ID_ATTRACTION" min="0" max="100" value="0.5" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+			</fieldset>
+		</form>
+
 	</div>
 </div>
 
@@ -426,7 +442,13 @@ ParticleSwarm.prototype.draw = function(context) {
 ///////////////////////////////////////////////////////////////////////////////
 const particles = new ParticleSwarm(canvasW, canvasH);
 
+let fade_factor = 0;
+let blur_enabled = false;
+
 function readParameters() {
+	fade_factor = parseFloat(document.getElementById("ID_FADE").value);
+	blur_enabled = document.getElementById("ID_BLUR").checked;
+
 	particles.count = parseFloat(document.getElementById("ID_PARTICLES").value);
 	particles.radius = parseFloat(document.getElementById("ID_RADIUS").value);
 	particles.radiusRandom = document.getElementById("ID_RADIUS_RANDOM").checked;
@@ -466,9 +488,14 @@ window.onload = function() {
 	(function drawFrame () {
 		window.requestAnimationFrame(drawFrame, canvas);
 
-		darkenImage(context, 0.5);
+		darkenImage(context, fade_factor);
+
 		particles.draw(context);
-		blurImage(context);
+
+		if(blur_enabled) {
+			blurImage(context);
+		}
+
 	}());
 }
 
