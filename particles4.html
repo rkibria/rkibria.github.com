@@ -137,6 +137,14 @@ function gaussianRand()
 	return rand / 6;
 }
 
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandom(min, max) {
+	return min + Math.random() * (max - min);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 function Vec2(x = 0.0, y = 0.0) {
 	this.x = x;
@@ -510,8 +518,12 @@ window.onload = function() {
 	}());
 }
 
-function onResetButton()
-{
+let lockReset = false;
+function onResetButton() {
+	if(lockReset) {
+		return;
+	}
+
 	const context = canvas.getContext('2d');
 	context.save();
 	context.fillStyle = 'black';
@@ -520,6 +532,23 @@ function onResetButton()
 
 	readParameters();
 	particles.reset();
+}
+
+function onRandomizeButton() {
+	lockReset = true;
+	{
+		document.getElementById("ID_PARTICLES").value = getRandomInt(1, 200);
+		document.getElementById("ID_RADIUS").value = getRandomInt(1, 50);
+		document.getElementById("ID_RADIUS_RANDOM").checked = (Math.random() < 0.5);
+		document.getElementById("ID_REPULSION").value = getRandom(0, 100);
+		document.getElementById("ID_ATTRACTION").value = getRandom(0, 10);
+		document.getElementById("ID_FRICTION").value = getRandom(0, 1);
+		document.getElementById("ID_CLAMP_SPEED").value = getRandom(0.01, 50);
+
+		document.getElementById("ID_FADE").value = getRandom(0, 0.5);
+	}
+	lockReset = false;
+	onResetButton();
 }
 
 </script>
