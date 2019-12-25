@@ -83,6 +83,8 @@ body {
 				<input type="checkbox" id="ID_RADIUS_RANDOM" onclick="onResetButton()">Randomize radius<br>
 				Repulsion: <input type="number" id="ID_REPULSION" min="0" max="100" value="0.1" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
 				Attraction: <input type="number" id="ID_ATTRACTION" min="0" max="100" value="0.5" step="0.01" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+				Friction: <input type="number" id="ID_FRICTION" min="0" max="1" value="0.999" step="0.001" onclick="onResetButton()" onkeydown="onResetButton()"><br>
+				Clamp speed: <input type="number" id="ID_CLAMP_SPEED" min="0" max="50" value="7" step="0.1" onclick="onResetButton()" onkeydown="onResetButton()"><br>
 			</fieldset>
 		</form>
 
@@ -461,6 +463,8 @@ function readParameters() {
 	particles.radiusRandom = document.getElementById("ID_RADIUS_RANDOM").checked;
 	particles.repulsion_factor = parseFloat(document.getElementById("ID_REPULSION").value);
 	particles.attraction_factor = parseFloat(document.getElementById("ID_ATTRACTION").value);
+	particles.friction = parseFloat(document.getElementById("ID_FRICTION").value);
+	particles.clamp_speed = parseFloat(document.getElementById("ID_CLAMP_SPEED").value);
 }
 readParameters();
 particles.reset();
